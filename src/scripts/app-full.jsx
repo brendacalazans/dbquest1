@@ -1264,7 +1264,7 @@
 
         // --- Funções da API Gemini ---
         const callGeminiAPI = useCallback(async (payload, retries = 3, delay = 1000) => {
-            const apiKey = ""; // A plataforma injetará a chave aqui
+            const apiKey = "AIzaSyChnSD9-dvdoYRzDqoR5hVhywtrbbiKMhg"; // A plataforma injetará a chave aqui
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             for (let i = 0; i < retries; i++) {
