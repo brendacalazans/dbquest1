@@ -543,7 +543,7 @@
                     update(ref(db, `users/${userId}`), { cooldownUntil: cooldownTime.toISOString() });
                 }
             }
-        }, [showResult, currentLesson, currentQuestion, userProgress.lives, userId, db]);
+        }, [showResult, currentLesson, currentQuestion, userProgress.lives, userId, db]); // Remova hasLostLifeThisAttempt das dependências
 
 
         // NOVO: Coloque este objeto de configuração aqui
