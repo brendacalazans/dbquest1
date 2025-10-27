@@ -279,6 +279,8 @@
         // --- EFEITOS (Restaurados) ---
         // Efeito: Observador de Autenticação
         useEffect(() => {
+            // A autenticação inicial é tratada no <script type="module">
+            // Este listener apenas reage a mudanças (login/logout)
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 setUserId(user ? user.uid : null);
                 setIsAuthChecked(true);
@@ -415,7 +417,7 @@
                         // Atualiza o estado local com os dados do DB (e possíveis atualizações)
                         setUserProgress({
                             ...data.gamification,
-                            username: data.name || auth.currentUser.displayName || 'Aluno',
+                            username: data.name || (auth.currentUser ? auth.currentUser.displayName : 'Aluno') || 'Aluno',
                             avatar: data.avatar || '👤',
                             cooldownUntil: cooldown ? cooldown.toISOString() : null,
                             lives: lives
@@ -435,9 +437,9 @@
                     } else {
                         // --- Cria novo usuário no DB (Restaurado) ---
                         const newUser = {
-                            name: auth.currentUser.displayName || 'Novo Aluno',
+                            name: (auth.currentUser ? auth.currentUser.displayName : 'Novo Aluno') || 'Novo Aluno',
                             avatar: '👤',
-                            email: auth.currentUser.email,
+                            email: auth.currentUser ? auth.currentUser.email : '',
                             joinedDate: new Date().toISOString(),
                             gamification: {
                                 level: 1,
@@ -671,8 +673,8 @@
                         <div className="flex items-center gap-2 bg-red-500/20 px-3 py-2 rounded-full"> <Heart className={`${userProgress.lives > 0 ? 'text-red-400' : 'text-gray-500'}`} /> <span className="font-bold">{userProgress.lives}</span> </div>
                         <button onClick={() => onNavigate('profile')} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-bold text-2xl">{userProgress.avatar ? userProgress.avatar : initials}</button>
                     </div>
-                </div>
-            </header>
+                    </div>
+                </header>
             );
         });
 
@@ -1262,7 +1264,7 @@
 
         // --- Funções da API Gemini ---
         const callGeminiAPI = useCallback(async (payload, retries = 3, delay = 1000) => {
-            const apiKey = "";
+            const apiKey = ""; // A plataforma injetará a chave aqui
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             for (let i = 0; i < retries; i++) {
@@ -1280,6 +1282,14 @@
                     const result = await response.json();
                     const candidate = result.candidates?.[0];
 
+                    // Para JSON (schema)
+                    if (payload.generationConfig?.responseMimeType === "application/json") {
+                        if (candidate && candidate.content?.parts?.[0]?.text) {
+                            return candidate.content.parts[0].text;
+                        }
+                    }
+                    
+                    // Para Texto
                     if (candidate && candidate.content?.parts?.[0]?.text) {
                         return candidate.content.parts[0].text;
                     } else {
@@ -1367,10 +1377,10 @@
                 return <div className="min-h-screen flex items-center justify-center text-white"><h2 className="text-2xl font-bold">✨ Gerando um novo desafio...</h2></div>;
             }
             if (userProgress.lives <= 0 && !['home', 'ranking', 'profile', 'noLives', 'challenge'].includes(currentView)) {
-                if(!showResult) {
+                if(!showResult) { // Permite ver a tela de resultado mesmo sem vidas
                     setCurrentView('noLives');
+                    return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
                 }
-                return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
             }
             
             switch (currentView) {
