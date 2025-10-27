@@ -544,45 +544,63 @@
                 }
             }
         }, [showResult, currentLesson, currentQuestion, userProgress.lives, userId, db]);
+
+
+        // NOVO: Coloque este objeto de configuração aqui
+        const REWARD_CONFIG = {
+            article:  { xp: 15, gems: 5  },
+            lesson:   { xp: 50, gems: 10 },
+            practice: { xp: 75, gems: 15 },
+            theory:   { xp: 20, gems: 5  },
+            default:  { xp: 10, gems: 2  } // Valor padrão para tipos não listados
+        };
         
         // --- LÓGICA DE OFENSIVA (STREAK) CORRIGIDA ---
-        const handleLessonCompletion = (lessonId, lessonXP) => {
+        const handleLessonCompletion = (completedLesson) => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
-            
+            today.setHours(0, 0, 0, 0);
+        
             const lastCompletedDate = userProgress.lastCompletedLessonDate ? new Date(userProgress.lastCompletedLessonDate) : null;
             if (lastCompletedDate) {
-                lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
+                lastCompletedDate.setHours(0, 0, 0, 0);
             }
-
+        
             let newStreak = userProgress.streak || 0;
-            // Só incrementa a ofensiva se a última lição foi ANTES de hoje
             if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
                 newStreak += 1;
                 console.log("Ofensiva incrementada!");
             } else {
                 console.log("Lição completada hoje, ofensiva mantida.");
             }
-
-            const newXP = (Number(userProgress.totalXP) || 0) + (Number(lessonXP) || 0);
+        
+            // --- LÓGICA DE RECOMPENSA DINÂMICA (A MÁGICA ACONTECE AQUI) ---
+            const lessonType = completedLesson.type || 'default';
+            const rewards = REWARD_CONFIG[lessonType] || REWARD_CONFIG.default;
+        
+            const newXP = (Number(userProgress.totalXP) || 0) + (rewards.xp || 0);
+            const newGems = (Number(userProgress.gems) || 0) + (rewards.gems || 0);
+            // --------------------------------------------------------------------
+        
             const newLevel = Math.floor(newXP / 100) + 1;
             const completed = [...(userProgress.completedLessons || [])];
-            if (!completed.includes(lessonId)) {
-                completed.push(lessonId);
+            if (!completed.includes(completedLesson.id)) {
+                completed.push(completedLesson.id);
             }
-
+        
             const updates = {
                 totalXP: newXP,
                 level: newLevel,
                 streak: newStreak,
-                lastCompletedLessonDate: new Date().toISOString(), // Salva a data E hora exata
+                gems: newGems, // Gemas agora são adicionadas dinamicamente
+                lastCompletedLessonDate: new Date().toISOString(),
                 completedLessons: completed
             };
-
+        
             update(ref(db, `users/${userId}/gamification`), updates);
             update(ref(db, `leaderboard/${userId}`), { totalXP: newXP, streak: newStreak });
             
-            return newXP;
+            // Retorna o XP para o toast, se necessário
+            return rewards.xp; 
         };
 
         const nextQuestion = useCallback(() => {
@@ -598,8 +616,12 @@
                 const totalQuestions = currentLesson.questions.length;
                 
                 if (correctAnswers === totalQuestions) {
-                    // Chama a nova função centralizada
-                    handleLessonCompletion(currentLesson.id, currentLesson.xp);
+                    // ANTES:
+                    // handleLessonCompletion(currentLesson.id, currentLesson.xp);
+                
+                    // DEPOIS:
+                    handleLessonCompletion(currentLesson); 
+                    
                     setCurrentView('completion');
                 } else {
                     // Falhou na lição
@@ -609,13 +631,16 @@
         }, [currentQuestion, currentLesson, answeredQuestions, userProgress, userId, db]);
         
         const handleArticleCompletion = useCallback(() => {
-            // Chama a nova função centralizada
-            const newXP = handleLessonCompletion(currentLesson.id, currentLesson.xp);
+            // ANTES:
+            // const newXP = handleLessonCompletion(currentLesson.id, currentLesson.xp);
+            // setToast({ message: `Artigo concluído! +${currentLesson.xp} XP`, type: 'success' });
+        
+            // DEPOIS:
+            const xpGained = handleLessonCompletion(currentLesson);
+            setCurrentView('home'); 
+            setToast({ message: `Artigo concluído! +${xpGained} XP`, type: 'success' });
             
-            setCurrentView('home'); // Volta para a home
-            setToast({ message: `Artigo concluído! +${currentLesson.xp} XP`, type: 'success' });
-            
-        }, [currentLesson, userProgress, userId, db]);
+        }, [currentLesson, userId, db]); // Remova userProgress das dependências se não for mais usado diretamente aqui
         
         
         const handleRefillLives = useCallback(() => {
