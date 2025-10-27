@@ -300,15 +300,26 @@
                     title: 'Fundamentos de SQL',
                     description: 'Comece sua jornada aprendendo os comandos básicos de SQL.',
                     lessons: [
-                        { id: 'l1-1', title: 'O que é um Banco de Dados?', type: 'article', duration: '5 min', xp: 20, content: 'Um banco de dados é uma coleção organizada de informações - ou dados - estruturadas, geralmente armazenadas eletronicamente em um sistema de computador. Um banco de dados é geralmente controlado por um sistema de gerenciamento de banco de dados (DBMS). Juntos, os dados e o DBMS, juntamente com os aplicativos associados a eles, são chamados de sistema de banco de dados, ou simplesmente banco de dados.\n\nDados dentro dos tipos mais comuns de bancos de dados em operação atualmente são normalmente modelados em linhas e colunas em uma série de tabelas para tornar o processamento e a consulta de dados eficientes. Os dados podem ser facilmente acessados, gerenciados, modificados, atualizados, controlados e organizados. A maioria dos bancos de dados usa a linguagem de consulta estruturada (SQL) para escrever e consultar dados.' },
-                        { id: 'l1-2', title: 'Introdução ao SELECT', type: 'lesson', duration: '10 min', xp: 50, questions: [
-                            { question: 'Qual comando é usado para buscar dados de uma tabela?', options: ['GET', 'SELECT', 'FETCH', 'PULL'], correct: 1, explanation: 'O comando SELECT é usado para consultar e extrair dados de um banco de dados.' },
-                            { question: 'Qual símbolo seleciona todas as colunas?', options: ['*', '#', 'ALL', '&'], correct: 0, explanation: 'O asterisco (*) é um curinga que seleciona todas as colunas da tabela.' }
+                        // TIPO 1: Artigo (já existe)
+                        { id: 'l1-1', title: 'O que é um Banco de Dados?', type: 'article', content: '...' },
+                        
+                        // TIPO 2: Vídeo Aula (NOVO)
+                        { id: 'l1-2', title: 'SQL em 10 Minutos', type: 'video', videoId: 'p_n_d3q_t4k' }, // Usamos um ID de vídeo do YouTube como exemplo
+            
+                        // TIPO 3: Teoria - Múltipla Escolha (Renomeado de 'lesson')
+                        { id: 'l1-3', title: 'Introdução ao SELECT', type: 'theory', questions: [
+                            { question: 'Qual comando é usado para buscar dados de uma tabela?', options: ['GET', 'SELECT', 'FETCH', 'PULL'], correct: 1, explanation: '...' },
+                            { question: 'Qual símbolo seleciona todas as colunas?', options: ['*', '#', 'ALL', '&'], correct: 0, explanation: '...' }
                         ]},
-                        { id: 'l1-3', title: 'Filtrando com WHERE', type: 'lesson', duration: '12 min', xp: 60, questions: [
-                            { question: 'Qual cláusula filtra os resultados?', options: ['FILTER', 'WHERE', 'IF', 'FIND'], correct: 1, explanation: 'A cláusula WHERE é usada para filtrar registros que satisfazem uma condição específica.' },
-                             { question: 'Como você selecionaria usuários com idade superior a 18?', options: ['SELECT * FROM users WHERE age > 18', 'SELECT * FROM users IF age > 18', 'SELECT * FROM users FILTER age > 18', 'SELECT * FROM users WITH age > 18'], correct: 0, explanation: 'A sintaxe correta usa WHERE seguido da condição `age > 18`.' }
-                        ]}
+            
+                        // TIPO 4: Prática - Exercício de SQL (NOVO)
+                        { id: 'l1-4', title: 'Prática: Selecionando Usuários', type: 'practice', 
+                          description: 'Você tem uma tabela `usuarios` com as colunas `id`, `nome`, e `idade`. Sua tarefa é selecionar o nome de todos os usuários que têm mais de 25 anos.',
+                          schema: 'CREATE TABLE usuarios (\n  id INT PRIMARY KEY,\n  nome VARCHAR(100),\n  idade INT\n);',
+                          correctQuery: 'SELECT nome FROM usuarios WHERE idade > 25;',
+                          // Opcional: para a interface de arrastar e soltar
+                          queryParts: ['SELECT', 'nome', 'FROM', 'usuarios', 'WHERE', 'idade', '>', '25', ';'] 
+                        }
                     ]
                 },
                 {
@@ -493,31 +504,45 @@
         };
 
         const startLesson = (trail, lesson) => {
-            if (userProgress.lives <= 0) {
+            if (userProgress.lives <= 0 && lesson.type !== 'article' && lesson.type !== 'video') {
                 setCurrentView('noLives');
                 return;
             }
             setSelectedTrail(trail);
             setCurrentLesson(lesson);
+            
+            // Reseta estados comuns
             setCurrentQuestion(0);
             setAnsweredQuestions([]);
             setShowResult(false);
             setSelectedAnswer(null);
-            
-            if (lesson.type === 'article') {
-                setCurrentView('article');
-            } else {
-                setCurrentView('lesson');
+        
+            // Direciona para a view correta
+            switch (lesson.type) {
+                case 'article':
+                    setCurrentView('article');
+                    break;
+                case 'video':
+                    setCurrentView('video');
+                    break;
+                case 'theory': // Antigo 'lesson'
+                    setCurrentView('lesson'); // O componente LessonView será usado para teoria
+                    break;
+                case 'practice':
+                    setCurrentView('practice');
+                    break;
+                default:
+                    setCurrentView('home'); // Volta para home se o tipo for desconhecido
             }
         };
         
         const getContentTypeInfo = useCallback((type) => {
             switch (type) {
-                case 'article': return { label: 'Artigo', icon: <FileText />, color: 'border-blue-400 text-blue-300', bgGradient: 'from-blue-900/30 to-blue-800/20' };
-                case 'lesson': return { label: 'Aula', icon: <GraduationCap />, color: 'border-cyan-400 text-cyan-300', bgGradient: 'from-cyan-900/30 to-cyan-800/20' };
-                case 'theory': return { label: 'Teoria', icon: <BookOpen />, color: 'border-purple-400 text-purple-300', bgGradient: 'from-purple-900/30 to-purple-800/20' };
-                case 'practice': return { label: 'Prática', icon: <PenTool />, color: 'border-green-400 text-green-300', bgGradient: 'from-green-900/30 to-green-800/20' };
-                default: return { label: 'Conteúdo', icon: <FileText />, color: 'border-gray-400 text-gray-300', bgGradient: 'from-gray-900/30 to-gray-800/20' };
+                case 'article':  return { label: 'Artigo',   icon: <FileText />,      color: 'border-blue-400 text-blue-300',   bgGradient: 'from-blue-900/30 to-blue-800/20' };
+                case 'video':    return { label: 'Vídeo',    icon: <Play />,          color: 'border-red-400 text-red-300',     bgGradient: 'from-red-900/30 to-red-800/20' };
+                case 'theory':   return { label: 'Teoria',   icon: <GraduationCap />, color: 'border-cyan-400 text-cyan-300',   bgGradient: 'from-cyan-900/30 to-cyan-800/20' };
+                case 'practice': return { label: 'Prática',  icon: <Code />,          color: 'border-green-400 text-green-300', bgGradient: 'from-green-900/30 to-green-800/20' };
+                default:         return { label: 'Conteúdo', icon: <FileText />,      color: 'border-gray-400 text-gray-300', bgGradient: 'from-gray-900/30 to-gray-800/20' };
             }
         }, []);
 
@@ -549,10 +574,10 @@
         // NOVO: Coloque este objeto de configuração aqui
         const REWARD_CONFIG = {
             article:  { xp: 15, gems: 5  },
-            lesson:   { xp: 50, gems: 10 },
-            practice: { xp: 75, gems: 15 },
-            theory:   { xp: 20, gems: 5  },
-            default:  { xp: 10, gems: 2  } // Valor padrão para tipos não listados
+            video:    { xp: 25, gems: 7  }, // Novo
+            theory:   { xp: 50, gems: 10 }, // Renomeado de 'lesson'
+            practice: { xp: 75, gems: 15 }, // Novo
+            default:  { xp: 10, gems: 2  }
         };
         
         // --- LÓGICA DE OFENSIVA (STREAK) CORRIGIDA ---
@@ -780,6 +805,140 @@
             </main>
         ));
 
+        // NOVO COMPONENTE: VideoView
+        const VideoView = memo(({ currentLesson, onComplete, onNavigate }) => {
+            const videoSrc = `https://www.youtube.com/embed/${currentLesson.videoId}`;
+        
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col animate-fade-in">
+                    <header className="bg-white/10 border-b border-white/20">
+                        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
+                            <h2 className="font-bold truncate">{currentLesson.title}</h2>
+                        </div>
+                    </header>
+                    <main className="max-w-4xl w-full mx-auto px-6 py-8 flex-1">
+                        <div className="aspect-w-16 aspect-h-9 bg-black rounded-xl overflow-hidden shadow-2xl">
+                            <iframe 
+                                src={videoSrc}
+                                title={currentLesson.title}
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                                className="w-full h-full"
+                            ></iframe>
+                        </div>
+                    </main>
+                    <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
+                        <div className="max-w-4xl mx-auto">
+                            <button
+                                onClick={onComplete}
+                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform"
+                            >
+                                Concluir Vídeo Aula
+                            </button>
+                        </div>
+                    </footer>
+                </div>
+            );
+        });
+
+        // NOVO COMPONENTE: PracticeView (Ponto de Partida)
+        const PracticeView = memo(({ currentLesson, onComplete, onNavigate }) => {
+            const [userQuery, setUserQuery] = useState('');
+            const [result, setResult] = useState(null); // null, 'correct', 'incorrect'
+            const [showResult, setShowResult] = useState(false);
+        
+            const normalizeQuery = (query) => {
+                // Remove espaços extras, ponto e vírgula no final e transforma em minúsculas
+                return query.trim().replace(/;$/, '').replace(/\s+/g, ' ').toLowerCase();
+            };
+        
+            const handleCheckQuery = () => {
+                const isCorrect = normalizeQuery(userQuery) === normalizeQuery(currentLesson.correctQuery);
+                setResult(isCorrect ? 'correct' : 'incorrect');
+                setShowResult(true);
+        
+                // Se estiver correto, chama a função de conclusão principal
+                if (isCorrect) {
+                    onComplete();
+                }
+            };
+        
+            const handleTryAgain = () => {
+                setShowResult(false);
+                setResult(null);
+                setUserQuery('');
+            };
+            
+            const isCorrect = result === 'correct';
+        
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-green-900 via-teal-900 to-gray-900 text-white flex flex-col animate-fade-in">
+                    <header className="bg-white/10 border-b border-white/20">
+                        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
+                            <h2 className="font-bold truncate">{currentLesson.title}</h2>
+                        </div>
+                    </header>
+                    
+                    <main className="flex-1 flex flex-col p-6">
+                        <div className="max-w-3xl w-full mx-auto">
+                            <div className="bg-black/20 p-6 rounded-xl border border-white/10 mb-6">
+                                <p className="text-lg text-white/90 mb-4">{currentLesson.description}</p>
+                                <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{currentLesson.schema}</code></pre>
+                            </div>
+        
+                            <div className="mb-4">
+                                <h3 className="text-center font-semibold text-white/80 mb-3">Monte sua query arrastando os blocos ou digitando abaixo:</h3>
+                                <div className="flex flex-wrap gap-2 justify-center p-4 bg-black/20 rounded-lg">
+                                    {currentLesson.queryParts?.map((part, index) => (
+                                        <div key={index} className="bg-gray-700 text-white px-3 py-1 rounded font-mono cursor-pointer hover:bg-gray-600">
+                                            {part}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+        
+                            <textarea
+                                value={userQuery}
+                                onChange={(e) => setUserQuery(e.target.value)}
+                                disabled={showResult}
+                                placeholder="Digite sua query SQL aqui..."
+                                className="w-full h-32 p-4 font-mono bg-black/30 border-2 border-white/20 rounded-lg text-white focus:border-cyan-400 focus:ring-0 transition-colors"
+                            ></textarea>
+                        </div>
+                    </main>
+                    
+                    <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
+                        {!showResult ? (
+                            <div className="max-w-3xl w-full mx-auto">
+                                <button onClick={handleCheckQuery} disabled={!userQuery.trim()} className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-4 rounded-xl disabled:opacity-50 hover:scale-105 transition-transform">
+                                    Verificar
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="max-w-3xl mx-auto">
+                                <div className={`p-4 rounded-lg mb-4 text-center ${isCorrect ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-400'}`}>
+                                    <h3 className="font-bold text-lg">{isCorrect ? 'Correto! 🎉' : 'Incorreto, tente novamente!'}</h3>
+                                    <p className="text-sm">{isCorrect ? 'Você mandou bem!' : 'Dica: revise os comandos SELECT e WHERE.'}</p>
+                                </div>
+                                {isCorrect ? (
+                                     <button onClick={() => onNavigate('trailDetail')} className="w-full bg-cyan-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform">
+                                        Continuar Trilha
+                                    </button>
+                                ) : (
+                                    <button onClick={handleTryAgain} className="w-full bg-white/20 text-white font-bold py-4 rounded-xl hover:bg-white/30 transition-colors">
+                                        Tentar Novamente
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </footer>
+                </div>
+            );
+        });
+        
         const TrailDetailView = memo(({ selectedTrail, userProgress, onStartLesson, onBack, getContentTypeInfo, filterType, onFilterChange }) => {
             const filteredLessons = selectedTrail.lessons.filter(lesson => {
                 if (filterType === 'all') return true;
@@ -1409,16 +1568,15 @@
             }
             
             switch (currentView) {
-                case 'home': return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge} />;
-                case 'trailDetail': return <TrailDetailView selectedTrail={selectedTrail} userProgress={userProgress} onStartLesson={startLesson} onBack={handleBackToTrails} getContentTypeInfo={getContentTypeInfo} filterType={filterType} onFilterChange={setFilterType} />;
-                case 'article': return <ArticleView currentLesson={currentLesson} onNavigate={handleArticleCompletion} />;
-                case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
-                case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} />;
-                case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
-                case 'ranking': return <RankingView leaderboard={leaderboard} currentUserId={userId} isLoading={isRankingLoading} />;
-                case 'profile': return <ProfileView userProgress={userProgress} onLogout={handleLogout} onSaveProfile={handleSaveProfile} />;
-                case 'challenge': return <ChallengeView challenge={challenge} onBack={() => setCurrentView('home')} onGenerateChallenge={generateSqlChallenge} />;
-                default: return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge}/>;
+                case 'home':        return <HomeView ... />;
+                case 'trailDetail': return <TrailDetailView ... />;
+                case 'article':     return <ArticleView currentLesson={currentLesson} onNavigate={handleArticleCompletion} />;
+                case 'video':       return <VideoView currentLesson={currentLesson} onComplete={() => handleLessonCompletion(currentLesson)} onNavigate={handleNavigate} />; // NOVO
+                case 'lesson':      return <LessonView ... />; // Agora usado para 'theory'
+                case 'practice':    return <PracticeView currentLesson={currentLesson} onComplete={() => handleLessonCompletion(currentLesson)} onNavigate={handleNavigate} />; // NOVO
+                case 'completion':  return <CompletionView ... />;
+                // ... (outros cases)
+                default:            return <HomeView ... />;
             }
         };
 
