@@ -555,7 +555,7 @@
                 lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
             }
 
-            let newStreak = userProgress.streak;
+            let newStreak = userProgress.streak || 0;
             // Só incrementa a ofensiva se a última lição foi ANTES de hoje
             if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
                 newStreak += 1;
