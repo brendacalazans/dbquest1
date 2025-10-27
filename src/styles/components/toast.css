@@ -1,0 +1,36 @@
+/**
+ * Estilos do Componente Toast (Notificações)
+ * 
+ * Mantém todos os estilos Tailwind do componente Toast
+ */
+
+/* Container do toast */
+.toast {
+    position: fixed;
+    top: 1.25rem; /* top-5 */
+    right: 1.25rem; /* right-5 */
+    padding: 0.75rem 1.5rem; /* px-6 py-3 */
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /* shadow-lg */
+    z-index: 50; /* z-50 */
+    color: white;
+    font-weight: 500;
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+.toast.success {
+    background-color: #16a34a; /* bg-green-600 */
+}
+
+.toast.error {
+    background-color: #dc2626; /* bg-red-600 */
+}
+
+.toast.info {
+    background-color: #2563eb; /* bg-blue-600 */
+}
+
+.toast.warning {
+    background-color: #f59e0b; /* bg-yellow-600 */
+}
+

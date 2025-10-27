@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DBQuest - Redirecionando...</title>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDoI9Az5udHaeUHOybJc5-YW75oV-kKtgs",
+            authDomain: "dataquest-c39fd.firebaseapp.com",
+            databaseURL: "https://dataquest-c39fd-default-rtdb.firebaseio.com",
+            projectId: "dataquest-c39fd",
+            storageBucket: "dataquest-c39fd.appspot.com",
+            messagingSenderId: "130744038521",
+            appId: "1:130744038521:web:432aaa66a10650210e50a8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Redireciona baseado no estado de autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = '/src/pages/home.html';
+            } else {
+                window.location.href = '/src/pages/auth.html';
+            }
+        });
+    </script>
+</head>
+<body style="margin: 0; padding: 0; background: #1f2937; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: system-ui;">
+    <div style="text-align: center;">
+        <h1 style="font-size: 3rem; margin-bottom: 1rem;">DBQuest</h1>
+        <p>Redirecionando...</p>
+    </div>
+</body>
+</html>
+

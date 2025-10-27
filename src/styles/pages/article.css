@@ -1,0 +1,99 @@
+/**
+ * Estilos da Página de Artigo
+ * 
+ * Mantém todos os estilos Tailwind do componente ArticleView
+ */
+
+/* Container principal */
+.article-container {
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #1e1b4b, #312e81, #6366f1); /* from-indigo-900 via-purple-900 to-indigo-500 */
+    color: white;
+    padding: 1.5rem; /* p-6 */
+}
+
+/* Cabeçalho */
+.article-header {
+    max-width: 56rem; /* max-w-4xl */
+    margin: 0 auto 2rem; /* mx-auto mb-8 */
+}
+
+.article-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* gap-2 */
+    color: rgba(255, 255, 255, 0.7); /* text-white/70 */
+    margin-bottom: 1rem; /* mb-4 */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem; /* text-sm */
+    transition: color 0.3s;
+}
+
+.article-back-btn:hover {
+    color: white; /* hover:text-white */
+}
+
+.article-title {
+    font-size: 2.25rem; /* text-4xl */
+    font-weight: bold;
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+.article-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* gap-4 */
+    color: rgba(255, 255, 255, 0.7); /* text-white/70 */
+    font-size: 0.875rem; /* text-sm */
+}
+
+.article-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* gap-2 */
+}
+
+/* Conteúdo */
+.article-content {
+    max-width: 56rem; /* max-w-4xl */
+    margin: 0 auto; /* mx-auto */
+    background-color: rgba(255, 255, 255, 0.1); /* bg-white/10 */
+    backdrop-filter: blur(12px); /* backdrop-blur-md */
+    border-radius: 1.5rem; /* rounded-3xl */
+    padding: 2rem; /* p-8 */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* border-white/20 */
+    margin-bottom: 2rem; /* mb-8 */
+}
+
+.article-text {
+    color: rgba(255, 255, 255, 0.9); /* text-white/90 */
+    line-height: 1.75; /* leading-relaxed */
+    font-size: 1.125rem; /* text-lg */
+    white-space: pre-line;
+}
+
+/* Botão de conclusão */
+.article-complete-btn {
+    max-width: 56rem; /* max-w-4xl */
+    margin: 0 auto; /* mx-auto */
+    width: 100%;
+    background: linear-gradient(to right, #10b981, #059669); /* from-green-500 to-green-600 */
+    color: white;
+    font-weight: bold;
+    padding: 1rem; /* py-4 */
+    border-radius: 0.75rem; /* rounded-xl */
+    transition: transform 0.3s;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* gap-2 */
+}
+
+.article-complete-btn:hover {
+    transform: scale(1.02); /* hover:scale-102 */
+}
+

@@ -1,0 +1,119 @@
+/**
+ * Estilos da Página de Conclusão de Lição
+ * 
+ * Mantém todos os estilos Tailwind do componente CompletionView
+ */
+
+/* Container principal */
+.completion-container {
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #1e1b4b, #7c3aed, #ec4899); /* from-indigo-900 via-purple-900 to-pink-900 */
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem; /* p-6 */
+    text-align: center;
+}
+
+/* Card de resultado */
+.completion-card {
+    background-color: rgba(255, 255, 255, 0.1); /* bg-white/10 */
+    backdrop-filter: blur(12px); /* backdrop-blur-md */
+    border-radius: 1rem; /* rounded-2xl */
+    padding: 2rem; /* p-8 */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* border-white/20 */
+    max-width: 42rem; /* max-w-2xl */
+    width: 100%;
+}
+
+.completion-emoji {
+    font-size: 6rem; /* text-8xl */
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+.completion-title {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: bold;
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+.completion-message {
+    color: rgba(255, 255, 255, 0.8); /* text-white/80 */
+    font-size: 1.125rem; /* text-lg */
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+/* Estatísticas */
+.completion-stats {
+    background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+    border-radius: 0.75rem; /* rounded-xl */
+    padding: 1.5rem; /* p-6 */
+    margin-bottom: 2rem; /* mb-8 */
+    text-align: left;
+}
+
+.completion-stat-row {
+    padding: 1rem 0; /* py-4 */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* divide-y divide-white/10 */
+}
+
+.completion-stat-row:last-child {
+    border-bottom: none;
+}
+
+.completion-stat-label {
+    color: rgba(255, 255, 255, 0.7); /* text-white/70 */
+}
+
+.completion-stat-value {
+    font-weight: bold;
+    font-size: 1.5rem; /* text-2xl */
+}
+
+.completion-stat-value.success {
+    color: #86efac; /* text-green-400 */
+}
+
+.completion-stat-value.error {
+    color: #fca5a5; /* text-red-400 */
+}
+
+/* Botões de ação */
+.completion-actions {
+    display: flex;
+    gap: 1rem; /* gap-4 */
+}
+
+.completion-btn {
+    flex: 1;
+    font-weight: bold;
+    padding: 0.75rem 1.5rem; /* py-3 px-6 */
+    border-radius: 0.5rem; /* rounded-lg */
+    transition: all 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.completion-btn-retry {
+    background-color: rgba(255, 255, 255, 0.1); /* bg-white/10 */
+    color: white;
+}
+
+.completion-btn-retry:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* hover:bg-white/20 */
+}
+
+.completion-btn-continue {
+    background: linear-gradient(to right, #06b6d4, #3b82f6); /* from-cyan-500 to-blue-500 */
+    color: white;
+}
+
+.completion-btn-continue:hover {
+    opacity: 0.9;
+}
+

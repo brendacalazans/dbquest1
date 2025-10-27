@@ -1,0 +1,220 @@
+/**
+ * Estilos da Página de Perfil
+ * 
+ * Mantém todos os estilos Tailwind do componente ProfileView
+ */
+
+/* Container principal */
+.profile-container {
+    max-width: 56rem; /* max-w-4xl */
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 2rem; /* px-6 py-8 */
+}
+
+.profile-title {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: bold;
+    color: white;
+    margin-bottom: 2rem; /* mb-8 */
+}
+
+/* Card de informações */
+.profile-card {
+    background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+    backdrop-filter: blur(12px); /* backdrop-blur-md */
+    border-radius: 1.5rem; /* rounded-3xl */
+    padding: 2rem; /* p-8 */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* border-white/10 */
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+/* Seção do avatar */
+.profile-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; /* gap-6 */
+    margin-bottom: 2rem; /* mb-8 */
+}
+
+.profile-avatar {
+    width: 6rem; /* w-24 */
+    height: 6rem; /* h-24 */
+    border-radius: 9999px; /* rounded-full */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem; /* text-5xl */
+    font-weight: bold;
+    position: relative;
+}
+
+.profile-avatar.emoji {
+    font-size: 4rem; /* text-6xl */
+}
+
+.profile-avatar.initials {
+    background: linear-gradient(to bottom right, #8b5cf6, #6366f1); /* from-purple-500 to-indigo-500 */
+    color: white;
+}
+
+.profile-avatar-edit {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(to right, #06b6d4, #3b82f6); /* from-cyan-500 to-blue-500 */
+    width: 2rem; /* w-8 */
+    height: 2rem; /* h-8 */
+    border-radius: 9999px; /* rounded-full */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: 2px solid #1f2937; /* border-2 border-gray-800 */
+    transition: transform 0.3s;
+}
+
+.profile-avatar-edit:hover {
+    transform: scale(1.1); /* hover:scale-110 */
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-username {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: bold;
+    color: white;
+    margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.profile-email {
+    color: rgba(255, 255, 255, 0.6); /* text-white/60 */
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+.profile-edit-btn {
+    background-color: rgba(255, 255, 255, 0.1); /* bg-white/10 */
+    color: white;
+    padding: 0.5rem 1rem; /* px-4 py-2 */
+    border-radius: 0.5rem; /* rounded-lg */
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 600;
+    transition: background-color 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.profile-edit-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* hover:bg-white/20 */
+}
+
+/* Grid de estatísticas */
+.profile-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* grid-cols-2 */
+    gap: 1rem; /* gap-4 */
+    margin-bottom: 2rem; /* mb-8 */
+}
+
+@media (min-width: 768px) {
+    .profile-stats-grid {
+        grid-template-columns: repeat(4, 1fr); /* md:grid-cols-4 */
+    }
+}
+
+.profile-stat-card {
+    background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+    border-radius: 1rem; /* rounded-2xl */
+    padding: 1rem; /* p-4 */
+    text-align: center;
+}
+
+.profile-stat-icon {
+    width: 2rem; /* w-8 */
+    height: 2rem; /* h-8 */
+    margin: 0 auto 0.5rem; /* mx-auto mb-2 */
+}
+
+.profile-stat-value {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: bold;
+    color: white;
+}
+
+.profile-stat-label {
+    font-size: 0.75rem; /* text-xs */
+    color: rgba(255, 255, 255, 0.6); /* text-white/60 */
+    margin-top: 0.25rem; /* mt-1 */
+}
+
+/* Seção de conquistas */
+.profile-achievements {
+    margin-bottom: 2rem; /* mb-8 */
+}
+
+.profile-section-title {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: bold;
+    color: white;
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+.profile-achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* grid-cols-2 */
+    gap: 1rem; /* gap-4 */
+}
+
+@media (min-width: 768px) {
+    .profile-achievements-grid {
+        grid-template-columns: repeat(3, 1fr); /* md:grid-cols-3 */
+    }
+}
+
+.profile-achievement-card {
+    background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+    border-radius: 1rem; /* rounded-2xl */
+    padding: 1rem; /* p-4 */
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.1); /* border-white/10 */
+}
+
+.profile-achievement-card.locked {
+    opacity: 0.4; /* opacity-40 */
+}
+
+.profile-achievement-icon {
+    font-size: 2rem; /* text-4xl */
+    margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.profile-achievement-name {
+    font-weight: 600;
+    color: white;
+    font-size: 0.875rem; /* text-sm */
+}
+
+.profile-achievement-desc {
+    font-size: 0.75rem; /* text-xs */
+    color: rgba(255, 255, 255, 0.6); /* text-white/60 */
+    margin-top: 0.25rem; /* mt-1 */
+}
+
+/* Botão de logout */
+.profile-logout-btn {
+    width: 100%;
+    background: linear-gradient(to right, #ef4444, #dc2626); /* from-red-500 to-red-600 */
+    color: white;
+    font-weight: bold;
+    padding: 0.75rem; /* py-3 */
+    border-radius: 0.75rem; /* rounded-xl */
+    transition: transform 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.profile-logout-btn:hover {
+    transform: scale(1.02); /* hover:scale-102 */
+}
+

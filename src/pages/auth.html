@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DBQuest</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- React -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../styles/global.css">
+    <link rel="stylesheet" href="../styles/pages/auth.css">
+</head>
+<body>
+    <!-- Container principal -->
+    <div id="root"></div>
+
+    <!-- Firebase Config -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { 
+            getAuth, 
+            onAuthStateChanged,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            GoogleAuthProvider,
+            signInWithPopup,
+            updateProfile,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDoI9Az5udHaeUHOybJc5-YW75oV-kKtgs",
+            authDomain: "dataquest-c39fd.firebaseapp.com",
+            databaseURL: "https://dataquest-c39fd-default-rtdb.firebaseio.com",
+            projectId: "dataquest-c39fd",
+            storageBucket: "dataquest-c39fd.appspot.com",
+            messagingSenderId: "130744038521",
+            appId: "1:130744038521:web:432aaa66a10650210e50a8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        window.FB = {
+            auth, 
+            onAuthStateChanged, 
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword, 
+            GoogleAuthProvider, 
+            signInWithPopup,
+            updateProfile, 
+            signOut
+        };
+
+        // Redireciona se já estiver logado
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                window.location.href = '/index.html';
+            }
+        });
+    </script>
+    
+    <!-- Componente React -->
+    <script type="text/babel" src="../components/AuthComponent.jsx"></script>
+</body>
+</html>
+

@@ -1,0 +1,188 @@
+/**
+ * Estilos da Página Home
+ * 
+ * Mantém todos os estilos Tailwind do componente HomeView
+ */
+
+/* Container principal */
+.home-container {
+    max-width: 80rem; /* max-w-7xl */
+    margin: 0 auto;
+    padding: 1.5rem; /* px-6 py-8 */
+}
+
+/* Seção de boas-vindas */
+.home-welcome {
+    background: linear-gradient(to right, #6366f1, #8b5cf6); /* from-indigo-500 to-purple-500 */
+    border-radius: 1.5rem; /* rounded-3xl */
+    padding: 2rem; /* p-8 */
+    margin-bottom: 2rem; /* mb-8 */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); /* shadow-xl */
+}
+
+.home-welcome-title {
+    font-size: 2.25rem; /* text-4xl */
+    font-weight: bold;
+    color: white;
+    margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.home-welcome-subtitle {
+    color: rgba(255, 255, 255, 0.9); /* text-white/90 */
+    font-size: 1.125rem; /* text-lg */
+}
+
+/* Filtros */
+.home-filters {
+    display: flex;
+    gap: 0.75rem; /* gap-3 */
+    margin-bottom: 2rem; /* mb-8 */
+    flex-wrap: wrap;
+}
+
+.home-filter-btn {
+    padding: 0.5rem 1rem; /* px-4 py-2 */
+    border-radius: 9999px; /* rounded-full */
+    font-weight: 600;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: none;
+}
+
+.home-filter-btn.active {
+    background: linear-gradient(to right, #06b6d4, #3b82f6); /* from-cyan-500 to-blue-500 */
+    color: white;
+}
+
+.home-filter-btn:not(.active) {
+    background-color: rgba(255, 255, 255, 0.1); /* bg-white/10 */
+    color: rgba(255, 255, 255, 0.7); /* text-white/70 */
+}
+
+.home-filter-btn:not(.active):hover {
+    background-color: rgba(255, 255, 255, 0.2); /* hover:bg-white/20 */
+}
+
+/* Grid de trilhas */
+.home-trails-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem; /* gap-6 */
+}
+
+@media (min-width: 768px) {
+    .home-trails-grid {
+        grid-template-columns: repeat(2, 1fr); /* md:grid-cols-2 */
+    }
+}
+
+@media (min-width: 1024px) {
+    .home-trails-grid {
+        grid-template-columns: repeat(3, 1fr); /* lg:grid-cols-3 */
+    }
+}
+
+/* Card de trilha */
+.home-trail-card {
+    background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+    backdrop-filter: blur(12px); /* backdrop-blur-md */
+    border-radius: 1.5rem; /* rounded-3xl */
+    padding: 1.5rem; /* p-6 */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* border-white/10 */
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.home-trail-card:hover {
+    transform: translateY(-0.5rem); /* hover:-translate-y-2 */
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); /* hover:shadow-2xl */
+}
+
+.home-trail-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* gap-3 */
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+.home-trail-icon {
+    font-size: 3rem; /* text-5xl */
+}
+
+.home-trail-info {
+    flex: 1;
+}
+
+.home-trail-title {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: bold;
+    color: white;
+}
+
+.home-trail-description {
+    color: rgba(255, 255, 255, 0.7); /* text-white/70 */
+    font-size: 0.875rem; /* text-sm */
+    margin-top: 0.5rem; /* mt-2 */
+}
+
+/* Progresso da trilha */
+.home-trail-progress {
+    margin-top: 1rem; /* mt-4 */
+}
+
+.home-trail-progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem; /* text-xs */
+    color: rgba(255, 255, 255, 0.6); /* text-white/60 */
+    margin-bottom: 0.5rem; /* mb-2 */
+}
+
+.home-trail-progress-bar {
+    width: 100%;
+    height: 0.5rem; /* h-2 */
+    background-color: rgba(255, 255, 255, 0.1); /* bg-white/10 */
+    border-radius: 9999px; /* rounded-full */
+    overflow: hidden;
+}
+
+.home-trail-progress-fill {
+    height: 100%;
+    border-radius: 9999px; /* rounded-full */
+    transition: width 0.5s;
+}
+
+/* Botão de ação */
+.home-trail-btn {
+    width: 100%;
+    margin-top: 1rem; /* mt-4 */
+    padding: 0.75rem; /* py-3 */
+    border-radius: 0.75rem; /* rounded-xl */
+    font-weight: 600;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem; /* gap-2 */
+    border: none;
+    cursor: pointer;
+}
+
+.home-trail-btn-start {
+    background: linear-gradient(to right, #10b981, #059669); /* from-green-500 to-green-600 */
+    color: white;
+}
+
+.home-trail-btn-start:hover {
+    transform: scale(1.05); /* hover:scale-105 */
+}
+
+.home-trail-btn-continue {
+    background-color: rgba(255, 255, 255, 0.1); /* bg-white/10 */
+    color: white;
+}
+
+.home-trail-btn-continue:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* hover:bg-white/20 */
+}
+

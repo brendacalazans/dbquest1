@@ -1,0 +1,147 @@
+/**
+ * Estilos da Página de Ranking
+ * 
+ * Mantém todos os estilos Tailwind do componente RankingView
+ */
+
+/* Container principal */
+.ranking-container {
+    max-width: 48rem; /* max-w-3xl */
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 2rem; /* px-6 py-8 */
+}
+
+.ranking-title {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: bold;
+    color: white;
+    margin-bottom: 2rem; /* mb-8 */
+}
+
+/* Loading */
+.ranking-loading {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7); /* text-white/70 */
+}
+
+/* Lista de ranking */
+.ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem; /* space-y-3 */
+}
+
+/* Card de usuário no ranking */
+.ranking-card {
+    background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+    border-radius: 1rem; /* rounded-2xl */
+    padding: 1rem; /* p-4 */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* border-white/10 */
+    transition: all 0.3s;
+}
+
+.ranking-card:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* hover:bg-white/10 */
+    transform: translateX(0.25rem); /* hover:translate-x-1 */
+}
+
+/* Destaque para o usuário atual */
+.ranking-card.current-user {
+    background: linear-gradient(to right, #8b5cf6, #6366f1); /* from-purple-500 to-indigo-500 */
+    border-color: #a78bfa; /* border-purple-400 */
+}
+
+/* Posições especiais (1º, 2º, 3º) */
+.ranking-card.rank-1 {
+    border-color: #facc15; /* border-yellow-400 */
+    background-color: rgba(250, 204, 21, 0.1); /* bg-yellow-400/10 */
+}
+
+.ranking-card.rank-2 {
+    border-color: #9ca3af; /* border-gray-400 */
+    background-color: rgba(156, 163, 175, 0.1); /* bg-gray-400/10 */
+}
+
+.ranking-card.rank-3 {
+    border-color: #b45309; /* border-yellow-700 */
+    background-color: rgba(180, 83, 9, 0.1); /* bg-yellow-700/10 */
+}
+
+/* Conteúdo do card */
+.ranking-card-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* gap-4 */
+}
+
+/* Ícone de posição */
+.ranking-position {
+    width: 3rem; /* w-12 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ranking-position-number {
+    color: rgba(255, 255, 255, 0.5); /* text-white/50 */
+    font-weight: 600;
+}
+
+/* Avatar */
+.ranking-avatar {
+    width: 3rem; /* w-12 */
+    height: 3rem; /* h-12 */
+    border-radius: 9999px; /* rounded-full */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.125rem; /* text-lg */
+}
+
+.ranking-avatar.emoji {
+    font-size: 1.5rem; /* text-2xl */
+}
+
+.ranking-avatar.initials {
+    background: linear-gradient(to bottom right, #8b5cf6, #6366f1); /* from-purple-500 to-indigo-500 */
+    color: white;
+}
+
+/* Informações do usuário */
+.ranking-user-info {
+    flex: 1;
+}
+
+.ranking-username {
+    font-weight: 600;
+    color: white;
+}
+
+.ranking-stats {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* gap-4 */
+    margin-top: 0.25rem; /* mt-1 */
+    font-size: 0.75rem; /* text-xs */
+    color: rgba(255, 255, 255, 0.6); /* text-white/60 */
+}
+
+.ranking-stat {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem; /* gap-1 */
+}
+
+.ranking-stat-icon {
+    width: 0.875rem; /* w-3.5 */
+    height: 0.875rem; /* h-3.5 */
+}
+
+/* XP total */
+.ranking-xp {
+    font-weight: bold;
+    font-size: 1.125rem; /* text-lg */
+    color: white;
+}
+

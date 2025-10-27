@@ -1,0 +1,225 @@
+/**
+ * Estilos da Página de Lição
+ * 
+ * Mantém todos os estilos Tailwind do componente LessonView
+ */
+
+/* Container principal */
+.lesson-container {
+    min-height: 100vh;
+    background: linear-gradient(to bottom right, #1e1b4b, #312e81, #7c3aed); /* from-indigo-900 via-purple-900 to-purple-600 */
+    color: white;
+    padding: 1.5rem; /* p-6 */
+}
+
+/* Cabeçalho da lição */
+.lesson-header {
+    max-width: 56rem; /* max-w-4xl */
+    margin: 0 auto 2rem; /* mx-auto mb-8 */
+}
+
+.lesson-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* gap-2 */
+    color: rgba(255, 255, 255, 0.7); /* text-white/70 */
+    margin-bottom: 1rem; /* mb-4 */
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.875rem; /* text-sm */
+    transition: color 0.3s;
+}
+
+.lesson-back-btn:hover {
+    color: white; /* hover:text-white */
+}
+
+.lesson-title {
+    font-size: 1.875rem; /* text-3xl */
+    font-weight: bold;
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+/* Barra de progresso */
+.lesson-progress-bar {
+    width: 100%;
+    height: 0.75rem; /* h-3 */
+    background-color: rgba(255, 255, 255, 0.2); /* bg-white/20 */
+    border-radius: 9999px; /* rounded-full */
+    overflow: hidden;
+}
+
+.lesson-progress-fill {
+    height: 100%;
+    background: linear-gradient(to right, #10b981, #059669); /* from-green-500 to-green-600 */
+    border-radius: 9999px; /* rounded-full */
+    transition: width 0.5s;
+}
+
+.lesson-progress-text {
+    text-align: center;
+    margin-top: 0.5rem; /* mt-2 */
+    font-size: 0.875rem; /* text-sm */
+    color: rgba(255, 255, 255, 0.7); /* text-white/70 */
+}
+
+/* Card da questão */
+.lesson-question-card {
+    max-width: 56rem; /* max-w-4xl */
+    margin: 0 auto; /* mx-auto */
+    background-color: rgba(255, 255, 255, 0.1); /* bg-white/10 */
+    backdrop-filter: blur(12px); /* backdrop-blur-md */
+    border-radius: 1.5rem; /* rounded-3xl */
+    padding: 2rem; /* p-8 */
+    border: 1px solid rgba(255, 255, 255, 0.2); /* border-white/20 */
+}
+
+.lesson-question-text {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: bold;
+    margin-bottom: 2rem; /* mb-8 */
+}
+
+/* Opções de resposta */
+.lesson-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* space-y-4 */
+}
+
+.lesson-option {
+    padding: 1rem 1.5rem; /* px-6 py-4 */
+    border-radius: 1rem; /* rounded-2xl */
+    border: 2px solid rgba(255, 255, 255, 0.2); /* border-2 border-white/20 */
+    background-color: rgba(255, 255, 255, 0.05); /* bg-white/5 */
+    transition: all 0.3s;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.lesson-option:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* hover:bg-white/10 */
+    transform: translateX(0.5rem); /* hover:translate-x-2 */
+}
+
+.lesson-option.selected {
+    background-color: rgba(59, 130, 246, 0.3); /* bg-blue-500/30 */
+    border-color: #3b82f6; /* border-blue-500 */
+}
+
+.lesson-option.correct {
+    background-color: rgba(16, 185, 129, 0.3); /* bg-green-500/30 */
+    border-color: #10b981; /* border-green-500 */
+}
+
+.lesson-option.incorrect {
+    background-color: rgba(239, 68, 68, 0.3); /* bg-red-500/30 */
+    border-color: #ef4444; /* border-red-500 */
+}
+
+.lesson-option.disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Rodapé com resultado */
+.lesson-result-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1.5rem; /* p-6 */
+    box-shadow: 0 -10px 15px -3px rgba(0, 0, 0, 0.1); /* shadow-lg */
+}
+
+.lesson-result-footer.correct {
+    background: linear-gradient(to right, #10b981, #059669); /* from-green-500 to-green-600 */
+}
+
+.lesson-result-footer.incorrect {
+    background: linear-gradient(to right, #f97316, #ea580c); /* from-orange-500 to-orange-600 */
+}
+
+.lesson-result-content {
+    max-width: 56rem; /* max-w-4xl */
+    margin: 0 auto; /* mx-auto */
+}
+
+.lesson-result-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem; /* gap-3 */
+    margin-bottom: 0.75rem; /* mb-3 */
+}
+
+.lesson-result-title {
+    font-weight: bold;
+    font-size: 1.125rem; /* text-lg */
+}
+
+.lesson-result-title.correct {
+    color: #86efac; /* text-green-400 */
+}
+
+.lesson-result-title.incorrect {
+    color: #fca5a5; /* text-red-400 */
+}
+
+.lesson-result-explanation {
+    color: rgba(255, 255, 255, 0.9); /* text-white/90 */
+    margin-bottom: 1rem; /* mb-4 */
+}
+
+/* Explicação da IA */
+.lesson-ai-explanation-btn {
+    font-size: 0.875rem; /* text-sm */
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* gap-2 */
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.3s;
+    color: #d8b4fe; /* text-purple-300 */
+}
+
+.lesson-ai-explanation-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.lesson-ai-explanation-content {
+    margin-top: 0.5rem; /* mt-2 */
+    padding: 1rem; /* p-4 */
+    background-color: rgba(0, 0, 0, 0.2); /* bg-black/20 */
+    border-radius: 0.5rem; /* rounded-lg */
+    font-size: 0.875rem; /* text-sm */
+    color: rgba(255, 255, 255, 0.8); /* text-white/80 */
+}
+
+/* Botão continuar */
+.lesson-continue-btn {
+    width: 100%;
+    color: white;
+    font-weight: bold;
+    padding: 1rem; /* py-4 */
+    border-radius: 0.75rem; /* rounded-xl */
+    transition: transform 0.3s;
+    border: none;
+    cursor: pointer;
+}
+
+.lesson-continue-btn:hover {
+    transform: scale(1.05); /* hover:scale-105 */
+}
+
+.lesson-continue-btn.correct {
+    background: linear-gradient(to right, #10b981, #059669); /* from-green-500 to-emerald-500 */
+}
+
+.lesson-continue-btn.incorrect {
+    background: linear-gradient(to right, #f97316, #ef4444); /* from-orange-500 to-red-500 */
+}
+

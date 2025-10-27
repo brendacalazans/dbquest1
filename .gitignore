@@ -1,0 +1,110 @@
+# ========================================
+# ARQUIVOS DE DOCUMENTAÇÃO TEMPORÁRIOS
+# (Não precisa no GitHub)
+# ========================================
+COMO_USAR.md
+ESTRUTURA_COMPLETA.md
+ESTRUTURA_PROJETO.md
+FIREBASE_ANALYSIS.md
+GUIA_ATUALIZACAO_GITHUB.md
+README_FINAL.md
+RESUMO_REESTRUTURACAO.md
+VALIDACAO.md
+
+# ========================================
+# BACKUPS E ARQUIVOS MONOLÍTICOS
+# ========================================
+index-monolitico-backup.html
+dbquest.html
+
+# ========================================
+# SCRIPTS TEMPORÁRIOS
+# ========================================
+*.py
+separate_components.py
+create_all_pages.py
+analyze_html.py
+extract_components.py
+extract_detailed.py
+
+# ========================================
+# ARQUIVOS DO SISTEMA OPERACIONAL
+# ========================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ========================================
+# IDEs E EDITORES
+# ========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+.classpath
+
+# ========================================
+# NODE.JS (caso adicione no futuro)
+# ========================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# ========================================
+# PYTHON
+# ========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+*.pyc
+*.pyo
+
+# ========================================
+# LOGS
+# ========================================
+logs/
+*.log
+
+# ========================================
+# ARQUIVOS TEMPORÁRIOS
+# ========================================
+*.tmp
+*.temp
+.cache/
+
+# ========================================
+# BUILD (caso compile no futuro)
+# ========================================
+dist/
+build/
+*.min.js
+*.min.css
+
+# ========================================
+# ARQUIVOS SENSÍVEIS
+# ========================================
+.env
+.env.local
+.env.*.local
+config.local.js
+secrets.js
+
+# ========================================
+# ARQUIVOS ZIP
+# ========================================
+*.zip
