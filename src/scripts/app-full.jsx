@@ -510,19 +510,7 @@
                     }
                     // O bloco "else" foi removido. A criação agora é feita nos handlers de login/registro.
                 });
-                        await set(userRef, newUser);
-                        setUserProgress(newUser.gamification);
-                        
-                        // Adiciona ao leaderboard
-                        await set(ref(db, `leaderboard/${userId}`), {
-                            username: newUser.name,
-                            totalXP: 0,
-                            avatar: newUser.avatar
-                        });
-                    }
-                });
-            } else {
-                // Reseta o progresso se o usuário deslogar
+                      
                 setUserProgress({
                     username: 'Convidado', avatar: '👤', level: 1, totalXP: 0,
                     streak: 0, gems: 0, lives: 5, completedLessons: []
