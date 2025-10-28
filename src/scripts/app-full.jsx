@@ -1,5 +1,4 @@
 (function() {
-
     const {
         auth, db, onAuthStateChanged, createUserWithEmailAndPassword,
         signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
@@ -7,7 +6,6 @@
         get 
     } = window.FB;
     
-
     const { useState, useEffect, useCallback, memo, createContext, useContext } = React;
     
     // --- Ícones como Componentes React (Memoizados) ---
@@ -93,48 +91,11 @@
             }
             setIsLoading(true);
             try {
-                // 1. Cria o usuário na autenticação
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-        
-                // 2. Atualiza o perfil de autenticação com o nome
-                await updateProfile(user, { displayName: name });
-        
-                // 3. CRIA O PERFIL COMPLETO NO BANCO DE DADOS (A GRANDE MUDANÇA)
-                const userRef = ref(db, `users/${user.uid}`);
-                const newUserProfile = {
-                    name: name, // Usa o nome do formulário, não do auth
-                    avatar: '👤',
-                    email: user.email,
-                    joinedDate: new Date().toISOString(),
-                    gamification: {
-                        level: 1,
-                        totalXP: 0,
-                        streak: 0,
-                        gems: 100,
-                        lives: 5,
-                        completedLessons: [],
-                        lastCompletedLessonDate: null,
-                        lastLifeResetDate: new Date().setHours(0,0,0,0)
-                    },
-                    cooldownUntil: null
-                };
-                
-                // 4. Salva o perfil principal
-                await set(userRef, newUserProfile);
-        
-                // 5. Salva a entrada inicial no ranking
-                const leaderboardRef = ref(db, `leaderboard/${user.uid}`);
-                await set(leaderboardRef, {
-                    username: name,
-                    totalXP: 0,
-                    avatar: '👤'
-                });
-        
-                // O listener onAuthStateChanged cuidará do resto
-                
+                const cred = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(cred.user, { displayName: name });
+                // Success is handled by onAuthStateChanged in App
             } catch (error) {
-                console.error("Erro no registro:", error);
+                console.error(error);
                 setLocalToast({ message: error.message, type: 'error' });
             } finally {
                 setIsLoading(false);
@@ -144,36 +105,10 @@
         const handleGoogleLogin = async () => {
             const provider = new GoogleAuthProvider();
             try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-        
-                // Verifica se o usuário já existe no nosso banco de dados
-                const userRef = ref(db, `users/${user.uid}`);
-                const snapshot = await get(userRef);
-        
-                // Se NÃO existir, cria o perfil completo
-                if (!snapshot.exists()) {
-                    const newUserProfile = {
-                        name: user.displayName || 'Aluno do Google',
-                        avatar: '👤',
-                        email: user.email,
-                        joinedDate: new Date().toISOString(),
-                        gamification: { /* ...mesmos valores padrão... */ },
-                        cooldownUntil: null
-                    };
-                    await set(userRef, newUserProfile);
-        
-                    const leaderboardRef = ref(db, `leaderboard/${user.uid}`);
-                    await set(leaderboardRef, {
-                        username: user.displayName || 'Aluno do Google',
-                        totalXP: 0,
-                        avatar: '👤'
-                    });
-                }
-                // Se o usuário já existe, o useEffect cuidará de carregar os dados.
-        
+                await signInWithPopup(auth, provider);
+                // Success is handled by onAuthStateChanged in App
             } catch (error) {
-                console.error("Erro no login com Google:", error);
+                console.error(error);
                 setLocalToast({ message: error.message, type: 'error' });
             }
         };
@@ -295,7 +230,7 @@
 
     function App() {
         
-        // --- ESTADO DA APLICAÇÃO ---
+        // --- ESTADO DA APLICAÇÃO (Restaurado) ---
         // Estados de Autenticação e Usuário
         const [userId, setUserId] = useState(null);
         const [isAuthChecked, setIsAuthChecked] = useState(false);
@@ -342,8 +277,6 @@
         // --- EFEITOS (Restaurados) ---
         // Efeito: Observador de Autenticação
         useEffect(() => {
-            // A autenticação inicial é tratada no <script type="module">
-            // Este listener apenas reage a mudanças (login/logout)
             const unsubscribe = onAuthStateChanged(auth, (user) => {
                 setUserId(user ? user.uid : null);
                 setIsAuthChecked(true);
@@ -355,7 +288,7 @@
         useEffect(() => {
             // Carrega as trilhas estáticas (simulação de API)
             // (Esta parte estava faltando, adicionei a estrutura de dados)
-            const trailsData = [
+             const trailsData = [
                 {
                     id: 'trail1',
                     icon: '🚀',
@@ -363,26 +296,15 @@
                     title: 'Fundamentos de SQL',
                     description: 'Comece sua jornada aprendendo os comandos básicos de SQL.',
                     lessons: [
-                        // TIPO 1: Artigo (já existe)
-                        { id: 'l1-1', title: 'O que é um Banco de Dados?', type: 'article', content: '...' },
-                        
-                        // TIPO 2: Vídeo Aula (NOVO)
-                        { id: 'l1-2', title: 'SQL em 10 Minutos', type: 'video', videoId: 'p_n_d3q_t4k' }, // Usamos um ID de vídeo do YouTube como exemplo
-            
-                        // TIPO 3: Teoria - Múltipla Escolha (Renomeado de 'lesson')
-                        { id: 'l1-3', title: 'Introdução ao SELECT', type: 'theory', questions: [
-                            { question: 'Qual comando é usado para buscar dados de uma tabela?', options: ['GET', 'SELECT', 'FETCH', 'PULL'], correct: 1, explanation: '...' },
-                            { question: 'Qual símbolo seleciona todas as colunas?', options: ['*', '#', 'ALL', '&'], correct: 0, explanation: '...' }
+                        { id: 'l1-1', title: 'O que é um Banco de Dados?', type: 'article', duration: '5 min', xp: 20, content: 'Um banco de dados é uma coleção organizada de informações - ou dados - estruturadas, geralmente armazenadas eletronicamente em um sistema de computador. Um banco de dados é geralmente controlado por um sistema de gerenciamento de banco de dados (DBMS). Juntos, os dados e o DBMS, juntamente com os aplicativos associados a eles, são chamados de sistema de banco de dados, ou simplesmente banco de dados.\n\nDados dentro dos tipos mais comuns de bancos de dados em operação atualmente são normalmente modelados em linhas e colunas em uma série de tabelas para tornar o processamento e a consulta de dados eficientes. Os dados podem ser facilmente acessados, gerenciados, modificados, atualizados, controlados e organizados. A maioria dos bancos de dados usa a linguagem de consulta estruturada (SQL) para escrever e consultar dados.' },
+                        { id: 'l1-2', title: 'Introdução ao SELECT', type: 'lesson', duration: '10 min', xp: 50, questions: [
+                            { question: 'Qual comando é usado para buscar dados de uma tabela?', options: ['GET', 'SELECT', 'FETCH', 'PULL'], correct: 1, explanation: 'O comando SELECT é usado para consultar e extrair dados de um banco de dados.' },
+                            { question: 'Qual símbolo seleciona todas as colunas?', options: ['*', '#', 'ALL', '&'], correct: 0, explanation: 'O asterisco (*) é um curinga que seleciona todas as colunas da tabela.' }
                         ]},
-            
-                        // TIPO 4: Prática - Exercício de SQL (NOVO)
-                        { id: 'l1-4', title: 'Prática: Selecionando Usuários', type: 'practice', 
-                          description: 'Você tem uma tabela `usuarios` com as colunas `id`, `nome`, e `idade`. Sua tarefa é selecionar o nome de todos os usuários que têm mais de 25 anos.',
-                          schema: 'CREATE TABLE usuarios (\n  id INT PRIMARY KEY,\n  nome VARCHAR(100),\n  idade INT\n);',
-                          correctQuery: 'SELECT nome FROM usuarios WHERE idade > 25;',
-                          // Opcional: para a interface de arrastar e soltar
-                          queryParts: ['SELECT', 'nome', 'FROM', 'usuarios', 'WHERE', 'idade', '>', '25', ';'] 
-                        }
+                        { id: 'l1-3', title: 'Filtrando com WHERE', type: 'lesson', duration: '12 min', xp: 60, questions: [
+                             { question: 'Qual cláusula filtra os resultados?', options: ['FILTER', 'WHERE', 'IF', 'FIND'], correct: 1, explanation: 'A cláusula WHERE é usada para filtrar registros que satisfazem uma condição específica.' },
+                             { question: 'Como você selecionaria usuários com idade superior a 18?', options: ['SELECT * FROM users WHERE age > 18', 'SELECT * FROM users IF age > 18', 'SELECT * FROM users FILTER age > 18', 'SELECT * FROM users WITH age > 18'], correct: 0, explanation: 'A sintaxe correta usa WHERE seguido da condição `age > 18`.' }
+                        ]}
                     ]
                 },
                 {
@@ -434,11 +356,15 @@
             let offUserProgress = () => {};
             if (userId) {
                 const userRef = ref(db, `users/${userId}`);
+                
+                // Flag para evitar criação duplicada de perfil
+                let isCreatingProfile = false;
+                
                 offUserProgress = onValue(userRef, async (snapshot) => {
                     if (snapshot.exists()) {
                         const data = snapshot.val();
                         
-                        // --- Verificação de Ofensiva e Vidas ---
+                        // --- Verificação de Ofensiva e Vidas (Restaurado) ---
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
                         const todayTimestamp = today.getTime();
@@ -491,15 +417,15 @@
                         // Atualiza o estado local com os dados do DB (e possíveis atualizações)
                         setUserProgress({
                             ...data.gamification,
-                            username: data.name || (auth.currentUser ? auth.currentUser.displayName : 'Aluno') || 'Aluno',
+                            username: data.name || auth.currentUser.displayName || 'Aluno',
                             avatar: data.avatar || '👤',
                             cooldownUntil: cooldown ? cooldown.toISOString() : null,
                             lives: lives
                         });
                         
-                        // Garante que o ranking esteja atualizado (esta parte é importante para atualizações de nome/avatar)
+                        // Garante que o ranking esteja atualizado
                         const rankRef = ref(db, `leaderboard/${userId}`);
-                        const rankSnapshot = await get(rankRef);
+                        const rankSnapshot = await get(rankRef); // 'get' precisa ser importado
                         if (!rankSnapshot.exists() || rankSnapshot.val().username !== data.name || rankSnapshot.val().avatar !== data.avatar) {
                             update(rankRef, {
                                 username: data.name,
@@ -507,10 +433,77 @@
                                 avatar: data.avatar || '👤'
                             });
                         }
+
+                    } else {
+                        // --- Cria novo usuário no DB ---
+                        // Proteção contra criação duplicada (condição de corrida)
+                        if (isCreatingProfile) {
+                            console.log('Perfil já está sendo criado, ignorando chamada duplicada');
+                            return;
+                        }
+                        
+                        isCreatingProfile = true;
+                        
+                        try {
+                            // Verifica novamente se o perfil foi criado enquanto esperávamos
+                            const recheckSnapshot = await get(userRef);
+                            if (recheckSnapshot.exists()) {
+                                console.log('Perfil foi criado por outro processo, usando dados existentes');
+                                const data = recheckSnapshot.val();
+                                setUserProgress({
+                                    ...data.gamification,
+                                    username: data.name || auth.currentUser.displayName || 'Aluno',
+                                    avatar: data.avatar || '👤'
+                                });
+                                return;
+                            }
+                            
+                            // Cria o novo perfil de usuário
+                            const newUser = {
+                                name: auth.currentUser.displayName || 'Novo Aluno',
+                                avatar: '👤',
+                                email: auth.currentUser.email,
+                                joinedDate: new Date().toISOString(),
+                                gamification: {
+                                    level: 1,
+                                    totalXP: 0,
+                                    streak: 0,
+                                    gems: 100,
+                                    lives: 5,
+                                    completedLessons: [],
+                                    lastCompletedLessonDate: null,
+                                    lastLifeResetDate: new Date().setHours(0,0,0,0)
+                                },
+                                cooldownUntil: null
+                            };
+                            
+                            // Salva no banco de dados
+                            await set(userRef, newUser);
+                            console.log('Novo perfil criado com sucesso para:', newUser.email);
+                            
+                            setUserProgress({
+                                ...newUser.gamification,
+                                username: newUser.name,
+                                avatar: newUser.avatar
+                            });
+                            
+                            // Adiciona ao leaderboard
+                            await set(ref(db, `leaderboard/${userId}`), {
+                                username: newUser.name,
+                                totalXP: 0,
+                                avatar: newUser.avatar
+                            });
+                            
+                        } catch (error) {
+                            console.error('Erro ao criar perfil de usuário:', error);
+                            setToast({ message: 'Erro ao criar perfil. Tente novamente.', type: 'error' });
+                        } finally {
+                            isCreatingProfile = false;
+                        }
                     }
-                    // O bloco "else" foi removido. A criação agora é feita nos handlers de login/registro.
                 });
-                      
+            } else {
+                // Reseta o progresso se o usuário deslogar
                 setUserProgress({
                     username: 'Convidado', avatar: '👤', level: 1, totalXP: 0,
                     streak: 0, gems: 0, lives: 5, completedLessons: []
@@ -538,45 +531,31 @@
         };
 
         const startLesson = (trail, lesson) => {
-            if (userProgress.lives <= 0 && lesson.type !== 'article' && lesson.type !== 'video') {
+            if (userProgress.lives <= 0) {
                 setCurrentView('noLives');
                 return;
             }
             setSelectedTrail(trail);
             setCurrentLesson(lesson);
-            
-            // Reseta estados comuns
             setCurrentQuestion(0);
             setAnsweredQuestions([]);
             setShowResult(false);
             setSelectedAnswer(null);
-        
-            // Direciona para a view correta
-            switch (lesson.type) {
-                case 'article':
-                    setCurrentView('article');
-                    break;
-                case 'video':
-                    setCurrentView('video');
-                    break;
-                case 'theory': // Antigo 'lesson'
-                    setCurrentView('lesson'); // O componente LessonView será usado para teoria
-                    break;
-                case 'practice':
-                    setCurrentView('practice');
-                    break;
-                default:
-                    setCurrentView('home'); // Volta para home se o tipo for desconhecido
+            
+            if (lesson.type === 'article') {
+                setCurrentView('article');
+            } else {
+                setCurrentView('lesson');
             }
         };
         
         const getContentTypeInfo = useCallback((type) => {
             switch (type) {
-                case 'article':  return { label: 'Artigo',   icon: <FileText />,      color: 'border-blue-400 text-blue-300',   bgGradient: 'from-blue-900/30 to-blue-800/20' };
-                case 'video':    return { label: 'Vídeo',    icon: <Play />,          color: 'border-red-400 text-red-300',     bgGradient: 'from-red-900/30 to-red-800/20' };
-                case 'theory':   return { label: 'Teoria',   icon: <GraduationCap />, color: 'border-cyan-400 text-cyan-300',   bgGradient: 'from-cyan-900/30 to-cyan-800/20' };
-                case 'practice': return { label: 'Prática',  icon: <Code />,          color: 'border-green-400 text-green-300', bgGradient: 'from-green-900/30 to-green-800/20' };
-                default:         return { label: 'Conteúdo', icon: <FileText />,      color: 'border-gray-400 text-gray-300', bgGradient: 'from-gray-900/30 to-gray-800/20' };
+                case 'article': return { label: 'Artigo', icon: <FileText />, color: 'border-blue-400 text-blue-300', bgGradient: 'from-blue-900/30 to-blue-800/20' };
+                case 'lesson': return { label: 'Aula', icon: <GraduationCap />, color: 'border-cyan-400 text-cyan-300', bgGradient: 'from-cyan-900/30 to-cyan-800/20' };
+                case 'theory': return { label: 'Teoria', icon: <BookOpen />, color: 'border-purple-400 text-purple-300', bgGradient: 'from-purple-900/30 to-purple-800/20' };
+                case 'practice': return { label: 'Prática', icon: <PenTool />, color: 'border-green-400 text-green-300', bgGradient: 'from-green-900/30 to-green-800/20' };
+                default: return { label: 'Conteúdo', icon: <FileText />, color: 'border-gray-400 text-gray-300', bgGradient: 'from-gray-900/30 to-gray-800/20' };
             }
         }, []);
 
@@ -602,64 +581,46 @@
                     update(ref(db, `users/${userId}`), { cooldownUntil: cooldownTime.toISOString() });
                 }
             }
-        }, [showResult, currentLesson, currentQuestion, userProgress.lives, userId, db]); // Remova hasLostLifeThisAttempt das dependências
-
-
-        // NOVO: Coloque este objeto de configuração aqui
-        const REWARD_CONFIG = {
-            article:  { xp: 15, gems: 5  },
-            video:    { xp: 25, gems: 7  }, // Novo
-            theory:   { xp: 50, gems: 10 }, // Renomeado de 'lesson'
-            practice: { xp: 75, gems: 15 }, // Novo
-            default:  { xp: 10, gems: 2  }
-        };
+        }, [showResult, currentLesson, currentQuestion, userProgress.lives, userId, db]);
         
         // --- LÓGICA DE OFENSIVA (STREAK) CORRIGIDA ---
-        const handleLessonCompletion = (completedLesson) => {
+        const handleLessonCompletion = (lessonId, lessonXP) => {
             const today = new Date();
-            today.setHours(0, 0, 0, 0);
-        
+            today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
+            
             const lastCompletedDate = userProgress.lastCompletedLessonDate ? new Date(userProgress.lastCompletedLessonDate) : null;
             if (lastCompletedDate) {
-                lastCompletedDate.setHours(0, 0, 0, 0);
+                lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
             }
-        
-            let newStreak = userProgress.streak || 0;
+
+            let newStreak = userProgress.streak;
+            // Só incrementa a ofensiva se a última lição foi ANTES de hoje
             if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
                 newStreak += 1;
                 console.log("Ofensiva incrementada!");
             } else {
                 console.log("Lição completada hoje, ofensiva mantida.");
             }
-        
-            // --- LÓGICA DE RECOMPENSA DINÂMICA (A MÁGICA ACONTECE AQUI) ---
-            const lessonType = completedLesson.type || 'default';
-            const rewards = REWARD_CONFIG[lessonType] || REWARD_CONFIG.default;
-        
-            const newXP = (Number(userProgress.totalXP) || 0) + (rewards.xp || 0);
-            const newGems = (Number(userProgress.gems) || 0) + (rewards.gems || 0);
-            // --------------------------------------------------------------------
-        
+
+            const newXP = (Number(userProgress.totalXP) || 0) + (Number(lessonXP) || 0);
             const newLevel = Math.floor(newXP / 100) + 1;
             const completed = [...(userProgress.completedLessons || [])];
-            if (!completed.includes(completedLesson.id)) {
-                completed.push(completedLesson.id);
+            if (!completed.includes(lessonId)) {
+                completed.push(lessonId);
             }
-        
+
             const updates = {
                 totalXP: newXP,
                 level: newLevel,
                 streak: newStreak,
-                gems: newGems, // Gemas agora são adicionadas dinamicamente
-                lastCompletedLessonDate: new Date().toISOString(),
+                lastCompletedLessonDate: new Date().toISOString(), // Salva a data E hora exata
                 completedLessons: completed
             };
-        
+
             update(ref(db, `users/${userId}/gamification`), updates);
             update(ref(db, `leaderboard/${userId}`), { totalXP: newXP, streak: newStreak });
             
-            // Retorna o XP para o toast, se necessário
-            return rewards.xp; 
+            return newXP;
         };
 
         const nextQuestion = useCallback(() => {
@@ -675,12 +636,8 @@
                 const totalQuestions = currentLesson.questions.length;
                 
                 if (correctAnswers === totalQuestions) {
-                    // ANTES:
-                    // handleLessonCompletion(currentLesson.id, currentLesson.xp);
-                
-                    // DEPOIS:
-                    handleLessonCompletion(currentLesson); 
-                    
+                    // Chama a nova função centralizada
+                    handleLessonCompletion(currentLesson.id, currentLesson.xp);
                     setCurrentView('completion');
                 } else {
                     // Falhou na lição
@@ -690,16 +647,13 @@
         }, [currentQuestion, currentLesson, answeredQuestions, userProgress, userId, db]);
         
         const handleArticleCompletion = useCallback(() => {
-            // ANTES:
-            // const newXP = handleLessonCompletion(currentLesson.id, currentLesson.xp);
-            // setToast({ message: `Artigo concluído! +${currentLesson.xp} XP`, type: 'success' });
-        
-            // DEPOIS:
-            const xpGained = handleLessonCompletion(currentLesson);
-            setCurrentView('home'); 
-            setToast({ message: `Artigo concluído! +${xpGained} XP`, type: 'success' });
+            // Chama a nova função centralizada
+            const newXP = handleLessonCompletion(currentLesson.id, currentLesson.xp);
             
-        }, [currentLesson, userId, db]); // Remova userProgress das dependências se não for mais usado diretamente aqui
+            setCurrentView('home'); // Volta para a home
+            setToast({ message: `Artigo concluído! +${currentLesson.xp} XP`, type: 'success' });
+            
+        }, [currentLesson, userProgress, userId, db]);
         
         
         const handleRefillLives = useCallback(() => {
@@ -757,8 +711,8 @@
                         <div className="flex items-center gap-2 bg-red-500/20 px-3 py-2 rounded-full"> <Heart className={`${userProgress.lives > 0 ? 'text-red-400' : 'text-gray-500'}`} /> <span className="font-bold">{userProgress.lives}</span> </div>
                         <button onClick={() => onNavigate('profile')} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white font-bold text-2xl">{userProgress.avatar ? userProgress.avatar : initials}</button>
                     </div>
-                    </div>
-                </header>
+                </div>
+            </header>
             );
         });
 
@@ -786,8 +740,8 @@
 
                 {/* Gemini API Feature: Quick Challenge */}
                 <div className="mt-10">
-                    <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Sparkles className="text-purple-400" /> Desafio Rápido</h2>
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all p-6 text-center">
+                     <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Sparkles className="text-purple-400" /> Desafio Rápido</h2>
+                     <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all p-6 text-center">
                         <p className="text-white/80 mb-4">Teste seus conhecimentos com um desafio de SQL gerado por IA!</p>
                         <button onClick={onGenerateChallenge} className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-3 px-8 rounded-lg hover:scale-105 transition-transform">
                             Gerar Desafio
@@ -839,143 +793,6 @@
             </main>
         ));
 
-        // NOVO COMPONENTE: VideoView
-        const VideoView = memo(({ currentLesson, onComplete, onNavigate }) => {
-            const videoSrc = `https://www.youtube.com/embed/${currentLesson.videoId}`;
-        
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col animate-fade-in">
-                    <header className="bg-white/10 border-b border-white/20">
-                        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
-                            <h2 className="font-bold truncate">{currentLesson.title}</h2>
-                        </div>
-                    </header>
-                    <main className="max-w-4xl w-full mx-auto px-6 py-8 flex-1">
-                        <div className="aspect-w-16 aspect-h-9 bg-black rounded-xl overflow-hidden shadow-2xl">
-                            <iframe 
-                                src={videoSrc}
-                                title={currentLesson.title}
-                                frameBorder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowFullScreen
-                                className="w-full h-full"
-                            ></iframe>
-                        </div>
-                    </main>
-                    <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
-                        <div className="max-w-4xl mx-auto">
-                            <button
-                                onClick={onComplete}
-                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform"
-                            >
-                                Concluir Vídeo Aula
-                            </button>
-                        </div>
-                    </footer>
-                </div>
-            );
-        });
-
-        // NOVO COMPONENTE: PracticeView (Ponto de Partida)
-        // ATUALIZADO: PracticeView
-        const PracticeView = memo(({ currentLesson, onComplete, onNavigate }) => {
-            const [userQuery, setUserQuery] = useState('');
-            const [result, setResult] = useState(null); // null, 'correct', 'incorrect'
-            const [showResult, setShowResult] = useState(false);
-        
-            const normalizeQuery = (query) => {
-                return query.trim().replace(/;$/, '').replace(/\s+/g, ' ').toLowerCase();
-            };
-        
-            const handleCheckQuery = () => {
-                const isCorrect = normalizeQuery(userQuery) === normalizeQuery(currentLesson.correctQuery);
-                setResult(isCorrect ? 'correct' : 'incorrect');
-                setShowResult(true);
-                // NOTA: A chamada para onComplete() foi removida daqui para dar tempo ao usuário de ver o resultado.
-            };
-        
-            const handleContinue = () => {
-                // NOVO: Esta função agora lida com a conclusão e navegação.
-                onComplete(); // Salva o progresso
-                onNavigate('trailDetail'); // Volta para a lista de lições
-            };
-        
-            const handleTryAgain = () => {
-                setShowResult(false);
-                setResult(null);
-                setUserQuery('');
-            };
-            
-            const isCorrect = result === 'correct';
-        
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-green-900 via-teal-900 to-gray-900 text-white flex flex-col animate-fade-in">
-                    {/* O Header continua o mesmo... */}
-                    <header className="bg-white/10 border-b border-white/20">
-                        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
-                            <h2 className="font-bold truncate">{currentLesson.title}</h2>
-                        </div>
-                    </header>
-                    
-                    {/* O Main continua o mesmo... */}
-                    <main className="flex-1 flex flex-col p-6">
-                        <div className="max-w-3xl w-full mx-auto">
-                            <div className="bg-black/20 p-6 rounded-xl border border-white/10 mb-6">
-                                <p className="text-lg text-white/90 mb-4">{currentLesson.description}</p>
-                                <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{currentLesson.schema}</code></pre>
-                            </div>
-                            <div className="mb-4">
-                                <h3 className="text-center font-semibold text-white/80 mb-3">Monte sua query arrastando os blocos ou digitando abaixo:</h3>
-                                <div className="flex flex-wrap gap-2 justify-center p-4 bg-black/20 rounded-lg">
-                                    {currentLesson.queryParts?.map((part, index) => (
-                                        <div key={index} className="bg-gray-700 text-white px-3 py-1 rounded font-mono cursor-pointer hover:bg-gray-600">
-                                            {part}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <textarea
-                                value={userQuery}
-                                onChange={(e) => setUserQuery(e.target.value)}
-                                disabled={showResult}
-                                placeholder="Digite sua query SQL aqui..."
-                                className="w-full h-32 p-4 font-mono bg-black/30 border-2 border-white/20 rounded-lg text-white focus:border-cyan-400 focus:ring-0 transition-colors"
-                            ></textarea>
-                        </div>
-                    </main>
-                    
-                    {/* O Footer foi ATUALIZADO */}
-                    <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
-                        {!showResult ? (
-                            <div className="max-w-3xl w-full mx-auto">
-                                <button onClick={handleCheckQuery} disabled={!userQuery.trim()} className="w-full bg-gradient-to-r from-green-500 to-emerald-500 text-white font-bold py-4 rounded-xl disabled:opacity-50 hover:scale-105 transition-transform">
-                                    Verificar
-                                </button>
-                            </div>
-                        ) : (
-                            <div className="max-w-3xl mx-auto">
-                                <div className={`p-4 rounded-lg mb-4 text-center ${isCorrect ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-400'}`}>
-                                    <h3 className="font-bold text-lg">{isCorrect ? 'Correto! 🎉' : 'Incorreto, tente novamente!'}</h3>
-                                    <p className="text-sm">{isCorrect ? 'Você mandou bem! Seu progresso foi salvo.' : 'Dica: revise os comandos SELECT e WHERE.'}</p>
-                                </div>
-                                {isCorrect ? (
-                                     <button onClick={handleContinue} className="w-full bg-cyan-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform">
-                                        Continuar Trilha
-                                    </button>
-                                ) : (
-                                    <button onClick={handleTryAgain} className="w-full bg-white/20 text-white font-bold py-4 rounded-xl hover:bg-white/30 transition-colors">
-                                        Tentar Novamente
-                                    </button>
-                                )}
-                            </div>
-                        )}
-                    </footer>
-                </div>
-            );
-        });
-        
         const TrailDetailView = memo(({ selectedTrail, userProgress, onStartLesson, onBack, getContentTypeInfo, filterType, onFilterChange }) => {
             const filteredLessons = selectedTrail.lessons.filter(lesson => {
                 if (filterType === 'all') return true;
@@ -1249,7 +1066,7 @@
                         </div>
                         
                         <div className="space-y-4">
-                            <button
+                             <button
                                 onClick={onRefillWithGems}
                                 className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
                             >
@@ -1485,7 +1302,7 @@
 
         // --- Funções da API Gemini ---
         const callGeminiAPI = useCallback(async (payload, retries = 3, delay = 1000) => {
-            const apiKey = "AIzaSyChnSD9-dvdoYRzDqoR5hVhywtrbbiKMhg"; // A plataforma injetará a chave aqui
+            const apiKey = "";
             const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
             for (let i = 0; i < retries; i++) {
@@ -1503,14 +1320,6 @@
                     const result = await response.json();
                     const candidate = result.candidates?.[0];
 
-                    // Para JSON (schema)
-                    if (payload.generationConfig?.responseMimeType === "application/json") {
-                        if (candidate && candidate.content?.parts?.[0]?.text) {
-                            return candidate.content.parts[0].text;
-                        }
-                    }
-                    
-                    // Para Texto
                     if (candidate && candidate.content?.parts?.[0]?.text) {
                         return candidate.content.parts[0].text;
                     } else {
@@ -1598,112 +1407,23 @@
                 return <div className="min-h-screen flex items-center justify-center text-white"><h2 className="text-2xl font-bold">✨ Gerando um novo desafio...</h2></div>;
             }
             if (userProgress.lives <= 0 && !['home', 'ranking', 'profile', 'noLives', 'challenge'].includes(currentView)) {
-                if(!showResult) { // Permite ver a tela de resultado mesmo sem vidas
+                if(!showResult) {
                     setCurrentView('noLives');
-                    return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
                 }
+                return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
             }
             
             switch (currentView) {
-                case 'home':
-                    return <HomeView 
-                        userProgress={userProgress} 
-                        studyTrails={studyTrails} 
-                        onSelectTrail={handleSelectTrail} 
-                        onGenerateChallenge={generateSqlChallenge} 
-                    />;
-                    
-                case 'trailDetail':
-                    return <TrailDetailView 
-                        selectedTrail={selectedTrail} 
-                        userProgress={userProgress} 
-                        onStartLesson={startLesson} 
-                        onBack={handleBackToTrails} 
-                        getContentTypeInfo={getContentTypeInfo} 
-                        filterType={filterType} 
-                        onFilterChange={setFilterType} 
-                    />;
-                    
-                case 'article':
-                    return <ArticleView 
-                        currentLesson={currentLesson} 
-                        onNavigate={handleArticleCompletion} 
-                    />;
-                    
-                case 'video':
-                    return <VideoView 
-                        currentLesson={currentLesson} 
-                        onComplete={() => handleLessonCompletion(currentLesson)} 
-                        onNavigate={handleNavigate} 
-                    />;
-                    
-                case 'lesson': // Usado para 'theory'
-                    return <LessonView 
-                        currentLesson={currentLesson} 
-                        currentQuestion={currentQuestion} 
-                        userProgress={userProgress} 
-                        onCheckAnswer={checkAnswer} 
-                        onNextQuestion={nextQuestion} 
-                        onNavigate={handleNavigate} 
-                        showResult={showResult} 
-                        answeredQuestions={answeredQuestions} 
-                        selectedAnswer={selectedAnswer} 
-                        setSelectedAnswer={setSelectedAnswer} 
-                        onGetAiExplanation={getAiExplanation} 
-                        aiExplanation={aiExplanation} 
-                        isAiExplanationLoading={isAiExplanationLoading} 
-                    />;
-                    
-                case 'practice':
-                    return <PracticeView 
-                        currentLesson={currentLesson} 
-                        onComplete={() => handleLessonCompletion(currentLesson)} 
-                        onNavigate={handleNavigate} 
-                    />;
-                    
-                case 'completion':
-                    return <CompletionView 
-                        answeredQuestions={answeredQuestions} 
-                        currentLesson={currentLesson} 
-                        onNavigate={handleNavigate} 
-                    />;
-            
-                case 'noLives':
-                    return <NoLivesView 
-                        userProgress={userProgress} 
-                        onRefillWithGems={handleRefillLives} 
-                        onCooldownEnd={handleCooldownEnd} 
-                        onNavigate={handleNavigate} 
-                    />;
-            
-                case 'ranking':
-                    return <RankingView 
-                        leaderboard={leaderboard} 
-                        currentUserId={userId} 
-                        isLoading={isRankingLoading} 
-                    />;
-            
-                case 'profile':
-                    return <ProfileView 
-                        userProgress={userProgress} 
-                        onLogout={handleLogout} 
-                        onSaveProfile={handleSaveProfile} 
-                    />;
-                    
-                case 'challenge':
-                    return <ChallengeView 
-                        challenge={challenge} 
-                        onBack={() => setCurrentView('home')} 
-                        onGenerateChallenge={generateSqlChallenge} 
-                    />;
-                    
-                default:
-                    return <HomeView 
-                        userProgress={userProgress} 
-                        studyTrails={studyTrails} 
-                        onSelectTrail={handleSelectTrail} 
-                        onGenerateChallenge={generateSqlChallenge}
-                    />;
+                case 'home': return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge} />;
+                case 'trailDetail': return <TrailDetailView selectedTrail={selectedTrail} userProgress={userProgress} onStartLesson={startLesson} onBack={handleBackToTrails} getContentTypeInfo={getContentTypeInfo} filterType={filterType} onFilterChange={setFilterType} />;
+                case 'article': return <ArticleView currentLesson={currentLesson} onNavigate={handleArticleCompletion} />;
+                case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
+                case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} />;
+                case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
+                case 'ranking': return <RankingView leaderboard={leaderboard} currentUserId={userId} isLoading={isRankingLoading} />;
+                case 'profile': return <ProfileView userProgress={userProgress} onLogout={handleLogout} onSaveProfile={handleSaveProfile} />;
+                case 'challenge': return <ChallengeView challenge={challenge} onBack={() => setCurrentView('home')} onGenerateChallenge={generateSqlChallenge} />;
+                default: return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge}/>;
             }
         };
 
