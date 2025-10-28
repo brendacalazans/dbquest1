@@ -844,13 +844,13 @@
         });
 
         // NOVO COMPONENTE: PracticeView (Ponto de Partida)
+        // ATUALIZADO: PracticeView
         const PracticeView = memo(({ currentLesson, onComplete, onNavigate }) => {
             const [userQuery, setUserQuery] = useState('');
             const [result, setResult] = useState(null); // null, 'correct', 'incorrect'
             const [showResult, setShowResult] = useState(false);
         
             const normalizeQuery = (query) => {
-                // Remove espaços extras, ponto e vírgula no final e transforma em minúsculas
                 return query.trim().replace(/;$/, '').replace(/\s+/g, ' ').toLowerCase();
             };
         
@@ -858,11 +858,13 @@
                 const isCorrect = normalizeQuery(userQuery) === normalizeQuery(currentLesson.correctQuery);
                 setResult(isCorrect ? 'correct' : 'incorrect');
                 setShowResult(true);
+                // NOTA: A chamada para onComplete() foi removida daqui para dar tempo ao usuário de ver o resultado.
+            };
         
-                // Se estiver correto, chama a função de conclusão principal
-                if (isCorrect) {
-                    onComplete();
-                }
+            const handleContinue = () => {
+                // NOVO: Esta função agora lida com a conclusão e navegação.
+                onComplete(); // Salva o progresso
+                onNavigate('trailDetail'); // Volta para a lista de lições
             };
         
             const handleTryAgain = () => {
@@ -875,6 +877,7 @@
         
             return (
                 <div className="min-h-screen bg-gradient-to-br from-green-900 via-teal-900 to-gray-900 text-white flex flex-col animate-fade-in">
+                    {/* O Header continua o mesmo... */}
                     <header className="bg-white/10 border-b border-white/20">
                         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
                             <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
@@ -882,13 +885,13 @@
                         </div>
                     </header>
                     
+                    {/* O Main continua o mesmo... */}
                     <main className="flex-1 flex flex-col p-6">
                         <div className="max-w-3xl w-full mx-auto">
                             <div className="bg-black/20 p-6 rounded-xl border border-white/10 mb-6">
                                 <p className="text-lg text-white/90 mb-4">{currentLesson.description}</p>
                                 <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{currentLesson.schema}</code></pre>
                             </div>
-        
                             <div className="mb-4">
                                 <h3 className="text-center font-semibold text-white/80 mb-3">Monte sua query arrastando os blocos ou digitando abaixo:</h3>
                                 <div className="flex flex-wrap gap-2 justify-center p-4 bg-black/20 rounded-lg">
@@ -899,7 +902,6 @@
                                     ))}
                                 </div>
                             </div>
-        
                             <textarea
                                 value={userQuery}
                                 onChange={(e) => setUserQuery(e.target.value)}
@@ -910,6 +912,7 @@
                         </div>
                     </main>
                     
+                    {/* O Footer foi ATUALIZADO */}
                     <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
                         {!showResult ? (
                             <div className="max-w-3xl w-full mx-auto">
@@ -921,10 +924,10 @@
                             <div className="max-w-3xl mx-auto">
                                 <div className={`p-4 rounded-lg mb-4 text-center ${isCorrect ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-400'}`}>
                                     <h3 className="font-bold text-lg">{isCorrect ? 'Correto! 🎉' : 'Incorreto, tente novamente!'}</h3>
-                                    <p className="text-sm">{isCorrect ? 'Você mandou bem!' : 'Dica: revise os comandos SELECT e WHERE.'}</p>
+                                    <p className="text-sm">{isCorrect ? 'Você mandou bem! Seu progresso foi salvo.' : 'Dica: revise os comandos SELECT e WHERE.'}</p>
                                 </div>
                                 {isCorrect ? (
-                                     <button onClick={() => onNavigate('trailDetail')} className="w-full bg-cyan-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform">
+                                     <button onClick={handleContinue} className="w-full bg-cyan-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform">
                                         Continuar Trilha
                                     </button>
                                 ) : (
