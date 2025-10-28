@@ -93,11 +93,48 @@
             }
             setIsLoading(true);
             try {
-                const cred = await createUserWithEmailAndPassword(auth, email, password);
-                await updateProfile(cred.user, { displayName: name });
-                // Success is handled by onAuthStateChanged in App
+                // 1. Cria o usuário na autenticação
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+        
+                // 2. Atualiza o perfil de autenticação com o nome
+                await updateProfile(user, { displayName: name });
+        
+                // 3. CRIA O PERFIL COMPLETO NO BANCO DE DADOS (A GRANDE MUDANÇA)
+                const userRef = ref(db, `users/${user.uid}`);
+                const newUserProfile = {
+                    name: name, // Usa o nome do formulário, não do auth
+                    avatar: '👤',
+                    email: user.email,
+                    joinedDate: new Date().toISOString(),
+                    gamification: {
+                        level: 1,
+                        totalXP: 0,
+                        streak: 0,
+                        gems: 100,
+                        lives: 5,
+                        completedLessons: [],
+                        lastCompletedLessonDate: null,
+                        lastLifeResetDate: new Date().setHours(0,0,0,0)
+                    },
+                    cooldownUntil: null
+                };
+                
+                // 4. Salva o perfil principal
+                await set(userRef, newUserProfile);
+        
+                // 5. Salva a entrada inicial no ranking
+                const leaderboardRef = ref(db, `leaderboard/${user.uid}`);
+                await set(leaderboardRef, {
+                    username: name,
+                    totalXP: 0,
+                    avatar: '👤'
+                });
+        
+                // O listener onAuthStateChanged cuidará do resto
+                
             } catch (error) {
-                console.error(error);
+                console.error("Erro no registro:", error);
                 setLocalToast({ message: error.message, type: 'error' });
             } finally {
                 setIsLoading(false);
@@ -107,10 +144,36 @@
         const handleGoogleLogin = async () => {
             const provider = new GoogleAuthProvider();
             try {
-                await signInWithPopup(auth, provider);
-                // Success is handled by onAuthStateChanged in App
+                const result = await signInWithPopup(auth, provider);
+                const user = result.user;
+        
+                // Verifica se o usuário já existe no nosso banco de dados
+                const userRef = ref(db, `users/${user.uid}`);
+                const snapshot = await get(userRef);
+        
+                // Se NÃO existir, cria o perfil completo
+                if (!snapshot.exists()) {
+                    const newUserProfile = {
+                        name: user.displayName || 'Aluno do Google',
+                        avatar: '👤',
+                        email: user.email,
+                        joinedDate: new Date().toISOString(),
+                        gamification: { /* ...mesmos valores padrão... */ },
+                        cooldownUntil: null
+                    };
+                    await set(userRef, newUserProfile);
+        
+                    const leaderboardRef = ref(db, `leaderboard/${user.uid}`);
+                    await set(leaderboardRef, {
+                        username: user.displayName || 'Aluno do Google',
+                        totalXP: 0,
+                        avatar: '👤'
+                    });
+                }
+                // Se o usuário já existe, o useEffect cuidará de carregar os dados.
+        
             } catch (error) {
-                console.error(error);
+                console.error("Erro no login com Google:", error);
                 setLocalToast({ message: error.message, type: 'error' });
             }
         };
@@ -434,9 +497,9 @@
                             lives: lives
                         });
                         
-                        // Garante que o ranking esteja atualizado
+                        // Garante que o ranking esteja atualizado (esta parte é importante para atualizações de nome/avatar)
                         const rankRef = ref(db, `leaderboard/${userId}`);
-                        const rankSnapshot = await get(rankRef); // 'get' precisa ser importado
+                        const rankSnapshot = await get(rankRef);
                         if (!rankSnapshot.exists() || rankSnapshot.val().username !== data.name || rankSnapshot.val().avatar !== data.avatar) {
                             update(rankRef, {
                                 username: data.name,
@@ -444,26 +507,9 @@
                                 avatar: data.avatar || '👤'
                             });
                         }
-
-                    } else {
-                        // --- Cria novo usuário no DB (Restaurado) ---
-                        const newUser = {
-                            name: (auth.currentUser ? auth.currentUser.displayName : 'Novo Aluno') || 'Novo Aluno',
-                            avatar: '👤',
-                            email: auth.currentUser ? auth.currentUser.email : '',
-                            joinedDate: new Date().toISOString(),
-                            gamification: {
-                                level: 1,
-                                totalXP: 0,
-                                streak: 0,
-                                gems: 100,
-                                lives: 5,
-                                completedLessons: [],
-                                lastCompletedLessonDate: null,
-                                lastLifeResetDate: new Date().setHours(0,0,0,0)
-                            },
-                            cooldownUntil: null
-                        };
+                    }
+                    // O bloco "else" foi removido. A criação agora é feita nos handlers de login/registro.
+                });
                         await set(userRef, newUser);
                         setUserProgress(newUser.gamification);
                         
