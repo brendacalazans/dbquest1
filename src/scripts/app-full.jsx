@@ -1568,15 +1568,105 @@
             }
             
             switch (currentView) {
-                case 'home':        return <HomeView ... />;
-                case 'trailDetail': return <TrailDetailView ... />;
-                case 'article':     return <ArticleView currentLesson={currentLesson} onNavigate={handleArticleCompletion} />;
-                case 'video':       return <VideoView currentLesson={currentLesson} onComplete={() => handleLessonCompletion(currentLesson)} onNavigate={handleNavigate} />; // NOVO
-                case 'lesson':      return <LessonView ... />; // Agora usado para 'theory'
-                case 'practice':    return <PracticeView currentLesson={currentLesson} onComplete={() => handleLessonCompletion(currentLesson)} onNavigate={handleNavigate} />; // NOVO
-                case 'completion':  return <CompletionView ... />;
-                // ... (outros cases)
-                default:            return <HomeView ... />;
+                case 'home':
+                    return <HomeView 
+                        userProgress={userProgress} 
+                        studyTrails={studyTrails} 
+                        onSelectTrail={handleSelectTrail} 
+                        onGenerateChallenge={generateSqlChallenge} 
+                    />;
+                    
+                case 'trailDetail':
+                    return <TrailDetailView 
+                        selectedTrail={selectedTrail} 
+                        userProgress={userProgress} 
+                        onStartLesson={startLesson} 
+                        onBack={handleBackToTrails} 
+                        getContentTypeInfo={getContentTypeInfo} 
+                        filterType={filterType} 
+                        onFilterChange={setFilterType} 
+                    />;
+                    
+                case 'article':
+                    return <ArticleView 
+                        currentLesson={currentLesson} 
+                        onNavigate={handleArticleCompletion} 
+                    />;
+                    
+                case 'video':
+                    return <VideoView 
+                        currentLesson={currentLesson} 
+                        onComplete={() => handleLessonCompletion(currentLesson)} 
+                        onNavigate={handleNavigate} 
+                    />;
+                    
+                case 'lesson': // Usado para 'theory'
+                    return <LessonView 
+                        currentLesson={currentLesson} 
+                        currentQuestion={currentQuestion} 
+                        userProgress={userProgress} 
+                        onCheckAnswer={checkAnswer} 
+                        onNextQuestion={nextQuestion} 
+                        onNavigate={handleNavigate} 
+                        showResult={showResult} 
+                        answeredQuestions={answeredQuestions} 
+                        selectedAnswer={selectedAnswer} 
+                        setSelectedAnswer={setSelectedAnswer} 
+                        onGetAiExplanation={getAiExplanation} 
+                        aiExplanation={aiExplanation} 
+                        isAiExplanationLoading={isAiExplanationLoading} 
+                    />;
+                    
+                case 'practice':
+                    return <PracticeView 
+                        currentLesson={currentLesson} 
+                        onComplete={() => handleLessonCompletion(currentLesson)} 
+                        onNavigate={handleNavigate} 
+                    />;
+                    
+                case 'completion':
+                    return <CompletionView 
+                        answeredQuestions={answeredQuestions} 
+                        currentLesson={currentLesson} 
+                        onNavigate={handleNavigate} 
+                    />;
+            
+                case 'noLives':
+                    return <NoLivesView 
+                        userProgress={userProgress} 
+                        onRefillWithGems={handleRefillLives} 
+                        onCooldownEnd={handleCooldownEnd} 
+                        onNavigate={handleNavigate} 
+                    />;
+            
+                case 'ranking':
+                    return <RankingView 
+                        leaderboard={leaderboard} 
+                        currentUserId={userId} 
+                        isLoading={isRankingLoading} 
+                    />;
+            
+                case 'profile':
+                    return <ProfileView 
+                        userProgress={userProgress} 
+                        onLogout={handleLogout} 
+                        onSaveProfile={handleSaveProfile} 
+                    />;
+                    
+                case 'challenge':
+                    return <ChallengeView 
+                        challenge={challenge} 
+                        onBack={() => setCurrentView('home')} 
+                        onGenerateChallenge={generateSqlChallenge} 
+                    />;
+                    
+                default:
+                    return <HomeView 
+                        userProgress={userProgress} 
+                        studyTrails={studyTrails} 
+                        onSelectTrail={handleSelectTrail} 
+                        onGenerateChallenge={generateSqlChallenge}
+                    />;
             }
         };
 
