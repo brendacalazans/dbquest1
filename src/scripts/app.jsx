@@ -58,7 +58,7 @@
                     type: 'lesson', 
                     videoId: 'qup2BdIl_d8', // ID do link do seu doc 
                     duration: '5 min', 
-                    xp: REWARD_CONFIG.video.xp 
+                    xp: REWARD_CONFIG.lesson.xp 
                 },
                 // Unidade 1: Artigo SGBD
                 { 
