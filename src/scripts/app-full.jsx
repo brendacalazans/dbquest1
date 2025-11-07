@@ -34,6 +34,250 @@
     const User = memo(() => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
     const Edit2 = memo(() => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>); // Novo ícone
 
+  
+    const REWARD_CONFIG = {
+        lesson: { xp: 20 },
+        article: { xp: 30 },
+        theory: { xp: 50 },
+        practice: { xp: 75 }
+    };
+
+    // --- 2. DEFINIÇÃO DAS TRILHAS (MOVIDA PARA CÁ) ---
+    const trailsData = [
+                {
+            id: 'trail1',
+            icon: '🚀',
+            color: 'from-blue-500 to-cyan-400',
+            title: 'Fundamentos de Banco de Dados',
+            description: 'Comece do zero e construa uma base sólida.',
+            lessons: [
+                // Unidade 0: Vídeo
+                { 
+                    id: 't1-l0', 
+                    title: 'Vídeo: Introdução aos Fundamentos', 
+                    type: 'lesson', 
+                    videoId: 'qup2BdIl_d8', // ID do link do seu doc 
+                    duration: '5 min', 
+                    xp: REWARD_CONFIG.lesson.xp 
+                },
+                // Unidade 1: Artigo SGBD
+                { 
+                    id: 't1-l1-article', 
+                    title: 'Resumo: O Coração do Sistema (SGBD)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'O banco de dados em si é o "fichário" ou a "biblioteca" onde os dados são fisicamente armazenados. Mas quem opera essa biblioteca? Esse é o trabalho do SGBD (Sistema de Gerenciamento de Banco de Dados).\n\nO SGBD é o software, o "cérebro" ou o "bibliotecário" que recebe os seus pedidos, guarda as informações com segurança e as busca quando você precisa. Ele atua como uma interface entre o usuário e o banco de dados.\n\nSuas principais funções incluem:\n• Armazenamento e Recuperação de Dados\n• Segurança (Controla quem pode acessar o quê)\n• Integridade dos Dados (Garante que os dados sejam válidos, ex: idade não pode ser negativa)\n• Concorrência (Permite múltiplos acessos ao mesmo tempo sem corromper dados)\n• Recuperação de Falhas (Restaura o banco após uma queda de energia, por exemplo)\n\nExemplos de SGBDs Populares: MySQL, PostgreSQL, Oracle Database, SQL Server e SQLite.' // Baseado no Doc 
+                },
+                // Unidade 1: Teste SGBD
+                { 
+                    id: 't1-l1-theory', 
+                    title: 'Teste: O Papel do SGBD', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'A analogia do SGBD como um “bibliotecário digital” é usada porque ele:', options: ['Apenas armazena livros e artigos em formato digital.', 'Precisa de uma conexão de internet de alta velocidade.', 'Gerencia a organização, o acesso, a segurança e a recuperação dos dados.', 'Converte automaticamente dados físicos em digitais.'], correct: 2, explanation: 'A função principal do SGBD é gerenciar a organização, acesso, segurança e recuperação dos dados, assim como um bibliotecário.' },
+                        { question: 'Quais são duas funções essenciais de um SGBD (além de armazenar)?', options: ['Edição de código-fonte e compilação.', 'Controle de concorrência e recuperação de falhas.', 'Criação de interfaces gráficas e gerenciamento de rede.', 'Formatação de disco e instalação de drivers.'], correct: 1, explanation: 'Controle de concorrência (acesso simultâneo) e recuperação de falhas são funções essenciais de um SGBD.' },
+                        { question: 'Qual função do SGBD é fundamental se o sistema cair por uma queda de energia?', options: ['Concorrência', 'Segurança', 'Recuperação de falhas', 'Armazenamento'], correct: 2, explanation: 'A recuperação de falhas restaura o banco de dados a um estado consistente após um erro.' },
+                        { question: 'Quais dos seguintes são exemplos de SGBDs populares?', options: ['Microsoft Excel e Google Sheets', 'MySQL e Microsoft SQL Server', 'Adobe Photoshop e GIMP', 'Windows Server e Linux Ubuntu'], correct: 1, explanation: 'MySQL e SQL Server são SGBDs amplamente utilizados, enquanto os outros são planilhas, editores de imagem ou sistemas operacionais.' }
+                    ] // Perguntas baseadas na Unidade 1 do Doc 
+                },
+                // Unidade 2: Artigo SQL
+                { 
+                    id: 't1-l2-article', 
+                    title: 'Resumo: A Língua Universal (SQL)', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Para conversar com o "bibliotecário" (o SGBD), você precisa de uma linguagem que ele entenda. Essa linguagem é o SQL (Structured Query Language).\n\nO SQL é dividido em subconjuntos:\n• DDL (Data Definition Language): Usada para definir a estrutura (ex: CREATE TABLE, ALTER TABLE, DROP TABLE).\n• DML (Data Manipulation Language): Usada para manipular os dados dentro das tabelas (ex: INSERT, UPDATE, DELETE).\n• DCL (Data Control Language): Usada para gerenciar permissões (ex: GRANT, REVOKE).\n• TCL (Transaction Control Language): Usada para gerenciar transações (ex: COMMIT, ROLLBACK).' // Baseado no Doc 
+                },
+                // Unidade 2: Teste SQL (Perguntas novas, pois o doc repetiu)
+                { 
+                    id: 't1-l2-theory', 
+                    title: 'Teste: Comandos SQL', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual subconjunto do SQL é usado para CRIAR ou DELETAR tabelas?', options: ['DML', 'DCL', 'TCL', 'DDL'], correct: 3, explanation: 'DDL (Data Definition Language) é usada para definir a estrutura, o que inclui criar (CREATE) e deletar (DROP) tabelas.' },
+                        { question: 'O comando `INSERT` pertence a qual subconjunto do SQL?', options: ['DML', 'DDL', 'DCL', 'TCL'], correct: 0, explanation: 'DML (Data Manipulation Language) é usada para manipular os dados, o que inclui inserir (INSERT) novas linhas.' },
+                        { question: 'Para salvar permanentemente uma transação, qual comando TCL você usaria?', options: ['GRANT', 'ROLLBACK', 'COMMIT', 'UPDATE'], correct: 2, explanation: 'O comando COMMIT (parte do TCL) é usado para salvar as mudanças de uma transação permanentemente.' }
+                    ]
+                },
+                // Unidade 3: Artigo Modelo Relacional
+                { 
+                    id: 't1-l3-article', 
+                    title: 'Resumo: Organização (Modelo Relacional)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Focamos nos Bancos de Dados Relacionais, que organizam os dados em Tabelas (similares a planilhas).\n\nA estrutura de uma Tabela é dividida em:\n• Colunas (Atributos): As categorias de informação (ex: "Nome", "Email").\n• Linhas (Registros/Tuplas): O conjunto de informações sobre um único item (ex: os dados de um cliente específico).\n\nPara que as tabelas possam se relacionar, usamos chaves:\n• Chave Primária (Primary Key - PK): É o identificador único de cada linha (ex: ID_Cliente). Não pode ter valores duplicados e não pode ser nula.\n• Chave Estrangeira (Foreign Key - FK): É a "cola" que conecta as tabelas. É uma coluna em uma tabela que faz referência à Chave Primária de outra tabela (ex: a coluna ID_Cliente na tabela Pedidos).' // Baseado no Doc 
+                },
+                // Unidade 3: Teste Modelo Relacional
+                { 
+                    id: 't1-l3-theory', 
+                    title: 'Teste: Chaves e Relações', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'No modelo relacional, a estrutura (planilha) e os "cabeçalhos" são chamados de:', options: ['Linha e Tabela', 'Tabela e Coluna', 'Dado e Linha', 'Coluna e Chave'], correct: 1, explanation: 'A estrutura principal é a Tabela, e seus "cabeçalhos" (categorias) são as Colunas.' },
+                        { question: 'Qual afirmação sobre Chaves é VERDADEIRA?', options: ['PK pode ter valores repetidos.', 'FK conecta duas tabelas referenciando uma PK.', 'Uma tabela pode ter várias PKs.', 'PK é usada apenas para ordenar dados.'], correct: 1, explanation: 'A Chave Estrangeira (FK) é a "cola" que conecta tabelas, referenciando a Chave Primária (PK) de outra.' },
+                        { question: 'O que acontece se você tentar inserir um ID_Cliente em Pedidos que não existe na tabela Clientes?', options: ['Cria um novo cliente automaticamente.', 'A inserção falha (violação de integridade referencial).', 'O campo ID_Cliente fica nulo.', 'O SGBD permite, mas marca como "inválido".'], correct: 1, explanation: 'Isso é uma violação da integridade referencial. O SGBD rejeita a inserção para manter os dados consistentes.' }
+                    ] // Perguntas baseadas na Unidade 3 do Doc 
+                },
+                // Unidade 4: Artigo SELECT
+                { 
+                    id: 't1-l4-article', 
+                    title: 'Resumo: Seu Primeiro Comando (SELECT)', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'O comando fundamental para recuperar dados é o SELECT.\n\nPara ver todo o conteúdo (todas as colunas) de uma tabela, você usa o asterisco (*):\n`SELECT * FROM clientes;`\n\nSe você não precisa de tudo, pode especificar as colunas, o que é uma boa prática para otimizar o desempenho:\n`SELECT Nome, Email FROM clientes;`\n\nEste comando diz ao SGBD: "Mostre-me apenas as colunas Nome e Email a partir da tabela clientes".' // Baseado no Doc 
+                },
+                // Unidade 5: Artigo Casos de Uso
+                { 
+                    id: 't1-l5-article', 
+                    title: 'Resumo: Casos de Uso Reais', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Bancos de dados são a espinha dorsal da infraestrutura digital moderna.\n\nEm um E-commerce (como a Amazon), o SGBD gerencia:\n• Catálogo de Produtos (preços, estoque, avaliações)\n• Informações de Clientes (histórico de compras, endereços)\n• Pedidos (status, pagamento)\n• Logística (rastreamento, armazéns)\n\nEm um Sistema Bancário, o SGBD garante:\n• Transações Financeiras (depósitos, saques, saldos corretos)\n• Dados de Clientes (proteção de informações sensíveis)\n• Auditoria (registro detalhado de todas as operações)\n\nO SQL é a ferramenta que permite que analistas e desenvolvedores interajam com esses sistemas, seja para analisar vendas, inserir novos usuários em um app, ou atualizar o status de um pedido.' // Baseado no Doc 
+                },
+                // Unidade 6: Artigo Mais SQL
+                { 
+                    id: 't1-l6-article', 
+                    title: 'Resumo: Comandos Essenciais (DML)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Além de consultar, você precisa manipular os dados:\n\n• WHERE: Filtra os registros. É como pedir livros de um autor específico.\n`SELECT * FROM clientes WHERE Cidade = \'São Paulo\';`\n\n• ORDER BY: Ordena os resultados.\n`SELECT Nome, Cidade FROM clientes ORDER BY Nome ASC;` (ordem alfabética)\n\n• LIMIT: Restringe o número de linhas retornadas.\n`SELECT Nome, Preco FROM produtos ORDER BY Preco DESC LIMIT 3;` (Top 3 mais caros)\n\n• INSERT INTO: Adiciona novos registros (linhas).\n`INSERT INTO clientes (Nome, Email) VALUES (\'Daniel\', \'daniel.p@email.com\');`\n\n• UPDATE: Modifica registros existentes. (CUIDADO: Use WHERE!)\n`UPDATE clientes SET Email = \'ana.novo@email.com\' WHERE ID_Cliente = 1;`\n\n• DELETE FROM: Remove registros. (CUIDADO MÁXIMO: Use WHERE!)\n`DELETE FROM clientes WHERE ID_Cliente = 3;`' // Baseado no Doc 
+                },
+                // Unidade 4, 5, 6: Teste
+                { 
+                    id: 't1-l6-theory', 
+                    title: 'Teste: DQL e DML', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Para ver TODAS as colunas da tabela `clientes`, qual a sintaxe correta?', options: ['SELECT clientes FROM *;', 'SELECT * FROM clientes;', 'GET * FROM clientes;', 'SELECT ALL FROM clientes;'], correct: 1, explanation: '`SELECT *` significa "selecionar todas as colunas". `FROM clientes` especifica a tabela.' },
+                        { question: 'Qual cláusula você usaria para encontrar apenas clientes que moram em "São Paulo"?', options: ['LIMIT \'São Paulo\'', 'ORDER BY Cidade = \'São Paulo\'', 'WHERE Cidade = \'São Paulo\'', 'GROUP BY \'São Paulo\''], correct: 2, explanation: 'A cláusula WHERE é usada para filtrar os registros com base em uma condição.' },
+                        { question: 'Em um e-commerce, qual é uma prioridade do SGBD, segundo o texto?', options: ['O histórico de navegação anônimo.', 'A consistência entre o estoque real e o estoque no sistema.', 'As cores e fontes do site.', 'O número de "likes" de um produto.'], correct: 1, explanation: 'Garantir a consistência dos dados, como o estoque, é uma função crucial do SGBD.' }
+                    ] // Perguntas baseadas nas Unidades 4, 5, 6 do Doc 
+                },
+                // Exercícios Práticos (separados em lições individuais)
+                { 
+                    id: 't1-p1', 
+                    title: 'Prática: Consulta Simples', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes` (colunas: ID_Cliente, Nome, Sobrenome, Email, Cidade). Escreva o comando para visualizar todas as colunas e todos os registros da tabela `clientes`.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Sobrenome VARCHAR(50),\n  Email VARCHAR(100),\n  Cidade VARCHAR(50)\n);',
+                    correctQuery: 'SELECT * FROM clientes;',
+                    queryParts: ['SELECT', '*', 'FROM', 'clientes', ';'] 
+                },
+                { 
+                    id: 't1-p2', 
+                    title: 'Prática: Consulta Específica', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para selecionar apenas as colunas `Nome` e `Email` de todos os clientes.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Email VARCHAR(100)\n);',
+                    correctQuery: 'SELECT Nome, Email FROM clientes;',
+                    queryParts: ['SELECT', 'Nome', ',', 'Email', 'FROM', 'clientes', ';'] 
+                },
+                { 
+                    id: 't1-p3', 
+                    title: 'Prática: Filtro Simples (WHERE)', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para selecionar todos os dados dos clientes onde a `Cidade` seja exatamente \'São Paulo\'.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Cidade VARCHAR(50)\n);',
+                    correctQuery: 'SELECT * FROM clientes WHERE Cidade = \'São Paulo\';',
+                    queryParts: ['SELECT', '*', 'FROM', 'clientes', 'WHERE', 'Cidade', '=', "'São Paulo'", ';'] 
+                },
+                { 
+                    id: 't1-p4', 
+                    title: 'Prática: Ordenação e Limite', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `produtos` (colunas: Nome, Preco). Escreva o comando para selecionar o `Nome` e o `Preco` dos produtos, ordenados do mais caro para o mais barato (DESC), e limitar o resultado aos 3 primeiros.',
+                    schema: 'CREATE TABLE produtos (\n  ID_Produto INT,\n  Nome VARCHAR(100),\n  Preco DECIMAL(10, 2)\n);',
+                    correctQuery: 'SELECT Nome, Preco FROM produtos ORDER BY Preco DESC LIMIT 3;',
+                    queryParts: ['SELECT', 'Nome', ',', 'Preco', 'FROM', 'produtos', 'ORDER BY', 'Preco', 'DESC', 'LIMIT', '3', ';'] 
+                },
+                { 
+                    id: 't1-p5', 
+                    title: 'Prática: Inserção de Dados (INSERT)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para inserir um novo cliente com: ID_Cliente = 4, Nome = \'Daniel\', Sobrenome = \'Pereira\', Email = \'daniel.p@email.com\', Cidade = \'Curitiba\'.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Sobrenome VARCHAR(50),\n  Email VARCHAR(100),\n  Cidade VARCHAR(50)\n);',
+                    correctQuery: 'INSERT INTO clientes (ID_Cliente, Nome, Sobrenome, Email, Cidade) VALUES (4, \'Daniel\', \'Pereira\', \'daniel.p@email.com\', \'Curitiba\');',
+                    queryParts: ['INSERT INTO', 'clientes', '(', 'ID_Cliente', ',', 'Nome', ',', 'Sobrenome', ',', 'Email', ',', 'Cidade', ')', 'VALUES', '(', '4', ',', "'Daniel'", ',', "'Pereira'", ',', "'daniel.p@email.com'", ',', "'Curitiba'", ')', ';'] 
+                },
+                { 
+                    id: 't1-p6', 
+                    title: 'Prática: Atualização de Dados (UPDATE)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para atualizar o `Email` para \'ana.costa.novo@email.com\', especificamente para o cliente com `ID_Cliente` igual a 1.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Email VARCHAR(100)\n);',
+                    correctQuery: 'UPDATE clientes SET Email = \'ana.costa.novo@email.com\' WHERE ID_Cliente = 1;',
+                    queryParts: ['UPDATE', 'clientes', 'SET', 'Email', '=', "'ana.costa.novo@email.com'", 'WHERE', 'ID_Cliente', '=', '1', ';'] 
+                },
+                { 
+                    id: 't1-p7', 
+                    title: 'Prática: Exclusão de Dados (DELETE)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando SQL para excluir o registro da tabela `clientes` onde o `ID_Cliente` seja 4.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50)\n);',
+                    correctQuery: 'DELETE FROM clientes WHERE ID_Cliente = 4;',
+                    queryParts: ['DELETE FROM', 'clientes', 'WHERE', 'ID_Cliente', '=', '4', ';'] 
+                }
+            ]
+        },
+                {
+                    id: 'trail2',
+                    icon: '🧩',
+                    color: 'from-purple-500 to-indigo-400',
+                    title: 'SQL Intermediário',
+                    description: 'Aprofunde-se com JOINs, GROUP BY e funções agregadas.',
+                    lessons: [
+                        { id: 'l2-1', title: 'Unindo Tabelas com JOIN', type: 'lesson', duration: '15 min', xp: 75, questions: [
+                            { question: 'Qual comando combina linhas de duas ou mais tabelas?', options: ['COMBINE', 'MERGE', 'JOIN', 'LINK'], correct: 2, explanation: 'O comando JOIN é usado para combinar linhas de duas ou mais tabelas com base em uma coluna relacionada entre elas.' }
+                        ]},
+                        { id: 'l2-2', title: 'Agrupando com GROUP BY', type: 'lesson', duration: '15 min', xp: 75, questions: [
+                            { question: 'Qual cláusula é usada com funções agregadas para agrupar o conjunto de resultados por uma ou mais colunas?', options: ['GROUP BY', 'ORDER BY', 'HAVING', 'CLUSTER BY'], correct: 0, explanation: 'A cláusula GROUP BY é usada para agrupar linhas que têm os mesmos valores em colunas especificadas.' }
+                        ]}
+                    ]
+                },
+                {
+                    id: 'trail3',
+                    icon: '🌌',
+                    color: 'from-pink-500 to-rose-500',
+                    title: 'SQL Avançado',
+                    description: 'Domine subconsultas, índices e otimização de performance.',
+                    lessons: [
+                        { id: 'l3-1', title: 'Subconsultas (Subqueries)', type: 'article', duration: '10 min', xp: 40, content: 'Uma subconsulta é uma consulta SQL aninhada dentro de outra consulta SQL. Elas podem ser usadas em cláusulas WHERE, FROM ou SELECT para realizar operações complexas e filtrar dados com base nos resultados de outra consulta.' },
+                        { id: 'l3-2', title: 'Prática de Subconsulta', type: 'practice', duration: '20 min', xp: 100, questions: [
+                            { question: 'Qual comando você usaria para encontrar clientes que fizeram pedidos?', options: ['SELECT nome FROM clientes WHERE id IN (SELECT cliente_id FROM pedidos)', 'SELECT nome FROM clientes WHERE EXISTS pedidos', 'SELECT nome FROM clientes JOIN pedidos', 'SELECT nome FROM clientes AND pedidos'], correct: 0, explanation: 'Usar `IN` com uma subconsulta `(SELECT cliente_id FROM pedidos)` é uma maneira eficaz de encontrar clientes que existem na tabela de pedidos.' }
+                        ]}
+                    ]
+                }
+            ];
+
+    
     const getInitials = (name) => {
         if (!name || typeof name !== 'string' || name.length === 0) return '👤';
         const words = name.split(' ');
@@ -288,56 +532,7 @@
         useEffect(() => {
             // Carrega as trilhas estáticas (simulação de API)
             // (Esta parte estava faltando, adicionei a estrutura de dados)
-             const trailsData = [
-                {
-                    id: 'trail1',
-                    icon: '🚀',
-                    color: 'from-blue-500 to-cyan-400',
-                    title: 'Fundamentos de SQL',
-                    description: 'Comece sua jornada aprendendo os comandos básicos de SQL.',
-                    lessons: [
-                        { id: 'l1-1', title: 'O que é um Banco de Dados?', type: 'article', duration: '5 min', xp: 20, content: 'Um banco de dados é uma coleção organizada de informações - ou dados - estruturadas, geralmente armazenadas eletronicamente em um sistema de computador. Um banco de dados é geralmente controlado por um sistema de gerenciamento de banco de dados (DBMS). Juntos, os dados e o DBMS, juntamente com os aplicativos associados a eles, são chamados de sistema de banco de dados, ou simplesmente banco de dados.\n\nDados dentro dos tipos mais comuns de bancos de dados em operação atualmente são normalmente modelados em linhas e colunas em uma série de tabelas para tornar o processamento e a consulta de dados eficientes. Os dados podem ser facilmente acessados, gerenciados, modificados, atualizados, controlados e organizados. A maioria dos bancos de dados usa a linguagem de consulta estruturada (SQL) para escrever e consultar dados.' },
-                        { id: 'l1-2', title: 'Introdução ao SELECT', type: 'lesson', duration: '10 min', xp: 50, questions: [
-                            { question: 'Qual comando é usado para buscar dados de uma tabela?', options: ['GET', 'SELECT', 'FETCH', 'PULL'], correct: 1, explanation: 'O comando SELECT é usado para consultar e extrair dados de um banco de dados.' },
-                            { question: 'Qual símbolo seleciona todas as colunas?', options: ['*', '#', 'ALL', '&'], correct: 0, explanation: 'O asterisco (*) é um curinga que seleciona todas as colunas da tabela.' }
-                        ]},
-                        { id: 'l1-3', title: 'Filtrando com WHERE', type: 'lesson', duration: '12 min', xp: 60, questions: [
-                             { question: 'Qual cláusula filtra os resultados?', options: ['FILTER', 'WHERE', 'IF', 'FIND'], correct: 1, explanation: 'A cláusula WHERE é usada para filtrar registros que satisfazem uma condição específica.' },
-                             { question: 'Como você selecionaria usuários com idade superior a 18?', options: ['SELECT * FROM users WHERE age > 18', 'SELECT * FROM users IF age > 18', 'SELECT * FROM users FILTER age > 18', 'SELECT * FROM users WITH age > 18'], correct: 0, explanation: 'A sintaxe correta usa WHERE seguido da condição `age > 18`.' }
-                        ]}
-                    ]
-                },
-                {
-                    id: 'trail2',
-                    icon: '🧩',
-                    color: 'from-purple-500 to-indigo-400',
-                    title: 'SQL Intermediário',
-                    description: 'Aprofunde-se com JOINs, GROUP BY e funções agregadas.',
-                    lessons: [
-                        { id: 'l2-1', title: 'Unindo Tabelas com JOIN', type: 'lesson', duration: '15 min', xp: 75, questions: [
-                            { question: 'Qual comando combina linhas de duas ou mais tabelas?', options: ['COMBINE', 'MERGE', 'JOIN', 'LINK'], correct: 2, explanation: 'O comando JOIN é usado para combinar linhas de duas ou mais tabelas com base em uma coluna relacionada entre elas.' }
-                        ]},
-                        { id: 'l2-2', title: 'Agrupando com GROUP BY', type: 'lesson', duration: '15 min', xp: 75, questions: [
-                            { question: 'Qual cláusula é usada com funções agregadas para agrupar o conjunto de resultados por uma ou mais colunas?', options: ['GROUP BY', 'ORDER BY', 'HAVING', 'CLUSTER BY'], correct: 0, explanation: 'A cláusula GROUP BY é usada para agrupar linhas que têm os mesmos valores em colunas especificadas.' }
-                        ]}
-                    ]
-                },
-                {
-                    id: 'trail3',
-                    icon: '🌌',
-                    color: 'from-pink-500 to-rose-500',
-                    title: 'SQL Avançado',
-                    description: 'Domine subconsultas, índices e otimização de performance.',
-                    lessons: [
-                        { id: 'l3-1', title: 'Subconsultas (Subqueries)', type: 'article', duration: '10 min', xp: 40, content: 'Uma subconsulta é uma consulta SQL aninhada dentro de outra consulta SQL. Elas podem ser usadas em cláusulas WHERE, FROM ou SELECT para realizar operações complexas e filtrar dados com base nos resultados de outra consulta.' },
-                        { id: 'l3-2', title: 'Prática de Subconsulta', type: 'practice', duration: '20 min', xp: 100, questions: [
-                            { question: 'Qual comando você usaria para encontrar clientes que fizeram pedidos?', options: ['SELECT nome FROM clientes WHERE id IN (SELECT cliente_id FROM pedidos)', 'SELECT nome FROM clientes WHERE EXISTS pedidos', 'SELECT nome FROM clientes JOIN pedidos', 'SELECT nome FROM clientes AND pedidos'], correct: 0, explanation: 'Usar `IN` com uma subconsulta `(SELECT cliente_id FROM pedidos)` é uma maneira eficaz de encontrar clientes que existem na tabela de pedidos.' }
-                        ]}
-                    ]
-                }
-            ];
             setStudyTrails(trailsData);
-
 
             // Observador do Ranking
             const leaderboardRef = ref(db, 'leaderboard');
@@ -356,10 +551,6 @@
             let offUserProgress = () => {};
             if (userId) {
                 const userRef = ref(db, `users/${userId}`);
-                
-                // Flag para evitar criação duplicada de perfil
-                let isCreatingProfile = false;
-                
                 offUserProgress = onValue(userRef, async (snapshot) => {
                     if (snapshot.exists()) {
                         const data = snapshot.val();
@@ -435,71 +626,33 @@
                         }
 
                     } else {
-                        // --- Cria novo usuário no DB ---
-                        // Proteção contra criação duplicada (condição de corrida)
-                        if (isCreatingProfile) {
-                            console.log('Perfil já está sendo criado, ignorando chamada duplicada');
-                            return;
-                        }
-                        
-                        isCreatingProfile = true;
-                        
-                        try {
-                            // Verifica novamente se o perfil foi criado enquanto esperávamos
-                            const recheckSnapshot = await get(userRef);
-                            if (recheckSnapshot.exists()) {
-                                console.log('Perfil foi criado por outro processo, usando dados existentes');
-                                const data = recheckSnapshot.val();
-                                setUserProgress({
-                                    ...data.gamification,
-                                    username: data.name || auth.currentUser.displayName || 'Aluno',
-                                    avatar: data.avatar || '👤'
-                                });
-                                return;
-                            }
-                            
-                            // Cria o novo perfil de usuário
-                            const newUser = {
-                                name: auth.currentUser.displayName || 'Novo Aluno',
-                                avatar: '👤',
-                                email: auth.currentUser.email,
-                                joinedDate: new Date().toISOString(),
-                                gamification: {
-                                    level: 1,
-                                    totalXP: 0,
-                                    streak: 0,
-                                    gems: 100,
-                                    lives: 5,
-                                    completedLessons: [],
-                                    lastCompletedLessonDate: null,
-                                    lastLifeResetDate: new Date().setHours(0,0,0,0)
-                                },
-                                cooldownUntil: null
-                            };
-                            
-                            // Salva no banco de dados
-                            await set(userRef, newUser);
-                            console.log('Novo perfil criado com sucesso para:', newUser.email);
-                            
-                            setUserProgress({
-                                ...newUser.gamification,
-                                username: newUser.name,
-                                avatar: newUser.avatar
-                            });
-                            
-                            // Adiciona ao leaderboard
-                            await set(ref(db, `leaderboard/${userId}`), {
-                                username: newUser.name,
+                        // --- Cria novo usuário no DB (Restaurado) ---
+                        const newUser = {
+                            name: auth.currentUser.displayName || 'Novo Aluno',
+                            avatar: '👤',
+                            email: auth.currentUser.email,
+                            joinedDate: new Date().toISOString(),
+                            gamification: {
+                                level: 1,
                                 totalXP: 0,
-                                avatar: newUser.avatar
-                            });
-                            
-                        } catch (error) {
-                            console.error('Erro ao criar perfil de usuário:', error);
-                            setToast({ message: 'Erro ao criar perfil. Tente novamente.', type: 'error' });
-                        } finally {
-                            isCreatingProfile = false;
-                        }
+                                streak: 0,
+                                gems: 100,
+                                lives: 5,
+                                completedLessons: [],
+                                lastCompletedLessonDate: null,
+                                lastLifeResetDate: new Date().setHours(0,0,0,0)
+                            },
+                            cooldownUntil: null
+                        };
+                        await set(userRef, newUser);
+                        setUserProgress(newUser.gamification);
+                        
+                        // Adiciona ao leaderboard
+                        await set(ref(db, `leaderboard/${userId}`), {
+                            username: newUser.name,
+                            totalXP: 0,
+                            avatar: newUser.avatar
+                        });
                     }
                 });
             } else {
@@ -718,6 +871,7 @@
 
         const HomeView = memo(({ userProgress, studyTrails, onSelectTrail, onGenerateChallenge }) => (
             <main className="max-w-6xl mx-auto px-6 py-6 animate-fade-in">
+                {/* Bloco de XP (Preservado) */}
                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -738,7 +892,7 @@
                     </div>
                 </div>
 
-                {/* Gemini API Feature: Quick Challenge */}
+                {/* Bloco do Desafio Rápido / Gemini API (Preservado) */}
                 <div className="mt-10">
                      <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Sparkles className="text-purple-400" /> Desafio Rápido</h2>
                      <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all p-6 text-center">
@@ -749,6 +903,7 @@
                     </div>
                 </div>
         
+                {/* Bloco das Trilhas (Com o estilo de cadeado da imagem) */}
                 <div className="mt-10">
                     <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Target /> Trilhas de Aprendizado</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -768,22 +923,33 @@
                         }
         
                         return (
-                        <div key={trail.id} className={`bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all relative ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:border-white/40 cursor-pointer'}`} onClick={() => !isLocked && onSelectTrail(trail)}>
-                            {isLocked && (
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-                                    <Lock />
-                                </div>
-                            )}
+                        // Card agora usa 'opacity-60' se estiver bloqueado
+                        <div 
+                            key={trail.id} 
+                            className={`bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all relative ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:border-white/40 cursor-pointer'}`} 
+                            onClick={() => !isLocked && onSelectTrail(trail)}
+                        >
+                            
+                            {/* O overlay de bloqueio (fundo preto) foi REMOVIDO */}
+
                             <div className={`bg-gradient-to-r ${trail.color} p-6`}>
-                            <div className="flex items-center justify-between mb-3"><div className="text-5xl">{trail.icon}</div><div className="bg-white/20 px-3 py-1 rounded-full text-white text-sm font-bold">{completedCount}/{trail.lessons.length}</div></div>
-                            <h3 className="text-2xl font-bold text-white mb-1">{trail.title}</h3><p className="text-white/80 text-sm">{trail.description}</p>
+                                <div className="flex items-center justify-between mb-3"><div className="text-5xl">{trail.icon}</div><div className="bg-white/20 px-3 py-1 rounded-full text-white text-sm font-bold">{completedCount}/{trail.lessons.length}</div></div>
+                                
+                                {/* Título agora inclui o ícone de cadeado (se bloqueado) */}
+                                <h3 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
+                                    {trail.title}
+                                    {isLocked && <Lock className="w-5 h-5 flex-shrink-0" />} 
+                                </h3>
+                                <p className="text-white/80 text-sm">{trail.description}</p>
                             </div>
+
+                            {/* Rodapé do Card */}
                             <div className="p-6">
-                            <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-3"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${progress}%` }} /></div>
-                            <div className="flex justify-between items-center">
-                                <div className="text-white/60 text-sm">{progress.toFixed(0)}% Completo</div>
-                                <button className="text-white/80 hover:text-white font-bold flex items-center gap-1">Ver Lições <ChevronRight /></button>
-                            </div>
+                                <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-3"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${progress}%` }} /></div>
+                                <div className="flex justify-between items-center">
+                                    <div className="text-white/60 text-sm">{progress.toFixed(0)}% Completo</div>
+                                    <button className="text-white/80 hover:text-white font-bold flex items-center gap-1">Ver Lições <ChevronRight /></button>
+                                </div>
                             </div>
                         </div>
                         );
