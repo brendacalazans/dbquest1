@@ -521,8 +521,6 @@
         const [toast, setToast] = useState(null);
 
         const [lastGainedXP, setLastGainedXP] = useState(0);
-
-        // --- ADICIONE ESTA LINHA ---
         const [practiceResult, setPracticeResult] = useState(null); // 'correct' ou 'incorrect'
 
         // --- EFEITOS (Restaurados) ---
@@ -792,24 +790,6 @@
 
             const newTotalXP = (Number(userProgress.totalXP) || 0) + gainedXP;
             const newLevel = Math.floor(newTotalXP / 100) + 1;
-
-            const updates = {
-                totalXP: newTotalXP,
-                level: newLevel,
-                streak: newStreak,
-                lastCompletedLessonDate: new Date().toISOString(),
-                completedLessons: completed
-            };
-
-            update(ref(db, `users/${userId}/gamification`), updates);
-            
-            // Atualiza o ranking apenas se o XP mudou
-            if (gainedXP > 0) {
-                update(ref(db, `leaderboard/${userId}`), { totalXP: newTotalXP, streak: newStreak });
-            }
-            
-            // Retorna um objeto para sabermos quanto XP foi ganho
-            return { newTotalXP, gainedXP };
         };
 
     
@@ -1261,7 +1241,7 @@
                                 >
                                     {part}
                                 </button>
-                    s      ))}
+                          ))}
                         </div>
 
                         {/* Banco de Opções */}
@@ -1279,7 +1259,7 @@
                         </div>
                     </main>
                     
-G                   {/* Footer de Resultado/Ação */}
+                  {/* Footer de Resultado/Ação */}
                     {showResult ? (
                         <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0 animate-fade-in">
                             <div className="max-w-3xl mx-auto">
@@ -1434,16 +1414,16 @@ G                   {/* Footer de Resultado/Ação */}
                                     onClick={() => onNavigate('lesson')}
                                     className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg transition-colors"
                                 >
-                    t               Tentar Novamente
+                                   Tentar Novamente
                                 </button>
                             )}
                             <button
-M                              onClick={() => onNavigate('home')}
+                              onClick={() => onNavigate('home')}
                                 className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"
                             >
                                 Continuar
                             </button>
-                    M   </div>
+                       </div>
                     </div>
                 </div>
             );
@@ -1859,7 +1839,7 @@ M                              onClick={() => onNavigate('home')}
                     onNext={nextPracticeStep}
                     showResult={showResult}
                     practiceResult={practiceResult}
-s                />;
+                />;
                     
                 case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
                 case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} lastGainedXP={lastGainedXP} />;
