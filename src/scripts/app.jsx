@@ -36,7 +36,7 @@
 
   
     const REWARD_CONFIG = {
-        video: { xp: 20 },
+        lesson: { xp: 20 },
         article: { xp: 30 },
         theory: { xp: 50 },
         practice: { xp: 75 }
@@ -55,7 +55,7 @@
                 { 
                     id: 't1-l0', 
                     title: 'Vídeo: Introdução aos Fundamentos', 
-                    type: 'video', 
+                    type: 'lesson', 
                     videoId: 'qup2BdIl_d8', // ID do link do seu doc 
                     duration: '5 min', 
                     xp: REWARD_CONFIG.video.xp 
