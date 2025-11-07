@@ -695,9 +695,25 @@
             setShowResult(false);
             setSelectedAnswer(null);
             
+            // --- LÓGICA ATUALIZADA ---
             if (lesson.type === 'article') {
                 setCurrentView('article');
-            } else {
+            
+            } else if (lesson.videoId) { 
+                // NOVO: Se a lição tiver um videoId, use a 'video' view
+                setCurrentView('video'); 
+            
+            } else if (lesson.type === 'practice') {
+                // AVISO: Isso também vai quebrar, pois 'practice' não tem 'questions'
+                // Você precisará de um 'PracticeView' no futuro.
+                // Por enquanto, vamos mostrar um erro amigável:
+                console.error("Componente 'PracticeView' não implementado.");
+                setToast({ message: "Lição de prática ainda não disponível.", type: 'error' });
+                // Não mude a view para evitar o crash
+            
+            } else { 
+                // Se não for artigo, nem vídeo, nem prática, DEVE ser um quiz.
+                // Isso vai pegar 'lesson' (com questions) e 'theory'
                 setCurrentView('lesson');
             }
         };
@@ -1049,6 +1065,48 @@
                                 className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform"
                             >
                                 Concluir Artigo
+                            </button>
+                        </div>
+                    </footer>
+                </div>
+            );
+        });
+
+        const VideoView = memo(({ currentLesson, onNavigate, onComplete }) => {
+            // Cria a URL de "embed" correta para o YouTube
+            const videoSrc = `https://www.youtube.com/embed/${currentLesson.videoId}`;
+            
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col animate-fade-in">
+                    <header className="bg-white/10 border-b border-white/20">
+                        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+                            {/* Botão de voltar para os detalhes da trilha */}
+                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
+                            <div className="flex-1">
+                                <h3 className="text-white font-bold truncate">{currentLesson.title}</h3>
+                            </div>
+                        </div>
+                    </header>
+                    <main className="max-w-4xl mx-auto px-6 py-8 flex-1 w-full">
+                        {/* Box com aspect-ratio de 16:9 para o vídeo */}
+                        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
+                            <iframe 
+                                className="absolute top-0 left-0 w-full h-full rounded-lg"
+                                src={videoSrc}
+                                title={currentLesson.title}
+                                frameBorder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowFullScreen
+                            ></iframe>
+                        </div>
+                    </main>
+                    <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
+                        <div className="max-w-4xl mx-auto">
+                            <button
+                                onClick={onComplete} // Reutiliza a função de completar
+                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform"
+                            >
+                                Concluir Vídeo
                             </button>
                         </div>
                     </footer>
@@ -1583,6 +1641,10 @@
                 case 'home': return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge} />;
                 case 'trailDetail': return <TrailDetailView selectedTrail={selectedTrail} userProgress={userProgress} onStartLesson={startLesson} onBack={handleBackToTrails} getContentTypeInfo={getContentTypeInfo} filterType={filterType} onFilterChange={setFilterType} />;
                 case 'article': return <ArticleView currentLesson={currentLesson} onNavigate={handleArticleCompletion} />;
+                
+                {/* --- ADICIONEI ESTA LINHA --- */}
+                case 'video': return <VideoView currentLesson={currentLesson} onNavigate={handleNavigate} onComplete={handleArticleCompletion} />; 
+
                 case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
                 case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} />;
                 case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
