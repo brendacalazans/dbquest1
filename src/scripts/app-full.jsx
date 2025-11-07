@@ -640,9 +640,9 @@
                                 lives: 5,
                                 completedLessons: [],
                                 lastCompletedLessonDate: null,
-                                lastLifeResetDate: new Date().setHours(0,0,0,0)
                             },
-                            cooldownUntil: null
+                            cooldownUntil: null,
+                            lastLifeResetDate: new Date().setHours(0,0,0,0)
                         };
                         await set(userRef, newUser);
                         setUserProgress(newUser.gamification);
