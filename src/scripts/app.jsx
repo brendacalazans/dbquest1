@@ -44,12 +44,12 @@
 
     // --- 2. DEFINIÇÃO DAS TRILHAS (MOVIDA PARA CÁ) ---
     const trailsData = [
-            {
-            id: 'trail1',
-            icon: '🚀',
-            color: 'from-blue-500 to-cyan-400',
-            title: 'Fundamentos de SQL',
-            description: 'Comece sua jornada aprendendo os comandos básicos de SQL.',
+                {
+            id: 'trail1',
+            icon: '🚀',
+            color: 'from-blue-500 to-cyan-400',
+            title: 'Fundamentos de Banco de Dados',
+            description: 'Comece do zero e construa uma base sólida.',
             lessons: [
                 // Unidade 0: Vídeo
                 { 
@@ -869,12 +869,40 @@
             );
         });
 
-        const HomeView = memo(({ userProgress, studyTrails, onSelectTrail }) => (
-            // A 'main' agora não tem os blocos de XP e Desafio Rápido
-            <main className="max-w-6xl mx-auto px-6 py-6 animate-fade-in"> 
+        const HomeView = memo(({ userProgress, studyTrails, onSelectTrail, onGenerateChallenge }) => (
+            <main className="max-w-6xl mx-auto px-6 py-6 animate-fade-in">
+                <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center"><Trophy /></div>
+                            <div>
+                                <div className="text-white/60 text-sm">Nível {userProgress.level}</div>
+                                <div className="text-2xl font-bold">{userProgress.totalXP} XP</div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-8">
+                            <div className="text-center hidden md:block"><div className="text-3xl font-bold">{(userProgress.completedLessons || []).length}</div><div className="text-white/60 text-sm">Lições Completas</div></div>
+                            <div className="text-center"><div className="text-3xl font-bold text-cyan-400">{userProgress.streak}</div><div className="text-white/60 text-sm">Dias de Ofensiva</div></div>
+                        </div>
+                    </div>
+                    <div className="mt-4">
+                        <div className="bg-white/20 rounded-full h-3 overflow-hidden"><div className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full rounded-full transition-all duration-500" style={{ width: `${(userProgress.totalXP % 100)}%` }} /></div>
+                        <div className="text-white/60 text-xs mt-1 text-right">{100 - (userProgress.totalXP % 100)} XP para o próximo nível</div>
+                    </div>
+                </div>
+
+                {/* Gemini API Feature: Quick Challenge */}
+                <div className="mt-10">
+                     <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Sparkles className="text-purple-400" /> Desafio Rápido</h2>
+                     <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all p-6 text-center">
+                        <p className="text-white/80 mb-4">Teste seus conhecimentos com um desafio de SQL gerado por IA!</p>
+                        <button onClick={onGenerateChallenge} className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-bold py-3 px-8 rounded-lg hover:scale-105 transition-transform">
+                            Gerar Desafio
+                        </button>
+                    </div>
+                </div>
         
-                {/* O 'mt-10' foi removido para a lista começar do topo, como na imagem */}
-                <div> 
+                <div className="mt-10">
                     <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Target /> Trilhas de Aprendizado</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {studyTrails.map((trail, index) => {
@@ -893,42 +921,22 @@
                         }
         
                         return (
-                        // O card externo agora usa 'opacity-60' e 'cursor-not-allowed' quando bloqueado
-                        <div 
-                            key={trail.id} 
-                            className={`bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all relative ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:border-white/40 cursor-pointer'}`} 
-                            onClick={() => !isLocked && onSelectTrail(trail)}
-                        >
-                            
-                            {/* O overlay de bloqueio (fundo preto e cadeado gigante) foi REMOVIDO */}
-
-                            {/* Parte de cima com o gradiente */}
+                        <div key={trail.id} className={`bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all relative ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:border-white/40 cursor-pointer'}`} onClick={() => !isLocked && onSelectTrail(trail)}>
+                            {isLocked && (
+                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
+                                    <Lock />
+                                </div>
+                            )}
                             <div className={`bg-gradient-to-r ${trail.color} p-6`}>
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="text-5xl">{trail.icon}</div>
-                                    <div className="bg-white/20 px-3 py-1 rounded-full text-white text-sm font-bold">{completedCount}/{trail.lessons.length}</div>
-                                </div>
-                                
-                                {/* TÍTULO: Modificado para incluir o ícone de cadeado (se bloqueado) */}
-                                <h3 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
-                                    {trail.title}
-                                    {isLocked && <Lock className="w-5 h-5" />} 
-                                </h3>
-                                {/* DESCRIÇÃO: Modificada para incluir o ícone de cadeado (se bloqueado) */}
-                                <p className="text-white/80 text-sm flex items-center gap-1">
-                                    {trail.description}
-                                </p>
+                            <div className="flex items-center justify-between mb-3"><div className="text-5xl">{trail.icon}</div><div className="bg-white/20 px-3 py-1 rounded-full text-white text-sm font-bold">{completedCount}/{trail.lessons.length}</div></div>
+                            <h3 className="text-2xl font-bold text-white mb-1">{trail.title}</h3><p className="text-white/80 text-sm">{trail.description}</p>
                             </div>
-
-                            {/* Parte de baixo (rodapé) */}
-                            <div className="p-6"> {/* Este p-6 pega o 'bg-white/10' do pai, criando o rodapé escuro */}
-                                <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-3">
-                                    <div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
-                                </div>
-                                <div className="flex justify-between items-center">
-                                    <div className="text-white/60 text-sm">{progress.toFixed(0)}% Completo</div>
-                                    <button className="text-white/80 hover:text-white font-bold flex items-center gap-1">Ver Lições <ChevronRight /></button>
-                                </div>
+                            <div className="p-6">
+                            <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-3"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${progress}%` }} /></div>
+                            <div className="flex justify-between items-center">
+                                <div className="text-white/60 text-sm">{progress.toFixed(0)}% Completo</div>
+                                <button className="text-white/80 hover:text-white font-bold flex items-center gap-1">Ver Lições <ChevronRight /></button>
+                            </div>
                             </div>
                         </div>
                         );
