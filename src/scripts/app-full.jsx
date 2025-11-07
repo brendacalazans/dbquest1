@@ -303,7 +303,7 @@
         );
     });
 
-    const [lastGainedXP, setLastGainedXP] = useState(0);
+    
     
     // --- Componente AuthScreen (ATUALIZADO PARA O DESIGN DA IMAGEM) ---
     const AuthScreen = memo(({ auth }) => {
@@ -519,6 +519,8 @@
         
         // Estado de Notificação
         const [toast, setToast] = useState(null);
+
+        const [lastGainedXP, setLastGainedXP] = useState(0);
 
         // --- EFEITOS (Restaurados) ---
         // Efeito: Observador de Autenticação
@@ -812,19 +814,7 @@
             return { newTotalXP, gainedXP };
         };
 
-            const updates = {
-                totalXP: newXP,
-                level: newLevel,
-                streak: newStreak,
-                lastCompletedLessonDate: new Date().toISOString(), // Salva a data E hora exata
-                completedLessons: completed
-            };
-
-            update(ref(db, `users/${userId}/gamification`), updates);
-            update(ref(db, `leaderboard/${userId}`), { totalXP: newXP, streak: newStreak });
-            
-            return newXP;
-        };
+    
 
         const nextQuestion = useCallback(() => {
             setShowResult(false);
@@ -1722,7 +1712,6 @@ M                              onClick={() => onNavigate('home')}
             </div>
         );
     }
-    
     // Novo Componente para o Desafio de IA
     const ChallengeView = memo(({ challenge, onBack, onGenerateChallenge }) => {
         const [selectedAnswer, setSelectedAnswer] = useState(null);
