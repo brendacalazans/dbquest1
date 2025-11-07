@@ -302,6 +302,8 @@
             </div>
         );
     });
+
+    const [lastGainedXP, setLastGainedXP] = useState(0);
     
     // --- Componente AuthScreen (ATUALIZADO PARA O DESIGN DA IMAGEM) ---
     const AuthScreen = memo(({ auth }) => {
@@ -753,30 +755,62 @@
         }, [showResult, currentLesson, currentQuestion, userProgress.lives, userId, db]);
         
         // --- LÓGICA DE OFENSIVA (STREAK) CORRIGIDA ---
-        const handleLessonCompletion = (lessonId, lessonXP) => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
-            
-            const lastCompletedDate = userProgress.lastCompletedLessonDate ? new Date(userProgress.lastCompletedLessonDate) : null;
-            if (lastCompletedDate) {
-                lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
-            }
+       const handleLessonCompletion = (lessonId, lessonXP) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
+            
+            const lastCompletedDate = userProgress.lastCompletedLessonDate ? new Date(userProgress.lastCompletedLessonDate) : null;
+            if (lastCompletedDate) {
+                lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
+            }
 
-            let newStreak = userProgress.streak;
-            // Só incrementa a ofensiva se a última lição foi ANTES de hoje
-            if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
-                newStreak += 1;
-                console.log("Ofensiva incrementada!");
-            } else {
-                console.log("Lição completada hoje, ofensiva mantida.");
-            }
+            let newStreak = userProgress.streak;
+            // Só incrementa a ofensiva se a última lição foi ANTES de hoje
+            if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
+                newStreak += 1;
+                console.log("Ofensiva incrementada!");
+            } else {
+                console.log("Lição completada hoje, ofensiva mantida.");
+            }
 
-            const newXP = (Number(userProgress.totalXP) || 0) + (Number(lessonXP) || 0);
-            const newLevel = Math.floor(newXP / 100) + 1;
-            const completed = [...(userProgress.completedLessons || [])];
-            if (!completed.includes(lessonId)) {
-                completed.push(lessonId);
-            }
+            // --- INÍCIO DA LÓGICA DE REVISÃO ---
+            const isAlreadyCompleted = (userProgress.completedLessons || []).includes(lessonId);
+            let gainedXP = 0; // Por padrão, não ganha XP
+
+            const completed = [...(userProgress.completedLessons || [])];
+            
+            if (!isAlreadyCompleted) {
+                // Se for a primeira vez, ganha XP e adiciona à lista
+                gainedXP = Number(lessonXP) || 0;
+                completed.push(lessonId);
+                console.log("Primeira vez completando! XP Ganhos:", gainedXP);
+            } else {
+                // Se for revisão, não ganha XP
+                console.log("Revisão de lição. Nenhum XP ganho.");
+            }
+            // --- FIM DA LÓGICA DE REVISÃO ---
+
+            const newTotalXP = (Number(userProgress.totalXP) || 0) + gainedXP;
+            const newLevel = Math.floor(newTotalXP / 100) + 1;
+
+            const updates = {
+                totalXP: newTotalXP,
+                level: newLevel,
+                streak: newStreak,
+                lastCompletedLessonDate: new Date().toISOString(),
+                completedLessons: completed
+            };
+
+            update(ref(db, `users/${userId}/gamification`), updates);
+            
+            // Atualiza o ranking apenas se o XP mudou
+            if (gainedXP > 0) {
+                update(ref(db, `leaderboard/${userId}`), { totalXP: newTotalXP, streak: newStreak });
+            }
+            
+            // Retorna um objeto para sabermos quanto XP foi ganho
+            return { newTotalXP, gainedXP };
+        };
 
             const updates = {
                 totalXP: newXP,
@@ -793,36 +827,44 @@
         };
 
         const nextQuestion = useCallback(() => {
-            setShowResult(false);
-            setSelectedAnswer(null);
-            setAiExplanation('');
+            setShowResult(false);
+            setSelectedAnswer(null);
+            setAiExplanation('');
 
-            if (currentQuestion < currentLesson.questions.length - 1) {
-                setCurrentQuestion(prev => prev + 1);
-            } else {
-                // Lição concluída
-                const correctAnswers = answeredQuestions.filter(a => a.isCorrect).length;
-                const totalQuestions = currentLesson.questions.length;
-                
-                if (correctAnswers === totalQuestions) {
-                    // Chama a nova função centralizada
-                    handleLessonCompletion(currentLesson.id, currentLesson.xp);
-                    setCurrentView('completion');
-                } else {
-                    // Falhou na lição
-                    setCurrentView('completion'); // Mostra os resultados mesmo se falhar
-                }
-            }
-        }, [currentQuestion, currentLesson, answeredQuestions, userProgress, userId, db]);
+            if (currentQuestion < currentLesson.questions.length - 1) {
+                setCurrentQuestion(prev => prev + 1);
+            } else {
+                // Lição concluída
+                const correctAnswers = answeredQuestions.filter(a => a.isCorrect).length;
+                const totalQuestions = currentLesson.questions.length;
+                
+                if (correctAnswers === totalQuestions) {
+                    // Chama a nova função centralizada
+                    const { gainedXP } = handleLessonCompletion(currentLesson.id, currentLesson.xp);
+                    setLastGainedXP(gainedXP); // <-- Salva o XP ganho
+                    setCurrentView('completion');
+                } else {
+                    // Falhou na lição
+                    setLastGainedXP(0); // <-- Garante que é 0 se falhar
+                    setCurrentView('completion'); // Mostra os resultados mesmo se falhar
+                }
+            }
+        }, [currentQuestion, currentLesson, answeredQuestions, userProgress, userId, db]);
         
         const handleArticleCompletion = useCallback(() => {
-            // Chama a nova função centralizada
-            const newXP = handleLessonCompletion(currentLesson.id, currentLesson.xp);
-            
-            setCurrentView('home'); // Volta para a home
-            setToast({ message: `Artigo concluído! +${currentLesson.xp} XP`, type: 'success' });
-            
-        }, [currentLesson, userProgress, userId, db]);
+            // Chama a nova função centralizada
+            const { gainedXP } = handleLessonCompletion(currentLesson.id, currentLesson.xp);
+            
+            setCurrentView('home'); // Volta para a home
+            
+            // Toast condicional
+            if (gainedXP > 0) {
+                setToast({ message: `Concluído! +${gainedXP} XP`, type: 'success' });
+            } else {
+                setToast({ message: "Conteúdo revisado!", type: 'success' });
+            }
+            
+        }, [currentLesson, userProgress, userId, db]);
         
         
         const handleRefillLives = useCallback(() => {
@@ -1202,47 +1244,52 @@
             );
         });
         
-        const CompletionView = memo(({ answeredQuestions, currentLesson, onNavigate }) => {
-            const correctAnswers = answeredQuestions.filter(a => a.isCorrect).length;
-            const totalQuestions = currentLesson.questions.length;
-            const xpGained = correctAnswers === totalQuestions ? currentLesson.xp : 0;
-            const isSuccess = correctAnswers === totalQuestions;
-            
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col items-center justify-center p-6 text-center animate-fade-in">
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 max-w-2xl w-full">
-                        <div className="text-8xl mb-6">{isSuccess ? '🎉' : '🤔'}</div>
-                        <h2 className="text-3xl font-bold mb-4">{isSuccess ? 'Lição Concluída!' : 'Quase lá!'}</h2>
-                        <p className="text-white/80 text-lg mb-6">
-                            {isSuccess ? `Você ganhou +${xpGained} XP e manteve sua ofensiva!` : 'Você não acertou todas as perguntas. Revise o material e tente novamente!'}
-                        </p>
-                        
-                        <div className="bg-white/5 rounded-xl p-6 mb-8 text-left divide-y divide-white/10">
-                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">Precisão</span><span className={`font-bold text-2xl ${isSuccess ? 'text-green-400' : 'text-red-400'}`}>{((correctAnswers / totalQuestions) * 100).toFixed(0)}%</span></div>
-                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">Perguntas Corretas</span><span className="font-bold text-2xl">{correctAnswers} de {totalQuestions}</span></div>
-                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">XP Ganhos</span><span className="font-bold text-2xl">{xpGained}</span></div>
-                        </div>
-                        
-                        <div className="flex gap-4">
-                            {!isSuccess && (
-                                <button
-                                    onClick={() => onNavigate('lesson')}
-                                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-                                >
-                                    Tentar Novamente
-                                </button>
-                            )}
-                            <button
-                                onClick={() => onNavigate('home')}
-                                className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-                            >
-                                Continuar
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            );
-        });
+        const CompletionView = memo(({ answeredQuestions, currentLesson, onNavigate, lastGainedXP }) => {
+            const correctAnswers = answeredQuestions.filter(a => a.isCorrect).length;
+            const totalQuestions = currentLesson.questions.length;
+            const isSuccess = correctAnswers === totalQuestions;
+            
+            // Usa o prop 'lastGainedXP' em vez de recalcular
+            const xpGained = lastGainedXP; 
+            
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 max-w-2xl w-full">
+                        <div className="text-8xl mb-6">{isSuccess ? '🎉' : '🤔'}</div>
+                        <h2 className="text-3xl font-bold mb-4">{isSuccess ? 'Lição Concluída!' : 'Quase lá!'}</h2>
+                        <p className="text-white/80 text-lg mb-6">
+                            {/* Mensagem atualizada */}
+                            {isSuccess ? 
+                                (xpGained > 0 ? `Você ganhou +${xpGained} XP e manteve sua ofensiva!` : `Lição revisada com sucesso!`) 
+                                : 'Você não acertou todas as perguntas. Revise o material e tente novamente!'}
+                        </p>
+                        
+                        <div className="bg-white/5 rounded-xl p-6 mb-8 text-left divide-y divide-white/10">
+                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">Precisão</span><span className={`font-bold text-2xl ${isSuccess ? 'text-green-400' : 'text-red-400'}`}>{((correctAnswers / totalQuestions) * 100).toFixed(0)}%</span></div>
+                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">Perguntas Corretas</span><span className="font-bold text-2xl">{correctAnswers} de {totalQuestions}</span></div>
+                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">XP Ganhos</span><span className="font-bold text-2xl">{xpGained}</span></div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                            {!isSuccess && (
+                                <button
+                                    onClick={() => onNavigate('lesson')}
+                                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                                >
+                    t               Tentar Novamente
+                                </button>
+                            )}
+                            <button
+M                              onClick={() => onNavigate('home')}
+                                className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                            >
+                                Continuar
+                            </button>
+                    M   </div>
+                    </div>
+                </div>
+            );
+        });
 
         const NoLivesView = memo(({ userProgress, onRefillWithGems, onCooldownEnd, onNavigate }) => {
             const [timeLeft, setTimeLeft] = useState('');
@@ -1646,7 +1693,7 @@
                 case 'video': return <VideoView currentLesson={currentLesson} onNavigate={handleNavigate} onComplete={handleArticleCompletion} />; 
 
                 case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
-                case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} />;
+                case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} lastGainedXP={lastGainedXP} />;
                 case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
                 case 'ranking': return <RankingView leaderboard={leaderboard} currentUserId={userId} isLoading={isRankingLoading} />;
                 case 'profile': return <ProfileView userProgress={userProgress} onLogout={handleLogout} onSaveProfile={handleSaveProfile} />;
