@@ -871,6 +871,7 @@
 
         const HomeView = memo(({ userProgress, studyTrails, onSelectTrail, onGenerateChallenge }) => (
             <main className="max-w-6xl mx-auto px-6 py-6 animate-fade-in">
+                {/* Bloco de XP (Preservado) */}
                 <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4">
@@ -891,7 +892,7 @@
                     </div>
                 </div>
 
-                {/* Gemini API Feature: Quick Challenge */}
+                {/* Bloco do Desafio Rápido / Gemini API (Preservado) */}
                 <div className="mt-10">
                      <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Sparkles className="text-purple-400" /> Desafio Rápido</h2>
                      <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all p-6 text-center">
@@ -902,6 +903,7 @@
                     </div>
                 </div>
         
+                {/* Bloco das Trilhas (Com o estilo de cadeado da imagem) */}
                 <div className="mt-10">
                     <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2"><Target /> Trilhas de Aprendizado</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -921,22 +923,33 @@
                         }
         
                         return (
-                        <div key={trail.id} className={`bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all relative ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:border-white/40 cursor-pointer'}`} onClick={() => !isLocked && onSelectTrail(trail)}>
-                            {isLocked && (
-                                <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-10">
-                                    <Lock />
-                                </div>
-                            )}
+                        // Card agora usa 'opacity-60' se estiver bloqueado
+                        <div 
+                            key={trail.id} 
+                            className={`bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden transition-all relative ${isLocked ? 'opacity-60 cursor-not-allowed' : 'hover:border-white/40 cursor-pointer'}`} 
+                            onClick={() => !isLocked && onSelectTrail(trail)}
+                        >
+                            
+                            {/* O overlay de bloqueio (fundo preto) foi REMOVIDO */}
+
                             <div className={`bg-gradient-to-r ${trail.color} p-6`}>
-                            <div className="flex items-center justify-between mb-3"><div className="text-5xl">{trail.icon}</div><div className="bg-white/20 px-3 py-1 rounded-full text-white text-sm font-bold">{completedCount}/{trail.lessons.length}</div></div>
-                            <h3 className="text-2xl font-bold text-white mb-1">{trail.title}</h3><p className="text-white/80 text-sm">{trail.description}</p>
+                                <div className="flex items-center justify-between mb-3"><div className="text-5xl">{trail.icon}</div><div className="bg-white/20 px-3 py-1 rounded-full text-white text-sm font-bold">{completedCount}/{trail.lessons.length}</div></div>
+                                
+                                {/* Título agora inclui o ícone de cadeado (se bloqueado) */}
+                                <h3 className="text-2xl font-bold text-white mb-1 flex items-center gap-2">
+                                    {trail.title}
+                                    {isLocked && <Lock className="w-5 h-5 flex-shrink-0" />} 
+                                </h3>
+                                <p className="text-white/80 text-sm">{trail.description}</p>
                             </div>
+
+                            {/* Rodapé do Card */}
                             <div className="p-6">
-                            <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-3"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${progress}%` }} /></div>
-                            <div className="flex justify-between items-center">
-                                <div className="text-white/60 text-sm">{progress.toFixed(0)}% Completo</div>
-                                <button className="text-white/80 hover:text-white font-bold flex items-center gap-1">Ver Lições <ChevronRight /></button>
-                            </div>
+                                <div className="bg-white/20 rounded-full h-2 overflow-hidden mb-3"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: `${progress}%` }} /></div>
+                                <div className="flex justify-between items-center">
+                                    <div className="text-white/60 text-sm">{progress.toFixed(0)}% Completo</div>
+                                    <button className="text-white/80 hover:text-white font-bold flex items-center gap-1">Ver Lições <ChevronRight /></button>
+                                </div>
                             </div>
                         </div>
                         );
