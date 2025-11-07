@@ -27,13 +27,40 @@ const handleLessonCompletion = (userProgress, lessonId, lessonXP, userId, db, re
         lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
     }
 
-    let newStreak = userProgress.streak;
-    // Só incrementa a ofensiva se a última lição foi ANTES de hoje
-    if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
-        newStreak += 1;
-        console.log("Ofensiva incrementada!");
+    // CORREÇÃO DA LÓGICA DE STREAK
+    let newStreak = userProgress.streak || 0;
+    
+    if (!lastCompletedDate) {
+        // Primeira lição do usuário - inicia o streak
+        newStreak = 1;
+        console.log("Primeira lição! Ofensiva iniciada: 1 dia");
     } else {
-        console.log("Lição completada hoje, ofensiva mantida.");
+        // Calcula ontem para verificar consecutividade
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        
+        const lastCompletedTime = lastCompletedDate.getTime();
+        const todayTime = today.getTime();
+        const yesterdayTime = yesterday.getTime();
+        
+        if (lastCompletedTime === todayTime) {
+            // Já completou uma lição hoje - mantém o streak atual
+            newStreak = userProgress.streak || 1;
+            console.log("Lição completada hoje, ofensiva mantida:", newStreak, "dias");
+        } else if (lastCompletedTime === yesterdayTime) {
+            // Completou lição ontem - incrementa o streak (consecutividade mantida)
+            newStreak = (userProgress.streak || 0) + 1;
+            console.log("Ofensiva incrementada! Dias consecutivos:", newStreak);
+        } else if (lastCompletedTime < yesterdayTime) {
+            // Completou há 2 ou mais dias - perdeu o streak, recomeça do 1
+            newStreak = 1;
+            console.log("Ofensiva perdida! Recomeçando do dia 1");
+        } else {
+            // Caso de segurança (não deveria acontecer)
+            newStreak = userProgress.streak || 1;
+            console.log("Ofensiva mantida (caso padrão):", newStreak);
+        }
     }
 
     const newXP = (Number(userProgress.totalXP) || 0) + (Number(lessonXP) || 0);
@@ -147,6 +174,7 @@ const checkDailyLifeReset = (data) => {
 
 /**
  * Verifica e reseta streak se necessário
+ * CORREÇÃO: Agora verifica corretamente o caminho dos dados da gamificação
  * @param {object} data - Dados do usuário do Firebase
  * @returns {object} Objeto com updates necessários e flag
  */
@@ -157,18 +185,24 @@ const checkStreakReset = (data) => {
     const updates = {};
     let needsUpdate = false;
     
-    const lastCompleted = data.lastCompletedLessonDate 
-        ? new Date(data.lastCompletedLessonDate) 
+    // CORREÇÃO: Verifica se os dados de gamificação existem antes de acessar
+    const lastCompleted = data.gamification?.lastCompletedLessonDate 
+        ? new Date(data.gamification.lastCompletedLessonDate) 
         : null;
     
     if (lastCompleted) {
+        lastCompleted.setHours(0, 0, 0, 0);
+        
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
         
         // Se a última lição completada foi ANTES de ontem, zera a ofensiva
+        // Isso significa que o usuário perdeu a consecutividade
         if (lastCompleted.getTime() < yesterday.getTime()) {
             updates['gamification/streak'] = 0;
             needsUpdate = true;
+            console.log("Streak resetado - usuário não completou lição ontem");
         }
     }
     
@@ -181,4 +215,3 @@ export {
     checkDailyLifeReset,
     checkStreakReset
 };
-
