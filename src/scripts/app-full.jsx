@@ -522,6 +522,9 @@
 
         const [lastGainedXP, setLastGainedXP] = useState(0);
 
+        // --- ADICIONE ESTA LINHA ---
+        const [practiceResult, setPracticeResult] = useState(null); // 'correct' ou 'incorrect'
+
         // --- EFEITOS (Restaurados) ---
         // Efeito: Observador de Autenticação
         useEffect(() => {
@@ -688,39 +691,34 @@
         };
 
         const startLesson = (trail, lesson) => {
-            if (userProgress.lives <= 0) {
-                setCurrentView('noLives');
-                return;
-            }
-            setSelectedTrail(trail);
-            setCurrentLesson(lesson);
-            setCurrentQuestion(0);
-            setAnsweredQuestions([]);
-            setShowResult(false);
-            setSelectedAnswer(null);
-            
-            // --- LÓGICA ATUALIZADA ---
-            if (lesson.type === 'article') {
-                setCurrentView('article');
-            
-            } else if (lesson.videoId) { 
-                // NOVO: Se a lição tiver um videoId, use a 'video' view
-                setCurrentView('video'); 
-            
-            } else if (lesson.type === 'practice') {
-                // AVISO: Isso também vai quebrar, pois 'practice' não tem 'questions'
-                // Você precisará de um 'PracticeView' no futuro.
-                // Por enquanto, vamos mostrar um erro amigável:
-                console.error("Componente 'PracticeView' não implementado.");
-                setToast({ message: "Lição de prática ainda não disponível.", type: 'error' });
-                // Não mude a view para evitar o crash
-            
-            } else { 
-                // Se não for artigo, nem vídeo, nem prática, DEVE ser um quiz.
-                // Isso vai pegar 'lesson' (com questions) e 'theory'
-                setCurrentView('lesson');
-            }
-        };
+            if (userProgress.lives <= 0) {
+                setCurrentView('noLives');
+                return;
+            }
+            setSelectedTrail(trail);
+            setCurrentLesson(lesson);
+            setCurrentQuestion(0);
+            setAnsweredQuestions([]);
+            setShowResult(false);
+            setSelectedAnswer(null);
+            setPracticeResult(null); // <-- Limpa o resultado anterior
+            
+            // --- LÓGICA ATUALIZADA ---
+            if (lesson.type === 'article') {
+                setCurrentView('article');
+            
+            } else if (lesson.videoId) { 
+                setCurrentView('video'); 
+            
+            } else if (lesson.type === 'practice') {
+                // NOVO: Direciona para a view de Prática
+                setCurrentView('practice');
+            
+            } else { 
+                // Quiz (lesson, theory)
+                setCurrentView('lesson');
+            }
+        };
         
         const getContentTypeInfo = useCallback((type) => {
             switch (type) {
@@ -916,6 +914,56 @@
             </header>
             );
         });
+
+        const checkPracticeAnswer = useCallback((userQueryParts) => {
+            if (showResult) return;
+
+            const correctQuery = currentLesson.queryParts.join(' ');
+            const userQuery = userQueryParts.join(' ');
+            const isCorrect = userQuery === correctQuery;
+            
+            setShowResult(true);
+
+            if (isCorrect) {
+                setPracticeResult('correct');
+            } else {
+                setPracticeResult('incorrect');
+                // Lógica de perder vida
+                const newLives = userProgress.lives - 1;
+                setUserProgress(prev => ({ ...prev, lives: newLives }));
+                update(ref(db, `users/${userId}/gamification`), { lives: newLives });
+                
+                if (newLives <= 0) {
+                    const cooldownTime = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
+                    setUserProgress(prev => ({ ...prev, cooldownUntil: cooldownTime.toISOString() }));
+                    update(ref(db, `users/${userId}`), { cooldownUntil: cooldownTime.toISOString() });
+                }
+            }
+        }, [showResult, currentLesson, userProgress.lives, userId, db]);
+
+        const nextPracticeStep = useCallback(() => {
+            setShowResult(false);
+            
+            if (practiceResult === 'correct') {
+                // Acertou -> Completa a lição e vai para a tela de conclusão
+                const { gainedXP } = handleLessonCompletion(currentLesson.id, currentLesson.xp);
+                setLastGainedXP(gainedXP);
+                // ATENÇÃO: A tela 'completion' é para quizzes (mostra % de acerto)
+                // O ideal seria criar uma 'PracticeCompletionView', mas por agora
+                // vamos apenas para a home com um toast.
+                if (gainedXP > 0) {
+                    setToast({ message: `Prática concluída! +${gainedXP} XP`, type: 'success' });
+                } else {
+                    setToast({ message: "Prática revisada!", type: 'success' });
+                }
+                setCurrentView('home');
+            } else {
+                // Errou -> Reseta a lição prática (o 'useEffect' no PracticeView vai cuidar disso)
+                setPracticeResult(null);
+                // Força o 'PracticeView' a recarregar o state resetando o 'currentLesson' para si mesmo
+                setCurrentLesson({...currentLesson}); 
+            }
+        }, [practiceResult, currentLesson, userProgress, userId, db]);
 
         const HomeView = memo(({ userProgress, studyTrails, onSelectTrail, onGenerateChallenge }) => (
             <main className="max-w-6xl mx-auto px-6 py-6 animate-fade-in">
@@ -1145,6 +1193,126 @@
                 </div>
             );
         });
+
+        const PracticeView = memo(({ 
+            currentLesson, 
+            userProgress, 
+            onNavigate, 
+            onCheckPractice, 
+            onNext,
+            showResult, 
+            practiceResult
+        }) => {
+            const [userQueryParts, setUserQueryParts] = useState([]);
+            const [availableParts, setAvailableParts] = useState([]);
+
+            // Reseta e embaralha as partes quando a lição muda
+            useEffect(() => {
+                if (currentLesson && currentLesson.queryParts) {
+                    // Embaralha o array de 'queryParts' para criar o banco de opções
+                    const shuffled = [...currentLesson.queryParts].sort(() => Math.random() - 0.5);
+                    setAvailableParts(shuffled);
+                    setUserQueryParts([]);
+                }
+            }, [currentLesson]);
+
+            // Adiciona uma parte à query do usuário
+            const handleSelectPart = (part, index) => {
+                if (showResult) return;
+                const newAvailable = [...availableParts];
+                newAvailable.splice(index, 1); // Remove do banco
+                setAvailableParts(newAvailable);
+                setUserQueryParts([...userQueryParts, part]); // Adiciona à query
+            };
+            
+            // Remove uma parte da query do usuário
+            const handleRemovePart = (part, index) => {
+                if (showResult) return;
+                const newQuery = [...userQueryParts];
+                newQuery.splice(index, 1); // Remove da query
+                setUserQueryParts(newQuery);
+                setAvailableParts([...availableParts, part]); // Devolve ao banco
+            };
+            
+            const isCorrect = practiceResult === 'correct';
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col">
+                    <header className="bg-white/10 border-b border-white/20">
+                        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><X/></button>
+                            <h3 className="text-white font-bold truncate">{currentLesson.title}</h3>
+                            <div className="flex items-center gap-2 text-red-400 ml-auto"> <Heart /> <span className="font-bold">{userProgress.lives}</span> </div>
+                        </div>
+                    </header>
+
+                    <main className="max-w-3xl mx-auto px-6 py-8 flex-1 w-full">
+                        <h2 className="text-xl md:text-2xl font-bold mb-4">{currentLesson.description}</h2>
+                        <pre className="bg-black/20 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap mb-6"><code>{currentLesson.schema}</code></pre>
+
+                        {/* Área da Query (onde o usuário monta) */}
+                        <div className="bg-black/20 border-2 border-dashed border-white/20 rounded-lg min-h-[120px] p-3 flex flex-wrap gap-2">
+                            {userQueryParts.map((part, index) => (
+                                <button 
+                                    key={index}
+                                    onClick={() => handleRemovePart(part, index)}
+                                    disabled={showResult}
+                                    className="bg-cyan-600 text-white font-mono font-bold px-3 py-2 rounded-md hover:bg-cyan-700"
+                                >
+                                    {part}
+                                </button>
+                    s      ))}
+                        </div>
+
+                        {/* Banco de Opções */}
+                        <div className="mt-8 p-3 flex flex-wrap justify-center gap-2">
+                            {availableParts.map((part, index) => (
+                                <button 
+                                    key={index}
+                                    onClick={() => handleSelectPart(part, index)}
+                                    disabled={showResult}
+                                    className="bg-gray-700/80 text-white font-mono font-bold px-3 py-2 rounded-md hover:bg-gray-600"
+                                >
+                                    {part}
+                                </button>
+                            ))}
+                        </div>
+                    </main>
+                    
+G                   {/* Footer de Resultado/Ação */}
+                    {showResult ? (
+                        <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0 animate-fade-in">
+                            <div className="max-w-3xl mx-auto">
+                                <div className="flex items-center gap-3 mb-3">
+                                    {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
+                                </div>
+                                <p className="text-white/90 mb-4">
+                                    {isCorrect ? 'Excelente! Você construiu a query corretamente.' : 'Ops! Essa não é a query correta. Tente de novo.'}
+                                </p>
+                                <button
+                                    onClick={() => onNext(userQueryParts)} // Passa a query para onNext
+                                    className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
+                                >
+                                    {isCorrect ? 'Continuar' : 'Tentar Novamente'}
+                                </button>
+                            </div>
+                        </footer>
+                    ) : (
+                        <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
+                            <div className="max-w-3xl mx-auto">
+                                <button
+                                    onClick={() => onCheckPractice(userQueryParts)}
+                                    disabled={userQueryParts.length === 0}
+                                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
+                                >
+                                    Verificar
+                                </button>
+                            </div>
+                        </footer>
+                    )}
+                </div>
+            );
+        });
         
         const LessonView = memo(({ currentLesson, currentQuestion, userProgress, onCheckAnswer, onNextQuestion, onNavigate, showResult, answeredQuestions, selectedAnswer, setSelectedAnswer, onGetAiExplanation, aiExplanation, isAiExplanationLoading }) => {
             const question = currentLesson.questions[currentQuestion];
@@ -1682,6 +1850,17 @@ M                              onClick={() => onNavigate('home')}
                 {/* --- ADICIONEI ESTA LINHA --- */}
                 case 'video': return <VideoView currentLesson={currentLesson} onNavigate={handleNavigate} onComplete={handleArticleCompletion} />; 
 
+                {/* --- ADICIONE ESTE CASE --- */}
+                case 'practice': return <PracticeView 
+                    currentLesson={currentLesson}
+                    userProgress={userProgress}
+                    onNavigate={handleNavigate}
+                    onCheckPractice={checkPracticeAnswer}
+                    onNext={nextPracticeStep}
+                    showResult={showResult}
+                    practiceResult={practiceResult}
+s                />;
+                    
                 case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
                 case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} lastGainedXP={lastGainedXP} />;
                 case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
