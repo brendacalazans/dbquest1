@@ -519,7 +519,7 @@
                         ]} 
                     ]
                 }
-        };
+        ];
 
     
     const getInitials = (name) => {
