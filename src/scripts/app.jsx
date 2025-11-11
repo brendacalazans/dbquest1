@@ -1,10 +1,11 @@
 (function() {
     const {
-        auth, db, onAuthStateChanged, createUserWithEmailAndPassword,
-        signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
-        updateProfile, signOut, ref, onValue, set, update, increment,
-        get 
-    } = window.FB;
+        auth, db, onAuthStateChanged, createUserWithEmailAndPassword,
+        signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
+        signInWithRedirect, getRedirectResult, // <-- ADICIONE ESTES DOIS
+        updateProfile, signOut, ref, onValue, set, update, increment,
+        get 
+    } = window.FB;
     
     const { useState, useEffect, useCallback, memo, createContext, useContext } = React;
     
@@ -554,15 +555,17 @@
         };
 
         const handleGoogleLogin = async () => {
-            const provider = new GoogleAuthProvider();
-            try {
-                await signInWithPopup(auth, provider);
-                // Success is handled by onAuthStateChanged in App
-            } catch (error) {
-                console.error(error);
-                setLocalToast({ message: error.message, type: 'error' });
-            }
-        };
+            const provider = new GoogleAuthProvider();
+            try {
+                // Apenas inicie o redirecionamento. O 'await' não é estritamente
+                // necessário aqui, pois a página irá navegar.
+                signInWithRedirect(auth, provider); 
+            } catch (error) {
+                // Erros de inicialização (ex: config errada) serão pegos aqui
+                console.error(error);
+                setLocalToast({ message: error.message, type: 'error' });
+            }
+        };
 
         return (
             <div className="min-h-screen bg-gray-100 text-gray-900 font-sans antialiased flex items-center justify-center p-5">
@@ -734,6 +737,29 @@
             });
             return () => unsubscribe(); // Limpa ao desmontar
         }, []);
+
+        useEffect(() => {
+            // Verifica se o usuário está voltando de um login por redirect
+            const checkRedirect = async () => {
+                try {
+                    const result = await getRedirectResult(auth);
+                    if (result) {
+                        // Login bem-sucedido. O onAuthStateChanged
+                        // também será disparado, mas podemos por um toast aqui.
+                        setToast({ message: `Bem-vindo, ${result.user.displayName}!`, type: 'success' });
+                    }
+                } catch (error) {
+                    // Trata erros do redirect (ex: email já em uso com outro método)
+                    console.error("Erro ao obter resultado do redirect:", error);
+                    setToast({ message: "Erro no login: " + error.message, type: 'error' });
+                }
+            };
+            
+            // Só executa quando a verificação de auth inicial estiver pronta
+            if (isAuthChecked) {
+                checkRedirect();
+            }
+        }, [isAuthChecked, auth, getRedirectResult]); // Adicione as dependências
 
         // Efeito: Carregar Dados do Usuário e Trilha
         useEffect(() => {
