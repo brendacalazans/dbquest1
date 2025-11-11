@@ -1,10 +1,11 @@
 (function() {
     const {
-        auth, db, onAuthStateChanged, createUserWithEmailAndPassword,
-        signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
-        updateProfile, signOut, ref, onValue, set, update, increment,
-        get 
-    } = window.FB;
+        auth, db, onAuthStateChanged, createUserWithEmailAndPassword,
+        signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
+        signInWithRedirect, getRedirectResult, // <-- ADICIONE ESTES DOIS
+        updateProfile, signOut, ref, onValue, set, update, increment,
+        get 
+    } = window.FB;
     
     const { useState, useEffect, useCallback, memo, createContext, useContext } = React;
     
@@ -44,238 +45,498 @@
 
     // --- 2. DEFINIÇÃO DAS TRILHAS (MOVIDA PARA CÁ) ---
     const trailsData = [
-                {
-            id: 'trail1',
-            icon: '🚀',
-            color: 'from-blue-500 to-cyan-400',
-            title: 'Fundamentos de Banco de Dados',
-            description: 'Comece do zero e construa uma base sólida.',
+                {
+            id: 'trail1',
+            icon: '🚀',
+            color: 'from-blue-500 to-cyan-400',
+            title: 'Fundamentos de Banco de Dados',
+            description: 'Comece do zero e construa uma base sólida.',
+            lessons: [
+                // Unidade 0: Vídeo
+                { 
+                    id: 't1-l0', 
+                    title: 'Vídeo: Introdução aos Fundamentos', 
+                    type: 'lesson', 
+                    videoId: 'qup2BdIl_d8', // ID do link do seu doc 
+                    duration: '5 min', 
+                    xp: REWARD_CONFIG.lesson.xp 
+                },
+                // Unidade 1: Artigo SGBD
+                { 
+                    id: 't1-l1-article', 
+                    title: 'Resumo: O Coração do Sistema (SGBD)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'O banco de dados em si é o "fichário" ou a "biblioteca" onde os dados são fisicamente armazenados. Mas quem opera essa biblioteca? Esse é o trabalho do SGBD (Sistema de Gerenciamento de Banco de Dados).\n\nO SGBD é o software, o "cérebro" ou o "bibliotecário" que recebe os seus pedidos, guarda as informações com segurança e as busca quando você precisa. Ele atua como uma interface entre o usuário e o banco de dados.\n\nSuas principais funções incluem:\n• Armazenamento e Recuperação de Dados\n• Segurança (Controla quem pode acessar o quê)\n• Integridade dos Dados (Garante que os dados sejam válidos, ex: idade não pode ser negativa)\n• Concorrência (Permite múltiplos acessos ao mesmo tempo sem corromper dados)\n• Recuperação de Falhas (Restaura o banco após uma queda de energia, por exemplo)\n\nExemplos de SGBDs Populares: MySQL, PostgreSQL, Oracle Database, SQL Server e SQLite.' // Baseado no Doc 
+                },
+                // Unidade 1: Teste SGBD
+                { 
+                    id: 't1-l1-theory', 
+                    title: 'Teste: O Papel do SGBD', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'A analogia do SGBD como um “bibliotecário digital” é usada porque ele:', options: ['Apenas armazena livros e artigos em formato digital.', 'Precisa de uma conexão de internet de alta velocidade.', 'Gerencia a organização, o acesso, a segurança e a recuperação dos dados.', 'Converte automaticamente dados físicos em digitais.'], correct: 2, explanation: 'A função principal do SGBD é gerenciar a organização, acesso, segurança e recuperação dos dados, assim como um bibliotecário.' },
+                        { question: 'Quais são duas funções essenciais de um SGBD (além de armazenar)?', options: ['Edição de código-fonte e compilação.', 'Controle de concorrência e recuperação de falhas.', 'Criação de interfaces gráficas e gerenciamento de rede.', 'Formatação de disco e instalação de drivers.'], correct: 1, explanation: 'Controle de concorrência (acesso simultâneo) e recuperação de falhas são funções essenciais de um SGBD.' },
+                        { question: 'Qual função do SGBD é fundamental se o sistema cair por uma queda de energia?', options: ['Concorrência', 'Segurança', 'Recuperação de falhas', 'Armazenamento'], correct: 2, explanation: 'A recuperação de falhas restaura o banco de dados a um estado consistente após um erro.' },
+                        { question: 'Quais dos seguintes são exemplos de SGBDs populares?', options: ['Microsoft Excel e Google Sheets', 'MySQL e Microsoft SQL Server', 'Adobe Photoshop e GIMP', 'Windows Server e Linux Ubuntu'], correct: 1, explanation: 'MySQL e SQL Server são SGBDs amplamente utilizados, enquanto os outros são planilhas, editores de imagem ou sistemas operacionais.' }
+                    ] // Perguntas baseadas na Unidade 1 do Doc 
+                },
+                // Unidade 2: Artigo SQL
+                { 
+                    id: 't1-l2-article', 
+                    title: 'Resumo: A Língua Universal (SQL)', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Para conversar com o "bibliotecário" (o SGBD), você precisa de uma linguagem que ele entenda. Essa linguagem é o SQL (Structured Query Language).\n\nO SQL é dividido em subconjuntos:\n• DDL (Data Definition Language): Usada para definir a estrutura (ex: CREATE TABLE, ALTER TABLE, DROP TABLE).\n• DML (Data Manipulation Language): Usada para manipular os dados dentro das tabelas (ex: INSERT, UPDATE, DELETE).\n• DCL (Data Control Language): Usada para gerenciar permissões (ex: GRANT, REVOKE).\n• TCL (Transaction Control Language): Usada para gerenciar transações (ex: COMMIT, ROLLBACK).' // Baseado no Doc 
+                },
+                // Unidade 2: Teste SQL (Perguntas novas, pois o doc repetiu)
+                { 
+                    id: 't1-l2-theory', 
+                    title: 'Teste: Comandos SQL', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual subconjunto do SQL é usado para CRIAR ou DELETAR tabelas?', options: ['DML', 'DCL', 'TCL', 'DDL'], correct: 3, explanation: 'DDL (Data Definition Language) é usada para definir a estrutura, o que inclui criar (CREATE) e deletar (DROP) tabelas.' },
+                        { question: 'O comando `INSERT` pertence a qual subconjunto do SQL?', options: ['DML', 'DDL', 'DCL', 'TCL'], correct: 0, explanation: 'DML (Data Manipulation Language) é usada para manipular os dados, o que inclui inserir (INSERT) novas linhas.' },
+                        { question: 'Para salvar permanentemente uma transação, qual comando TCL você usaria?', options: ['GRANT', 'ROLLBACK', 'COMMIT', 'UPDATE'], correct: 2, explanation: 'O comando COMMIT (parte do TCL) é usado para salvar as mudanças de uma transação permanentemente.' }
+                    ]
+                },
+                // Unidade 3: Artigo Modelo Relacional
+                { 
+                    id: 't1-l3-article', 
+                    title: 'Resumo: Organização (Modelo Relacional)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Focamos nos Bancos de Dados Relacionais, que organizam os dados em Tabelas (similares a planilhas).\n\nA estrutura de uma Tabela é dividida em:\n• Colunas (Atributos): As categorias de informação (ex: "Nome", "Email").\n• Linhas (Registros/Tuplas): O conjunto de informações sobre um único item (ex: os dados de um cliente específico).\n\nPara que as tabelas possam se relacionar, usamos chaves:\n• Chave Primária (Primary Key - PK): É o identificador único de cada linha (ex: ID_Cliente). Não pode ter valores duplicados e não pode ser nula.\n• Chave Estrangeira (Foreign Key - FK): É a "cola" que conecta as tabelas. É uma coluna em uma tabela que faz referência à Chave Primária de outra tabela (ex: a coluna ID_Cliente na tabela Pedidos).' // Baseado no Doc 
+                },
+                // Unidade 3: Teste Modelo Relacional
+                { 
+                    id: 't1-l3-theory', 
+                    title: 'Teste: Chaves e Relações', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'No modelo relacional, a estrutura (planilha) e os "cabeçalhos" são chamados de:', options: ['Linha e Tabela', 'Tabela e Coluna', 'Dado e Linha', 'Coluna e Chave'], correct: 1, explanation: 'A estrutura principal é a Tabela, e seus "cabeçalhos" (categorias) são as Colunas.' },
+                        { question: 'Qual afirmação sobre Chaves é VERDADEIRA?', options: ['PK pode ter valores repetidos.', 'FK conecta duas tabelas referenciando uma PK.', 'Uma tabela pode ter várias PKs.', 'PK é usada apenas para ordenar dados.'], correct: 1, explanation: 'A Chave Estrangeira (FK) é a "cola" que conecta tabelas, referenciando a Chave Primária (PK) de outra.' },
+                        { question: 'O que acontece se você tentar inserir um ID_Cliente em Pedidos que não existe na tabela Clientes?', options: ['Cria um novo cliente automaticamente.', 'A inserção falha (violação de integridade referencial).', 'O campo ID_Cliente fica nulo.', 'O SGBD permite, mas marca como "inválido".'], correct: 1, explanation: 'Isso é uma violação da integridade referencial. O SGBD rejeita a inserção para manter os dados consistentes.' }
+                    ] // Perguntas baseadas na Unidade 3 do Doc 
+                },
+                // Unidade 4: Artigo SELECT
+                { 
+                    id: 't1-l4-article', 
+                    title: 'Resumo: Seu Primeiro Comando (SELECT)', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'O comando fundamental para recuperar dados é o SELECT.\n\nPara ver todo o conteúdo (todas as colunas) de uma tabela, você usa o asterisco (*):\n`SELECT * FROM clientes;`\n\nSe você não precisa de tudo, pode especificar as colunas, o que é uma boa prática para otimizar o desempenho:\n`SELECT Nome, Email FROM clientes;`\n\nEste comando diz ao SGBD: "Mostre-me apenas as colunas Nome e Email a partir da tabela clientes".' // Baseado no Doc 
+                },
+                // Unidade 5: Artigo Casos de Uso
+                { 
+                    id: 't1-l5-article', 
+                    title: 'Resumo: Casos de Uso Reais', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Bancos de dados são a espinha dorsal da infraestrutura digital moderna.\n\nEm um E-commerce (como a Amazon), o SGBD gerencia:\n• Catálogo de Produtos (preços, estoque, avaliações)\n• Informações de Clientes (histórico de compras, endereços)\n• Pedidos (status, pagamento)\n• Logística (rastreamento, armazéns)\n\nEm um Sistema Bancário, o SGBD garante:\n• Transações Financeiras (depósitos, saques, saldos corretos)\n• Dados de Clientes (proteção de informações sensíveis)\n• Auditoria (registro detalhado de todas as operações)\n\nO SQL é a ferramenta que permite que analistas e desenvolvedores interajam com esses sistemas, seja para analisar vendas, inserir novos usuários em um app, ou atualizar o status de um pedido.' // Baseado no Doc 
+                },
+                // Unidade 6: Artigo Mais SQL
+                { 
+                    id: 't1-l6-article', 
+                    title: 'Resumo: Comandos Essenciais (DML)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Além de consultar, você precisa manipular os dados:\n\n• WHERE: Filtra os registros. É como pedir livros de um autor específico.\n`SELECT * FROM clientes WHERE Cidade = \'São Paulo\';`\n\n• ORDER BY: Ordena os resultados.\n`SELECT Nome, Cidade FROM clientes ORDER BY Nome ASC;` (ordem alfabética)\n\n• LIMIT: Restringe o número de linhas retornadas.\n`SELECT Nome, Preco FROM produtos ORDER BY Preco DESC LIMIT 3;` (Top 3 mais caros)\n\n• INSERT INTO: Adiciona novos registros (linhas).\n`INSERT INTO clientes (Nome, Email) VALUES (\'Daniel\', \'daniel.p@email.com\');`\n\n• UPDATE: Modifica registros existentes. (CUIDADO: Use WHERE!)\n`UPDATE clientes SET Email = \'ana.novo@email.com\' WHERE ID_Cliente = 1;`\n\n• DELETE FROM: Remove registros. (CUIDADO MÁXIMO: Use WHERE!)\n`DELETE FROM clientes WHERE ID_Cliente = 3;`' // Baseado no Doc 
+                },
+                // Unidade 4, 5, 6: Teste
+                { 
+                    id: 't1-l6-theory', 
+                    title: 'Teste: DQL e DML', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Para ver TODAS as colunas da tabela `clientes`, qual a sintaxe correta?', options: ['SELECT clientes FROM *;', 'SELECT * FROM clientes;', 'GET * FROM clientes;', 'SELECT ALL FROM clientes;'], correct: 1, explanation: '`SELECT *` significa "selecionar todas as colunas". `FROM clientes` especifica a tabela.' },
+                        { question: 'Qual cláusula você usaria para encontrar apenas clientes que moram em "São Paulo"?', options: ['LIMIT \'São Paulo\'', 'ORDER BY Cidade = \'São Paulo\'', 'WHERE Cidade = \'São Paulo\'', 'GROUP BY \'São Paulo\''], correct: 2, explanation: 'A cláusula WHERE é usada para filtrar os registros com base em uma condição.' },
+                        { question: 'Em um e-commerce, qual é uma prioridade do SGBD, segundo o texto?', options: ['O histórico de navegação anônimo.', 'A consistência entre o estoque real e o estoque no sistema.', 'As cores e fontes do site.', 'O número de "likes" de um produto.'], correct: 1, explanation: 'Garantir a consistência dos dados, como o estoque, é uma função crucial do SGBD.' }
+                    ] // Perguntas baseadas nas Unidades 4, 5, 6 do Doc 
+                },
+                // Exercícios Práticos (separados em lições individuais)
+                { 
+                    id: 't1-p1', 
+                    title: 'Prática: Consulta Simples', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes` (colunas: ID_Cliente, Nome, Sobrenome, Email, Cidade). Escreva o comando para visualizar todas as colunas e todos os registros da tabela `clientes`.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Sobrenome VARCHAR(50),\n  Email VARCHAR(100),\n  Cidade VARCHAR(50)\n);',
+                    correctQuery: 'SELECT * FROM clientes;',
+                    queryParts: ['SELECT', '*', 'FROM', 'clientes', ';'] 
+                },
+                { 
+                    id: 't1-p2', 
+                    title: 'Prática: Consulta Específica', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para selecionar apenas as colunas `Nome` e `Email` de todos os clientes.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Email VARCHAR(100)\n);',
+                    correctQuery: 'SELECT Nome, Email FROM clientes;',
+                    queryParts: ['SELECT', 'Nome', ',', 'Email', 'FROM', 'clientes', ';'] 
+                },
+                { 
+                    id: 't1-p3', 
+                    title: 'Prática: Filtro Simples (WHERE)', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para selecionar todos os dados dos clientes onde a `Cidade` seja exatamente \'São Paulo\'.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Cidade VARCHAR(50)\n);',
+                    correctQuery: 'SELECT * FROM clientes WHERE Cidade = \'São Paulo\';',
+                    queryParts: ['SELECT', '*', 'FROM', 'clientes', 'WHERE', 'Cidade', '=', "'São Paulo'", ';'] 
+                },
+                { 
+                    id: 't1-p4', 
+                    title: 'Prática: Ordenação e Limite', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `produtos` (colunas: Nome, Preco). Escreva o comando para selecionar o `Nome` e o `Preco` dos produtos, ordenados do mais caro para o mais barato (DESC), e limitar o resultado aos 3 primeiros.',
+                    schema: 'CREATE TABLE produtos (\n  ID_Produto INT,\n  Nome VARCHAR(100),\n  Preco DECIMAL(10, 2)\n);',
+                    correctQuery: 'SELECT Nome, Preco FROM produtos ORDER BY Preco DESC LIMIT 3;',
+                    queryParts: ['SELECT', 'Nome', ',', 'Preco', 'FROM', 'produtos', 'ORDER BY', 'Preco', 'DESC', 'LIMIT', '3', ';'] 
+                },
+                { 
+                    id: 't1-p5',
+                    title: 'Prática: Inserção (INSERT)',
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Tabela: `clientes`. Escreva o comando para inserir um novo cliente: ID 4, Nome 'Daniel', Sobrenome 'Pereira', Email 'daniel.p@email.com', Cidade 'Curitiba'.",
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Sobrenome VARCHAR(50),\n  Email VARCHAR(100),\n  Cidade VARCHAR(50)\n);',
+                    correctQuery: "INSERT INTO clientes (ID_Cliente, Nome, Sobrenome, Email, Cidade) VALUES (4, 'Daniel', 'Pereira', 'daniel.p@email.com', 'Curitiba');",
+                    queryParts: ['INSERT INTO', 'clientes', '(', 'ID_Cliente', ',', 'Nome', ',', 'Sobrenome', ',', 'Email', ',', 'Cidade', ')', 'VALUES', '(', '4', ',', "'Daniel'", ',', "'Pereira'", ',', "'daniel.p@email.com'", ',', "'Curitiba'", ')', ';'] 
+                },
+                { 
+                    id: 't1-p6',
+                    title: 'Prática: Atualização (UPDATE)',
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para atualizar o `Email` para \'ana.costa.novo@email.com\', especificamente para o cliente com `ID_Cliente` igual a 1.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Email VARCHAR(100)\n);',
+                    correctQuery: 'UPDATE clientes SET Email = \'ana.costa.novo@email.com\' WHERE ID_Cliente = 1;',
+                    queryParts: ['UPDATE', 'clientes', 'SET', 'Email', '=', "'ana.costa.novo@email.com'", 'WHERE', 'ID_Cliente', '=', '1', ';']
+                },
+                { 
+                    id: 't1-p7',
+                    title: 'Prática: Deleção (DELETE)',
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para deletar o registro da tabela `clientes` onde o `ID_Cliente` seja 4.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50)\n);',
+                    correctQuery: 'DELETE FROM clientes WHERE ID_Cliente = 4;',
+                    queryParts: ['DELETE FROM', 'clientes', 'WHERE', 'ID_Cliente', '=', '4', ';'] 
+                }
+            ]
+        },
+                {
+            id: 'trail2',
+            icon: '📐', // Ícone para "Arquitetura" ou "Modelagem"
+            color: 'from-purple-500 to-indigo-400', // Reutilizando a cor da trilha 2
+            title: 'Modelagem e Normalização',
+            description: 'Aprenda a arquitetar bancos de dados eficientes.',
             lessons: [
-                // Unidade 0: Vídeo
+                // Unidade 0: Introdução
                 { 
-                    id: 't1-l0', 
-                    title: 'Vídeo: Introdução aos Fundamentos', 
+                    id: 't2-l0-article', 
+                    title: 'Resumo: O que é Modelagem de Dados?', 
+                    type: 'article',
+                    duration: '3 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Antes de construir um prédio, você precisa de uma Planta Baixa Oficial. A Modelagem de Dados é exatamente isso: a arte de desenhar o mapa do seu "mundo de dados", definindo as estruturas e como elas se conectarão, antes de escrever qualquer código.\n\nÉ a fase conceitual e lógica onde se planeja como os dados serão armazenados, organizados e relacionados para atender aos requisitos de um sistema.\n\Uma boa modelagem de dados é crucial porque ela impacta diretamente a performance, a escalabilidade, a integridade e a facilidade de manutenção do banco de dados. Um projeto bem modelado evita redundâncias, inconsistências e problemas de desempenho no futuro.'
+                },
+                { 
+                    id: 't2-l0-video', 
+                    title: 'Vídeo: A Planta Baixa dos Dados', 
                     type: 'lesson', 
-                    videoId: 'qup2BdIl_d8', // ID do link do seu doc 
-                    duration: '5 min', 
+                    videoId: 'E24jFtgNroM', 
+                    duration: '6 min', 
                     xp: REWARD_CONFIG.lesson.xp 
                 },
-                // Unidade 1: Artigo SGBD
                 { 
-                    id: 't1-l1-article', 
-                    title: 'Resumo: O Coração do Sistema (SGBD)', 
-                    type: 'article',
-                    duration: '7 min',
-                    xp: REWARD_CONFIG.article.xp,
-                    content: 'O banco de dados em si é o "fichário" ou a "biblioteca" onde os dados são fisicamente armazenados. Mas quem opera essa biblioteca? Esse é o trabalho do SGBD (Sistema de Gerenciamento de Banco de Dados).\n\nO SGBD é o software, o "cérebro" ou o "bibliotecário" que recebe os seus pedidos, guarda as informações com segurança e as busca quando você precisa. Ele atua como uma interface entre o usuário e o banco de dados.\n\nSuas principais funções incluem:\n• Armazenamento e Recuperação de Dados\n• Segurança (Controla quem pode acessar o quê)\n• Integridade dos Dados (Garante que os dados sejam válidos, ex: idade não pode ser negativa)\n• Concorrência (Permite múltiplos acessos ao mesmo tempo sem corromper dados)\n• Recuperação de Falhas (Restaura o banco após uma queda de energia, por exemplo)\n\nExemplos de SGBDs Populares: MySQL, PostgreSQL, Oracle Database, SQL Server e SQLite.' // Baseado no Doc 
-                },
-                // Unidade 1: Teste SGBD
-                { 
-                    id: 't1-l1-theory', 
-                    title: 'Teste: O Papel do SGBD', 
+                    id: 't2-l0-theory', 
+                    title: 'Teste: Fundamentos da Modelagem', 
                     type: 'theory',
                     duration: '5 min',
                     xp: REWARD_CONFIG.theory.xp,
                     questions: [
-                        { question: 'A analogia do SGBD como um “bibliotecário digital” é usada porque ele:', options: ['Apenas armazena livros e artigos em formato digital.', 'Precisa de uma conexão de internet de alta velocidade.', 'Gerencia a organização, o acesso, a segurança e a recuperação dos dados.', 'Converte automaticamente dados físicos em digitais.'], correct: 2, explanation: 'A função principal do SGBD é gerenciar a organização, acesso, segurança e recuperação dos dados, assim como um bibliotecário.' },
-                        { question: 'Quais são duas funções essenciais de um SGBD (além de armazenar)?', options: ['Edição de código-fonte e compilação.', 'Controle de concorrência e recuperação de falhas.', 'Criação de interfaces gráficas e gerenciamento de rede.', 'Formatação de disco e instalação de drivers.'], correct: 1, explanation: 'Controle de concorrência (acesso simultâneo) e recuperação de falhas são funções essenciais de um SGBD.' },
-                        { question: 'Qual função do SGBD é fundamental se o sistema cair por uma queda de energia?', options: ['Concorrência', 'Segurança', 'Recuperação de falhas', 'Armazenamento'], correct: 2, explanation: 'A recuperação de falhas restaura o banco de dados a um estado consistente após um erro.' },
-                        { question: 'Quais dos seguintes são exemplos de SGBDs populares?', options: ['Microsoft Excel e Google Sheets', 'MySQL e Microsoft SQL Server', 'Adobe Photoshop e GIMP', 'Windows Server e Linux Ubuntu'], correct: 1, explanation: 'MySQL e SQL Server são SGBDs amplamente utilizados, enquanto os outros são planilhas, editores de imagem ou sistemas operacionais.' }
-                    ] // Perguntas baseadas na Unidade 1 do Doc 
-                },
-                // Unidade 2: Artigo SQL
-                { 
-                    id: 't1-l2-article', 
-                    title: 'Resumo: A Língua Universal (SQL)', 
-                    type: 'article',
-                    duration: '5 min',
-                    xp: REWARD_CONFIG.article.xp,
-                    content: 'Para conversar com o "bibliotecário" (o SGBD), você precisa de uma linguagem que ele entenda. Essa linguagem é o SQL (Structured Query Language).\n\nO SQL é dividido em subconjuntos:\n• DDL (Data Definition Language): Usada para definir a estrutura (ex: CREATE TABLE, ALTER TABLE, DROP TABLE).\n• DML (Data Manipulation Language): Usada para manipular os dados dentro das tabelas (ex: INSERT, UPDATE, DELETE).\n• DCL (Data Control Language): Usada para gerenciar permissões (ex: GRANT, REVOKE).\n• TCL (Transaction Control Language): Usada para gerenciar transações (ex: COMMIT, ROLLBACK).' // Baseado no Doc 
-                },
-                // Unidade 2: Teste SQL (Perguntas novas, pois o doc repetiu)
-                { 
-                    id: 't1-l2-theory', 
-                    title: 'Teste: Comandos SQL', 
-                    type: 'theory',
-                    duration: '5 min',
-                    xp: REWARD_CONFIG.theory.xp,
-                    questions: [
-                        { question: 'Qual subconjunto do SQL é usado para CRIAR ou DELETAR tabelas?', options: ['DML', 'DCL', 'TCL', 'DDL'], correct: 3, explanation: 'DDL (Data Definition Language) é usada para definir a estrutura, o que inclui criar (CREATE) e deletar (DROP) tabelas.' },
-                        { question: 'O comando `INSERT` pertence a qual subconjunto do SQL?', options: ['DML', 'DDL', 'DCL', 'TCL'], correct: 0, explanation: 'DML (Data Manipulation Language) é usada para manipular os dados, o que inclui inserir (INSERT) novas linhas.' },
-                        { question: 'Para salvar permanentemente uma transação, qual comando TCL você usaria?', options: ['GRANT', 'ROLLBACK', 'COMMIT', 'UPDATE'], correct: 2, explanation: 'O comando COMMIT (parte do TCL) é usado para salvar as mudanças de uma transação permanentemente.' }
+                        { question: 'O texto compara a Modelagem de Dados a uma "Planta Baixa Oficial" porque ela:', options: ['Define as cores e o design visual do sistema final.', 'É a arte de desenhar o mapa dos dados, definindo estruturas e conexões antes de codificar.', 'Determina qual linguagem de programação será usada.', 'Foca apenas na performance e velocidade do banco de dados.'], correct: 1, explanation: 'A modelagem é a "planta baixa" que define a estrutura e as conexões dos dados antes da codificação.' },
+                        { question: 'Qual é a principal função da modelagem de dados?', options: ['Definir a aparência visual do sistema.', 'Otimizar a navegação entre páginas de um site.', 'Organizar como os dados serão armazenados, organizados e relacionados.', 'Escrever os primeiros códigos SQL do projeto.'], correct: 2, explanation: 'A função principal é planejar a organização e o relacionamento dos dados.' },
+                        { question: 'Segundo o texto, uma boa modelagem de dados é crucial para evitar problemas futuros, como:', options: ['Falhas de rede e lentidão de internet.', 'Redundâncias, inconsistências e problemas de desempenho.', 'Baixa resolução de imagem no aplicativo.', 'Erros de sintaxe na linguagem de programação.'], correct: 1, explanation: 'Uma boa modelagem evita redundância, inconsistência e problemas de performance.' }
                     ]
                 },
-                // Unidade 3: Artigo Modelo Relacional
+
+                // Unidade 1: Blocos de Construção
                 { 
-                    id: 't1-l3-article', 
-                    title: 'Resumo: Organização (Modelo Relacional)', 
+                    id: 't2-l1-article', 
+                    title: 'Resumo: Blocos de Construção', 
                     type: 'article',
-                    duration: '7 min',
+                    duration: '5 min',
                     xp: REWARD_CONFIG.article.xp,
-                    content: 'Focamos nos Bancos de Dados Relacionais, que organizam os dados em Tabelas (similares a planilhas).\n\nA estrutura de uma Tabela é dividida em:\n• Colunas (Atributos): As categorias de informação (ex: "Nome", "Email").\n• Linhas (Registros/Tuplas): O conjunto de informações sobre um único item (ex: os dados de um cliente específico).\n\nPara que as tabelas possam se relacionar, usamos chaves:\n• Chave Primária (Primary Key - PK): É o identificador único de cada linha (ex: ID_Cliente). Não pode ter valores duplicados e não pode ser nula.\n• Chave Estrangeira (Foreign Key - FK): É a "cola" que conecta as tabelas. É uma coluna em uma tabela que faz referência à Chave Primária de outra tabela (ex: a coluna ID_Cliente na tabela Pedidos).' // Baseado no Doc 
+                    content: 'A modelagem se baseia em três conceitos:\n\n**Entidades (Os Edifícios):** São as "coisas" ou "conceitos" principais que você quer guardar informações (ex: Cliente, Produto, Aluno). Elas se tornarão Tabelas no banco de dados.\n\n**Atributos (As Características):** São as propriedades que descrevem uma entidade (ex: Nome, Email, Preço). Elas se tornarão Colunas na tabela.\n\n**Relacionamentos (As Estradas):** Definem como as entidades interagem (ex: Um Cliente *faz* um Pedido). Eles conectam as tabelas.\n\nPara visualizar isso, usamos um Diagrama Entidade-Relacionamento (DER), que é a "planta baixa" visual do banco de dados.'
                 },
-                // Unidade 3: Teste Modelo Relacional
                 { 
-                    id: 't1-l3-theory', 
-                    title: 'Teste: Chaves e Relações', 
+                    id: 't2-l1-theory', 
+                    title: 'Teste: Blocos de Construção', 
                     type: 'theory',
                     duration: '5 min',
                     xp: REWARD_CONFIG.theory.xp,
                     questions: [
-                        { question: 'No modelo relacional, a estrutura (planilha) e os "cabeçalhos" são chamados de:', options: ['Linha e Tabela', 'Tabela e Coluna', 'Dado e Linha', 'Coluna e Chave'], correct: 1, explanation: 'A estrutura principal é a Tabela, e seus "cabeçalhos" (categorias) são as Colunas.' },
-                        { question: 'Qual afirmação sobre Chaves é VERDADEIRA?', options: ['PK pode ter valores repetidos.', 'FK conecta duas tabelas referenciando uma PK.', 'Uma tabela pode ter várias PKs.', 'PK é usada apenas para ordenar dados.'], correct: 1, explanation: 'A Chave Estrangeira (FK) é a "cola" que conecta tabelas, referenciando a Chave Primária (PK) de outra.' },
-                        { question: 'O que acontece se você tentar inserir um ID_Cliente em Pedidos que não existe na tabela Clientes?', options: ['Cria um novo cliente automaticamente.', 'A inserção falha (violação de integridade referencial).', 'O campo ID_Cliente fica nulo.', 'O SGBD permite, mas marca como "inválido".'], correct: 1, explanation: 'Isso é uma violação da integridade referencial. O SGBD rejeita a inserção para manter os dados consistentes.' }
-                    ] // Perguntas baseadas na Unidade 3 do Doc 
+                        { question: 'Em um sistema escolar, "Aluno", "Professor" e "Disciplina" são exemplos de:', options: ['Atributos', 'Entidades', 'Relacionamentos', 'Chaves Primárias'], correct: 1, explanation: 'Entidades são os "substantivos" ou conceitos principais do sistema, como Aluno, Professor e Disciplina.' },
+                        { question: 'As características que descrevem uma entidade, como "Nome" e "Email" para um "Cliente", são chamadas de:', options: ['Atributos', 'Entidades', 'Relacionamentos', 'Chaves Estrangeiras'], correct: 0, explanation: 'Atributos são as propriedades ou características que descrevem uma entidade.' },
+                        { question: 'No banco de dados final, as Entidades e os Atributos se materializam, respectivamente, como:', options: ['Colunas e Tabelas', 'Tabelas e Colunas', 'Tabelas e Relacionamentos', 'Colunas e Chaves'], correct: 1, explanation: 'A entidade (ex: Cliente) vira uma Tabela, e os atributos (ex: Nome, Email) viram Colunas.' },
+                        { question: 'O que representa um "Relacionamento" na modelagem de dados?', options: ['O identificador único de uma tabela.', 'A descrição detalhada de uma entidade.', 'A conexão lógica ou interação entre duas ou mais entidades.', 'O diagrama visual que mostra o banco de dados.'], correct: 2, explanation: 'Relacionamentos são os "verbos" que conectam as entidades, como "Cliente FAZ Pedido".' }
+                    ]
                 },
-                // Unidade 4: Artigo SELECT
+
+                // Unidade 2: Chaves
                 { 
-                    id: 't1-l4-article', 
-                    title: 'Resumo: Seu Primeiro Comando (SELECT)', 
-                    type: 'article',
-                    duration: '5 min',
-                    xp: REWARD_CONFIG.article.xp,
-                    content: 'O comando fundamental para recuperar dados é o SELECT.\n\nPara ver todo o conteúdo (todas as colunas) de uma tabela, você usa o asterisco (*):\n`SELECT * FROM clientes;`\n\nSe você não precisa de tudo, pode especificar as colunas, o que é uma boa prática para otimizar o desempenho:\n`SELECT Nome, Email FROM clientes;`\n\nEste comando diz ao SGBD: "Mostre-me apenas as colunas Nome e Email a partir da tabela clientes".' // Baseado no Doc 
-                },
-                // Unidade 5: Artigo Casos de Uso
-                { 
-                    id: 't1-l5-article', 
-                    title: 'Resumo: Casos de Uso Reais', 
-                    type: 'article',
-                    duration: '5 min',
-                    xp: REWARD_CONFIG.article.xp,
-                    content: 'Bancos de dados são a espinha dorsal da infraestrutura digital moderna.\n\nEm um E-commerce (como a Amazon), o SGBD gerencia:\n• Catálogo de Produtos (preços, estoque, avaliações)\n• Informações de Clientes (histórico de compras, endereços)\n• Pedidos (status, pagamento)\n• Logística (rastreamento, armazéns)\n\nEm um Sistema Bancário, o SGBD garante:\n• Transações Financeiras (depósitos, saques, saldos corretos)\n• Dados de Clientes (proteção de informações sensíveis)\n• Auditoria (registro detalhado de todas as operações)\n\nO SQL é a ferramenta que permite que analistas e desenvolvedores interajam com esses sistemas, seja para analisar vendas, inserir novos usuários em um app, ou atualizar o status de um pedido.' // Baseado no Doc 
-                },
-                // Unidade 6: Artigo Mais SQL
-                { 
-                    id: 't1-l6-article', 
-                    title: 'Resumo: Comandos Essenciais (DML)', 
+                    id: 't2-l2-article', 
+                    title: 'Resumo: As Chaves do Reino (PK e FK)', 
                     type: 'article',
                     duration: '7 min',
                     xp: REWARD_CONFIG.article.xp,
-                    content: 'Além de consultar, você precisa manipular os dados:\n\n• WHERE: Filtra os registros. É como pedir livros de um autor específico.\n`SELECT * FROM clientes WHERE Cidade = \'São Paulo\';`\n\n• ORDER BY: Ordena os resultados.\n`SELECT Nome, Cidade FROM clientes ORDER BY Nome ASC;` (ordem alfabética)\n\n• LIMIT: Restringe o número de linhas retornadas.\n`SELECT Nome, Preco FROM produtos ORDER BY Preco DESC LIMIT 3;` (Top 3 mais caros)\n\n• INSERT INTO: Adiciona novos registros (linhas).\n`INSERT INTO clientes (Nome, Email) VALUES (\'Daniel\', \'daniel.p@email.com\');`\n\n• UPDATE: Modifica registros existentes. (CUIDADO: Use WHERE!)\n`UPDATE clientes SET Email = \'ana.novo@email.com\' WHERE ID_Cliente = 1;`\n\n• DELETE FROM: Remove registros. (CUIDADO MÁXIMO: Use WHERE!)\n`DELETE FROM clientes WHERE ID_Cliente = 3;`' // Baseado no Doc 
+                    content: 'Chaves são a espinha dorsal dos relacionamentos.\n\n**Chave Primária (Primary Key - PK):** É o identificador único e exclusivo de cada linha (ex: `id_cliente`). Ela não pode ter valores duplicados e não pode ser nula (NOT NULL). Pense nela como o CPF de um registro.\n\n**Chave Estrangeira (Foreign Key - FK):** É a "cola" que conecta as tabelas. É uma coluna em uma tabela que faz referência à Chave Primária de outra tabela (ex: a coluna `id_cliente` na tabela `Pedidos`).\n\nA FK garante a **Integridade Referencial**, que impede a criação de "registros órfãos" (como um Pedido que aponta para um Cliente que não existe).'
                 },
-                // Unidade 4, 5, 6: Teste
                 { 
-                    id: 't1-l6-theory', 
-                    title: 'Teste: DQL e DML', 
+                    id: 't2-l2-theory', 
+                    title: 'Teste: Chaves e Integridade', 
                     type: 'theory',
                     duration: '5 min',
                     xp: REWARD_CONFIG.theory.xp,
                     questions: [
-                        { question: 'Para ver TODAS as colunas da tabela `clientes`, qual a sintaxe correta?', options: ['SELECT clientes FROM *;', 'SELECT * FROM clientes;', 'GET * FROM clientes;', 'SELECT ALL FROM clientes;'], correct: 1, explanation: '`SELECT *` significa "selecionar todas as colunas". `FROM clientes` especifica a tabela.' },
-                        { question: 'Qual cláusula você usaria para encontrar apenas clientes que moram em "São Paulo"?', options: ['LIMIT \'São Paulo\'', 'ORDER BY Cidade = \'São Paulo\'', 'WHERE Cidade = \'São Paulo\'', 'GROUP BY \'São Paulo\''], correct: 2, explanation: 'A cláusula WHERE é usada para filtrar os registros com base em uma condição.' },
-                        { question: 'Em um e-commerce, qual é uma prioridade do SGBD, segundo o texto?', options: ['O histórico de navegação anônimo.', 'A consistência entre o estoque real e o estoque no sistema.', 'As cores e fontes do site.', 'O número de "likes" de um produto.'], correct: 1, explanation: 'Garantir a consistência dos dados, como o estoque, é uma função crucial do SGBD.' }
-                    ] // Perguntas baseadas nas Unidades 4, 5, 6 do Doc 
+                        { question: 'Qual é a definição correta de uma Chave Primária (PK)?', options: ['Uma coluna que armazena nomes de clientes.', 'Uma coluna que conecta duas tabelas diferentes.', 'Uma coluna (ou conjunto) que serve como identificador único e exclusivo para cada linha da tabela.', 'Uma coluna que pode ter valores repetidos, mas não nulos.'], correct: 2, explanation: 'A PK é o identificador único e exclusivo de uma linha (registro).' },
+                        { question: 'Uma das características essenciais que uma Chave Primária (PK) deve ter é:', options: ['Deve ser um texto longo.', 'Deve permitir valores duplicados.', 'Deve ser "Não Nula" (NOT NULL).', 'Deve ser sempre um número.'], correct: 2, explanation: 'A Chave Primária deve ser única e não nula (NOT NULL).' },
+                        { question: 'Qual é a principal função da Chave Estrangeira (FK)?', options: ['Garantir que cada linha da tabela seja única.', 'Ser a "cola" que conecta tabelas, fazendo referência à Chave Primária de outra tabela.', 'Armazenar dados calculados.', 'Ser o atributo principal de uma entidade.'], correct: 1, explanation: 'A FK é a "cola" que estabelece o vínculo entre tabelas, referenciando uma PK.' },
+                        { question: 'Na relação Clientes e Pedidos, a tabela Pedidos possui uma coluna id_cliente. Esta coluna é uma:', options: ['Chave Primária (PK)', 'Chave Estrangeira (FK)', 'Entidade', 'Dependência Transitiva'], correct: 1, explanation: 'A coluna `id_cliente` na tabela Pedidos é uma Chave Estrangeira que aponta para a PK da tabela Clientes.' },
+                        { question: 'O que é "Integridade Referencial"?', options: ['Impede que existam "registros órfãos" (como um pedido sem cliente).', 'Garante que todas as tabelas tenham o mesmo número de colunas.', 'Garante que os dados sejam armazenados em ordem alfabética.', 'Impede que a Chave Primária seja um número.'], correct: 0, explanation: 'Integridade Referencial é a regra que impede que uma FK aponte para um registro que não existe, evitando "registros órfãos".' }
+                    ]
                 },
-                // Exercícios Práticos (separados em lições individuais)
+
+                // Unidade 3: Cardinalidade
                 { 
-                    id: 't1-p1', 
-                    title: 'Prática: Consulta Simples', 
+                    id: 't2-l3-article', 
+                    title: 'Resumo: Regras de Trânsito (Cardinalidade)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Cardinalidade define as "regras de trânsito" de como as tabelas se conectam.\n\n**Um-para-Muitos (1:N):** O tipo mais comum. (Ex: Um Cliente pode ter Muitos Pedidos). A Chave Estrangeira (FK) é sempre colocada na tabela do lado "Muitos" (N). (Ex: `id_cliente` fica na tabela `Pedidos`).\n\n**Muitos-para-Muitos (N:M):** (Ex: Um Aluno cursa Muitas Disciplinas; Uma Disciplina tem Muitos Alunos). Este relacionamento não pode ser implementado diretamente.\n\n**Solução N:M:** Cria-se uma **Tabela de Ligação** (ex: `Matriculas`) que atua como uma "rotatória", quebrando o N:M em dois relacionamentos 1:N. Esta tabela conterá as FKs de ambas as tabelas (ex: `id_aluno` e `id_disciplina`).\n\n**Um-para-Um (1:1):** O tipo menos comum. (Ex: Um Funcionário tem um Detalhe_Funcionario). Geralmente usado para separar dados sensíveis ou opcionais.'
+                },
+                { 
+                    id: 't2-l3-theory', 
+                    title: 'Teste: Cardinalidade e Tabelas de Ligação', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'O que a "Cardinalidade" define?', options: ['O número total de tabelas.', 'O número de instâncias (registros) de uma entidade que podem se associar a instâncias de outra.', 'O número de colunas que uma entidade pode ter.', 'A velocidade máxima da conexão.'], correct: 1, explanation: 'Cardinalidade define as regras numéricas do relacionamento (quantos registros se conectam a quantos).' },
+                        { question: 'Em um relacionamento Um-para-Muitos (1:N), como "Cliente (1) faz Pedidos (N)", onde a FK deve ficar?', options: ['Na tabela do lado "1" (Clientes).', 'Na tabela do lado "N" (Pedidos).', 'Em ambas as tabelas.', 'Em uma tabela de ligação separada.'], correct: 1, explanation: 'A Chave Estrangeira (FK) é sempre colocada na tabela do lado "Muitos" (N).' },
+                        { question: 'Qual relacionamento exige uma "Tabela de Ligação"?', options: ['Um-para-Um (1:1)', 'Um-para-Muitos (1:N)', 'Muitos-para-Muitos (N:M)', 'Um-para-Nenhum (1:0)'], correct: 2, explanation: 'Relacionamentos Muitos-para-Muitos (N:M) não podem ser implementados diretamente e exigem uma tabela de ligação.' },
+                        { question: 'Como implementar a relação N:M "Aluno cursa Disciplinas"?', options: ['Colocando a FK de Disciplina em Aluno.', 'Colocando a FK de Aluno em Disciplina.', 'Criando uma tabela de ligação "Matricula" com as FKs de Aluno e Disciplina.', 'Permitindo que a coluna id_disciplina armazene múltiplos valores.'], correct: 2, explanation: 'Uma tabela de ligação (ex: Matricula) é criada contendo as FKs de ambas as tabelas (id_aluno, id_disciplina) para resolver o N:M.' }
+                    ]
+                },
+
+                // Unidade 4: Normalização
+                { 
+                    id: 't2-l4-article', 
+                    title: 'Resumo: A Arte de Organizar (Normalização)', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Normalização é o processo de organizar tabelas para minimizar a redundância (repetição) de dados e melhorar a integridade.\n\n**Primeira Forma Normal (1FN):** Garante que todos os atributos sejam "atômicos". (Ex: Não armazenar \'Notebook, Mouse\' em uma única célula. Você deve separar em linhas diferentes em uma tabela de ligação).\n\n**Segunda Forma Normal (2FN):** Resolve a "dependência parcial". (Ex: Em uma tabela `Itens_Pedido (id_pedido, id_produto)`, o `nome_produto` não pode estar ali, pois ele depende apenas do `id_produto`. Ele deve ir para a tabela `Produtos`).\n\n**Terceira Forma Normal (3FN):** Resolve a "dependência transitiva". (Ex: Em uma tabela `Clientes (id_cliente, nome, nome_cidade, estado)`, o `estado` depende do `nome_cidade`, que depende do `id_cliente`. Isso é transitivo. A solução é criar uma tabela `Cidades` separada).\n\n**Benefícios:** Redução da redundância e melhora da integridade dos dados.'
+                },
+                { 
+                    id: 't2-l4-theory', 
+                    title: 'Teste: Formas Normais', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual é o objetivo principal da Normalização de dados?', options: ['Aumentar a redundância para facilitar consultas rápidas.', 'Minimizar a redundância de dados e melhorar a integridade.', 'Tornar o banco de dados visualmente mais bonito.', 'Garantir que todas as tabelas tenham pelo menos 10 colunas.'], correct: 1, explanation: 'O objetivo principal é minimizar a redundância (repetição) e melhorar a integridade dos dados.' },
+                        { question: 'A Primeira Forma Normal (1FN) exige que:', options: ['Todas as tabelas tenham uma Chave Estrangeira.', 'Todos os atributos sejam "atômicos" (indivisíveis).', 'O banco de dados esteja totalmente livre de redundâncias.', 'Não existam relacionamentos do tipo 1:N.'], correct: 1, explanation: '1FN exige que todos os atributos sejam atômicos, ou seja, não contenham múltiplos valores em uma única célula.' },
+                        { question: 'Qual problema a Segunda Forma Normal (2FN) resolve?', options: ['Impede dependências transitivas.', 'Impede atributos multivalorados.', 'Impede que atributos não-chave dependam apenas de *parte* de uma Chave Primária composta.', 'Impede o uso de Chaves Estrangeiras.'], correct: 2, explanation: '2FN foca em chaves primárias compostas, garantindo que todos os atributos dependam da chave inteira, não de apenas parte dela.' },
+                        { question: 'Uma "dependência transitiva" (resolvida pela 3FN) ocorre quando:', options: ['Um atributo não-chave depende de outro atributo não-chave, em vez de depender da PK.', 'Uma tabela depende de si mesma.', 'Uma Chave Estrangeira aponta para a Chave Primária errada.', 'A tabela possui múltiplos valores em uma única coluna.'], correct: 0, explanation: 'Dependência transitiva é quando um atributo não-chave depende de outro atributo não-chave (ex: Estado depende de Cidade, que depende do id_cliente).' },
+                        { question: 'Na tabela `Clientes(id_cliente [PK], nome, id_cidade, nome_cidade, estado)`, a dependência `id_cliente -> id_cidade -> estado` é um exemplo de:', options: ['Primeira Forma Normal (1FN)', 'Chave Estrangeira (FK)', 'Dependência Transitiva (problema da 3FN)', 'Cardinalidade (1:N)'], correct: 2, explanation: 'Este é um exemplo clássico de dependência transitiva, onde `estado` depende de `id_cidade`, que por sua vez depende da PK `id_cliente`.' },
+                        { question: 'Quais são os benefícios diretos da Normalização?', options: ['Aumento da velocidade da internet.', 'Redução da redundância, melhora da integridade dos dados e maior flexibilidade.', 'Aumento do espaço de armazenamento.', 'Eliminação total da necessidade de usar Chaves Estrangeiras.'], correct: 1, explanation: 'A normalização reduz a redundância, melhora a integridade e torna o banco de dados mais flexível.' }
+                    ]
+                },
+
+                // Unidade 5: Exercícios Práticos
+                { 
+                    id: 't2-p1', 
+                    title: 'Prática: Testando Chave Primária (PK)', 
                     type: 'practice',
                     duration: '5 min',
                     xp: REWARD_CONFIG.practice.xp,
-                    description: 'Tabela: `clientes` (colunas: ID_Cliente, Nome, Sobrenome, Email, Cidade). Escreva o comando para visualizar todas as colunas e todos os registros da tabela `clientes`.',
-                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Sobrenome VARCHAR(50),\n  Email VARCHAR(100),\n  Cidade VARCHAR(50)\n);',
-                    correctQuery: 'SELECT * FROM clientes;',
-                    queryParts: ['SELECT', '*', 'FROM', 'clientes', ';'] 
+                    description: 'Tabela: `Clientes (id_cliente PK, nome, email)`. Tente inserir \'Carla Dias\' com `id_cliente` 2, que já está em uso.',
+                    schema: 'CREATE TABLE Clientes (\n  id_cliente INT PRIMARY KEY,\n  nome VARCHAR(100),\n  email VARCHAR(100)\n);',
+                    correctQuery: 'INSERT INTO Clientes (id_cliente, nome, email) VALUES (2, \'Carla Dias\', \'carla@email.com\');',
+                    queryParts: ['INSERT INTO', 'Clientes', '(', 'id_cliente', ',', 'nome', ',', 'email', ')', 'VALUES', '(', '2', ',', "'Carla Dias'", ',', "'carla@email.com'", ')', ';']
                 },
                 { 
-                    id: 't1-p2', 
-                    title: 'Prática: Consulta Específica', 
+                    id: 't2-p2', 
+                    title: 'Prática: Testando Chave Estrangeira (FK)', 
                     type: 'practice',
                     duration: '5 min',
                     xp: REWARD_CONFIG.practice.xp,
-                    description: 'Tabela: `clientes`. Escreva o comando para selecionar apenas as colunas `Nome` e `Email` de todos os clientes.',
-                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Email VARCHAR(100)\n);',
-                    correctQuery: 'SELECT Nome, Email FROM clientes;',
-                    queryParts: ['SELECT', 'Nome', ',', 'Email', 'FROM', 'clientes', ';'] 
+                    description: 'Tabelas: `Clientes (id_cliente PK)` e `Pedidos (id_cliente FK)`. Tente inserir um pedido para o `id_cliente` 5, que não existe.',
+                    schema: 'CREATE TABLE Clientes (\n  id_cliente INT PRIMARY KEY\n);\nCREATE TABLE Pedidos (\n  id_pedido INT PRIMARY KEY,\n  data_pedido DATE,\n  id_cliente INT,\n  FOREIGN KEY (id_cliente) REFERENCES Clientes(id_cliente)\n);',
+                    correctQuery: 'INSERT INTO Pedidos (id_pedido, data_pedido, id_cliente) VALUES (102, \'2023-10-27\', 5);',
+                    queryParts: ['INSERT INTO', 'Pedidos', '(', 'id_pedido', ',', 'data_pedido', ',', 'id_cliente', ')', 'VALUES', '(', '102', ',', "'2023-10-27'", ',', '5', ')', ';']
                 },
                 { 
-                    id: 't1-p3', 
-                    title: 'Prática: Filtro Simples (WHERE)', 
+                    id: 't2-p3', 
+                    title: 'Prática: Consultando Relação 1:N (JOIN)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabelas: `Clientes` e `Pedidos`. Escreva um `SELECT` que junte as tabelas e mostre o `nome` do cliente e a `data_pedido`.',
+                    schema: 'CREATE TABLE Clientes (\n  id_cliente INT PRIMARY KEY,\n  nome VARCHAR(100)\n);\nCREATE TABLE Pedidos (\n  id_pedido INT PRIMARY KEY,\n  data_pedido DATE,\n  id_cliente INT\n);',
+                    correctQuery: 'SELECT T1.nome, T2.data_pedido FROM Clientes AS T1 JOIN Pedidos AS T2 ON T1.id_cliente = T2.id_cliente;',
+                    queryParts: ['SELECT', 'T1.nome', ',', 'T2.data_pedido', 'FROM', 'Clientes', 'AS T1', 'JOIN', 'Pedidos', 'AS T2', 'ON', 'T1.id_cliente', '=', 'T2.id_cliente', ';']
+                },
+                { 
+                    id: 't2-p4', 
+                    title: 'Prática: Inserindo em Tabela de Ligação (N:M)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabelas: `Alunos`, `Disciplinas`, `Matriculas`. Insira um registro em `Matriculas` para ligar o aluno 1 à disciplina 11.',
+                    schema: 'CREATE TABLE Alunos (id_aluno INT PRIMARY KEY);\nCREATE TABLE Disciplinas (id_disciplina INT PRIMARY KEY);\nCREATE TABLE Matriculas (\n  id_aluno INT,\n  id_disciplina INT\n);',
+                    correctQuery: 'INSERT INTO Matriculas (id_aluno, id_disciplina) VALUES (1, 11);',
+                    queryParts: ['INSERT INTO', 'Matriculas', '(', 'id_aluno', ',', 'id_disciplina', ')', 'VALUES', '(', '1', ',', '11', ')', ';']
+                },
+                { 
+                    id: 't2-p5', 
+                    title: 'Prática: Consultando Relação N:M (JOIN Triplo)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabelas: `Alunos`, `Disciplinas`, `Matriculas`. Escreva um `SELECT` que mostre o `nome_aluno` e o `nome_disciplina`.',
+                    schema: 'CREATE TABLE Alunos (id_aluno INT, nome_aluno VARCHAR(100));\nCREATE TABLE Disciplinas (id_disciplina INT, nome_disciplina VARCHAR(100));\nCREATE TABLE Matriculas (id_aluno INT, id_disciplina INT);',
+                    correctQuery: 'SELECT T1.nome_aluno, T3.nome_disciplina FROM Alunos AS T1 JOIN Matriculas AS T2 ON T1.id_aluno = T2.id_aluno JOIN Disciplinas AS T3 ON T2.id_disciplina = T3.id_disciplina;',
+                    queryParts: ['SELECT', 'T1.nome_aluno', ',', 'T3.nome_disciplina', 'FROM', 'Alunos', 'AS T1', 'JOIN', 'Matriculas', 'AS T2', 'ON', 'T1.id_aluno', '=', 'T2.id_aluno', 'JOIN', 'Disciplinas', 'AS T3', 'ON', 'T2.id_disciplina', '=', 'T3.id_disciplina', ';']
+                },
+                { 
+                    id: 't2-p6', 
+                    title: 'Prática: O Problema da 1FN (LIKE)', 
                     type: 'practice',
                     duration: '7 min',
                     xp: REWARD_CONFIG.practice.xp,
-                    description: 'Tabela: `clientes`. Escreva o comando para selecionar todos os dados dos clientes onde a `Cidade` seja exatamente \'São Paulo\'.',
-                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Cidade VARCHAR(50)\n);',
-                    correctQuery: 'SELECT * FROM clientes WHERE Cidade = \'São Paulo\';',
-                    queryParts: ['SELECT', '*', 'FROM', 'clientes', 'WHERE', 'Cidade', '=', "'São Paulo'", ';'] 
+                    description: 'Tabela: `Pedidos_Nao_Normalizados (produtos)`. Escreva um `SELECT` para encontrar pedidos que contenham \'Teclado\'.',
+                    schema: 'CREATE TABLE Pedidos_Nao_Normalizados (\n  id_pedido INT,\n  id_cliente INT,\n  produtos VARCHAR(255)\n);',
+                    correctQuery: 'SELECT * FROM Pedidos_Nao_Normalizados WHERE produtos LIKE \'%Teclado%\';',
+                    queryParts: ['SELECT', '*', 'FROM', 'Pedidos_Nao_Normalizados', 'WHERE', 'produtos', 'LIKE', "'%Teclado%'", ';']
                 },
                 { 
-                    id: 't1-p4', 
-                    title: 'Prática: Ordenação e Limite', 
+                    id: 't2-p7', 
+                    title: 'Prática: Anomalia da 3FN (UPDATE)', 
                     type: 'practice',
                     duration: '7 min',
                     xp: REWARD_CONFIG.practice.xp,
-                    description: 'Tabela: `produtos` (colunas: Nome, Preco). Escreva o comando para selecionar o `Nome` e o `Preco` dos produtos, ordenados do mais caro para o mais barato (DESC), e limitar o resultado aos 3 primeiros.',
-                    schema: 'CREATE TABLE produtos (\n  ID_Produto INT,\n  Nome VARCHAR(100),\n  Preco DECIMAL(10, 2)\n);',
-                    correctQuery: 'SELECT Nome, Preco FROM produtos ORDER BY Preco DESC LIMIT 3;',
-                    queryParts: ['SELECT', 'Nome', ',', 'Preco', 'FROM', 'produtos', 'ORDER BY', 'Preco', 'DESC', 'LIMIT', '3', ';'] 
+                    description: 'Tabela: `Clientes_Nao_3FN`. O estado de \'São Paulo\' mudou a sigla para \'SP-BR\'. Escreva o `UPDATE` para corrigir isso.',
+                    schema: 'CREATE TABLE Clientes_Nao_3FN (\n  id_cliente INT,\n  nome VARCHAR(100),\n  id_cidade INT,\n  nome_cidade VARCHAR(100),\n  estado VARCHAR(2)\n);',
+                    correctQuery: 'UPDATE Clientes_Nao_3FN SET estado = \'SP-BR\' WHERE nome_cidade = \'São Paulo\';',
+                    queryParts: ['UPDATE', 'Clientes_Nao_3FN', 'SET', 'estado', '=', "'SP-BR'", 'WHERE', 'nome_cidade', '=', "'São Paulo'", ';']
                 },
+                
+                // Unidade 7: Resumo Final
                 { 
-                    id: 't1-p5', 
-                    title: 'Prática: Inserção de Dados (INSERT)', 
-                    type: 'practice',
-                    duration: '10 min',
-                    xp: REWARD_CONFIG.practice.xp,
-                    description: 'Tabela: `clientes`. Escreva o comando para inserir um novo cliente com: ID_Cliente = 4, Nome = \'Daniel\', Sobrenome = \'Pereira\', Email = \'daniel.p@email.com\', Cidade = \'Curitiba\'.',
-                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Sobrenome VARCHAR(50),\n  Email VARCHAR(100),\n  Cidade VARCHAR(50)\n);',
-                    correctQuery: 'INSERT INTO clientes (ID_Cliente, Nome, Sobrenome, Email, Cidade) VALUES (4, \'Daniel\', \'Pereira\', \'daniel.p@email.com\', \'Curitiba\');',
-                    queryParts: ['INSERT INTO', 'clientes', '(', 'ID_Cliente', ',', 'Nome', ',', 'Sobrenome', ',', 'Email', ',', 'Cidade', ')', 'VALUES', '(', '4', ',', "'Daniel'", ',', "'Pereira'", ',', "'daniel.p@email.com'", ',', "'Curitiba'", ')', ';'] 
-                },
-                { 
-                    id: 't1-p6', 
-                    title: 'Prática: Atualização de Dados (UPDATE)', 
-                    type: 'practice',
-                    duration: '10 min',
-                    xp: REWARD_CONFIG.practice.xp,
-                    description: 'Tabela: `clientes`. Escreva o comando para atualizar o `Email` para \'ana.costa.novo@email.com\', especificamente para o cliente com `ID_Cliente` igual a 1.',
-                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Email VARCHAR(100)\n);',
-                    correctQuery: 'UPDATE clientes SET Email = \'ana.costa.novo@email.com\' WHERE ID_Cliente = 1;',
-                    queryParts: ['UPDATE', 'clientes', 'SET', 'Email', '=', "'ana.costa.novo@email.com'", 'WHERE', 'ID_Cliente', '=', '1', ';'] 
-                },
-                { 
-                    id: 't1-p7', 
-                    title: 'Prática: Exclusão de Dados (DELETE)', 
-                    type: 'practice',
-                    duration: '10 min',
-                    xp: REWARD_CONFIG.practice.xp,
-                    description: 'Tabela: `clientes`. Escreva o comando SQL para excluir o registro da tabela `clientes` onde o `ID_Cliente` seja 4.',
-                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50)\n);',
-                    correctQuery: 'DELETE FROM clientes WHERE ID_Cliente = 4;',
-                    queryParts: ['DELETE FROM', 'clientes', 'WHERE', 'ID_Cliente', '=', '4', ';'] 
+                    id: 't2-l5-review', 
+                    title: 'Revisão: A Planta Baixa Completa', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Antes de construir um prédio, você precisa de uma Planta Baixa Oficial. A Modelagem de Dados é exatamente isso: a arte de desenhar o mapa do seu "mundo de dados", definindo as estruturas e como elas se conectarão, antes de escrever qualquer código.\n\n**1. Blocos de Construção da Arquitetura**\nA modelagem define três conceitos principais:\n• Entidades (Os Edifícios): As "coisas" ou "conceitos" principais que você quer guardar (ex: Cliente, Produto, Pedido). Entidades se tornam tabelas.\n• Atributos (As Características): As propriedades de uma entidade (ex: para o Cliente, os atributos são Nome, Email, Endereço). Atributos se tornam colunas.\n• Relacionamentos (As Estradas): A forma como as entidades interagem (ex: um Cliente faz um Pedido).\n\n**2. As Chaves do Reino (Identificação)**\nPara que os relacionamentos funcionem, precisamos de um sistema de códigos infalível.\n• Chave Primária (PK): É o identificador único e exclusivo de cada linha (ex: CPF). Deve ser única e nunca nula.\n• Chave Estrangeira (FK): É a "cola" que conecta as tabelas. É a cópia da PK de uma tabela, inserida como coluna em outra para criar o vínculo (ex: `id_cliente` na tabela `pedidos`).\n\n**3. As Regras de Trânsito (Cardinalidade)**\nA cardinalidade define as regras de negócio:\n• Um-para-Muitos (1:N): O tipo mais comum. (Ex: Um cliente faz muitos pedidos). A FK é colocada na tabela do lado "Muitos" (pedidos).\n• Muitos-para-Muitos (N:M): (Ex: Um pedido tem muitos produtos). Para resolver isso, cria-se uma Tabela de Ligação (como `itens_pedido`), que atua como uma "rotatória", contendo as FKs de ambas as tabelas.\n\n**4. Normalização: Organização e Integridade**\nNormalização é o processo de organizar as tabelas para evitar a repetição de dados (redundância) e garantir a integridade. A ideia é simples: garantir que cada tabela trate de apenas um assunto.\n\n**5. O Mapa Visual (DER)**\nO Diagrama de Entidade-Relacionamento (DER) é a "planta baixa" visual que mostra todas as tabelas, seus atributos e as regras de cardinalidade.'
                 }
             ]
         },
-                {
-                    id: 'trail2',
-                    icon: '🧩',
-                    color: 'from-purple-500 to-indigo-400',
-                    title: 'SQL Intermediário',
-                    description: 'Aprofunde-se com JOINs, GROUP BY e funções agregadas.',
-                    lessons: [
-                        { id: 'l2-1', title: 'Unindo Tabelas com JOIN', type: 'lesson', duration: '15 min', xp: 75, questions: [
-                            { question: 'Qual comando combina linhas de duas ou mais tabelas?', options: ['COMBINE', 'MERGE', 'JOIN', 'LINK'], correct: 2, explanation: 'O comando JOIN é usado para combinar linhas de duas ou mais tabelas com base em uma coluna relacionada entre elas.' }
-                        ]},
-                        { id: 'l2-2', title: 'Agrupando com GROUP BY', type: 'lesson', duration: '15 min', xp: 75, questions: [
-                            { question: 'Qual cláusula é usada com funções agregadas para agrupar o conjunto de resultados por uma ou mais colunas?', options: ['GROUP BY', 'ORDER BY', 'HAVING', 'CLUSTER BY'], correct: 0, explanation: 'A cláusula GROUP BY é usada para agrupar linhas que têm os mesmos valores em colunas especificadas.' }
-                        ]}
-                    ]
-                },
-                {
-                    id: 'trail3',
-                    icon: '🌌',
-                    color: 'from-pink-500 to-rose-500',
-                    title: 'SQL Avançado',
-                    description: 'Domine subconsultas, índices e otimização de performance.',
-                    lessons: [
-                        { id: 'l3-1', title: 'Subconsultas (Subqueries)', type: 'article', duration: '10 min', xp: 40, content: 'Uma subconsulta é uma consulta SQL aninhada dentro de outra consulta SQL. Elas podem ser usadas em cláusulas WHERE, FROM ou SELECT para realizar operações complexas e filtrar dados com base nos resultados de outra consulta.' },
-                        { id: 'l3-2', title: 'Prática de Subconsulta', type: 'practice', duration: '20 min', xp: 100, questions: [
-                            { question: 'Qual comando você usaria para encontrar clientes que fizeram pedidos?', options: ['SELECT nome FROM clientes WHERE id IN (SELECT cliente_id FROM pedidos)', 'SELECT nome FROM clientes WHERE EXISTS pedidos', 'SELECT nome FROM clientes JOIN pedidos', 'SELECT nome FROM clientes AND pedidos'], correct: 0, explanation: 'Usar `IN` com uma subconsulta `(SELECT cliente_id FROM pedidos)` é uma maneira eficaz de encontrar clientes que existem na tabela de pedidos.' }
-                        ]}
-                    ]
-                }
-            ];
+                Ah, peço desculpas! Agora entendi perfeitamente. Você quer manter todos os seus módulos existentes (Fundamentos, Modelagem, SQL Avançado) e adicionar o novo módulo "SQL Intermediário" da imagem.
+
+O seu código está correto, mas ele não contém o módulo "SQL Intermediário" (o do 🧩). Ele está pulando direto do "Modelagem" para o "SQL Avançado".
+
+Para corrigir isso, você precisa inserir o novo módulo "SQL Intermediário" entre o seu trail2 (Modelagem) e o seu trail3 (SQL Avançado).
+
+Aqui está a única parte que você precisa alterar.
+
+Correção no trailsData
+No seu array trailsData, encontre o final do objeto trail2 (Modelagem) e cole o novo bloco trail3 (SQL Intermediário) logo depois dele. Em seguida, renomeie o seu "SQL Avançado" para trail4.
+
+JavaScript
+
+// ... (Este é o fim do seu módulo 'trail2' - Modelagem e Normalização)
+                }
+            ]
+        },
+
+// --- INICIO DA CORREÇÃO ---
+// 1. COLE ESTE NOVO MÓDULO "SQL INTERMEDIÁRIO" AQUI
+        {
+            id: 'trail3', // Este é o NOVO trail3
+            icon: '🧩', // Ícone da imagem
+            color: 'from-purple-500 to-indigo-400', // Cor da imagem
+            title: 'SQL Intermediário', // Título da imagem
+            description: 'Aprofunde-se com JOINs, GROUP BY e funções agregadas.', // Descrição da imagem
+            lessons: [
+                // Duas lições para bater com o "0/2" da imagem
+                { 
+                    id: 't3-l1-article', // ID da lição atualizado para t3
+                    title: 'Resumo: Conectando Tabelas (JOINs)', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'O INNER JOIN é o tipo mais comum. Ele retorna apenas os registros que têm valores correspondentes em AMBAS as tabelas...'
+                },
+                { 
+                    id: 't3-l2-theory', // ID da lição atualizado para t3
+                    title: 'Teste: Agregando Dados (GROUP BY)', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual comando é usado para agrupar linhas que têm os mesmos valores em colunas especificadas?', options: ['ORDER BY', 'GROUP BY', 'WHERE', 'JOIN'], correct: 1, explanation: 'GROUP BY é usado para agrupar linhas baseadas em um valor comum.' },
+                        { question: 'Qual função de agregação conta o número de linhas?', options: ['SUM()', 'AVG()', 'COUNT()', 'MAX()'], correct: 2, explanation: 'COUNT() é usada para contar o número de linhas.' }
+                    ]
+                }
+            ]
+        },
+        
+            // 2. PEGUE O SEU MÓDULO ANTIGO "trail3" E MUDE O ID DELE PARA "trail4"
+        {
+                    id: 'trail4', // <-- ID MUDADO DE 'trail3' PARA 'trail4'
+                    icon: '🌌',
+                    color: 'from-pink-500 to-rose-500',
+                    title: 'SQL Avançado',
+                    description: 'Domine subconsultas, índices e otimização de performance.',
+                    lessons: [
+                        { id: 't4-l1-article', title: 'Subconsultas (Subqueries)', type: 'article', duration: '10 min', xp: 40, content: '...' }, // <-- ID DA LIÇÃO MUDADO
+                        { id: 't4-l2-theory', title: 'Prática de Subconsulta', // <-- ID MUDADO
+                          type: 'theory', // <-- TIPO CORRIGIDO (era 'practice' mas usava 'questions')
+                          duration: '20 min', xp: 100, 
+                          questions: [
+                            { question: 'Qual comando você usaria para encontrar clientes que fizeram pedidos?', options: ['SELECT nome FROM clientes WHERE id IN (SELECT cliente_id FROM pedidos)', 'SELECT nome FROM clientes WHERE EXISTS pedidos', 'SELECT nome FROM clientes JOIN pedidos', 'SELECT nome FROM clientes AND pedidos'], correct: 0, explanation: '...' }
+                        ]} 
+                    ]
+                };
 
     
     const getInitials = (name) => {
@@ -302,8 +563,6 @@
             </div>
         );
     });
-
-    
     
     // --- Componente AuthScreen (ATUALIZADO PARA O DESIGN DA IMAGEM) ---
     const AuthScreen = memo(({ auth }) => {
@@ -349,15 +608,17 @@
         };
 
         const handleGoogleLogin = async () => {
-            const provider = new GoogleAuthProvider();
-            try {
-                await signInWithPopup(auth, provider);
-                // Success is handled by onAuthStateChanged in App
-            } catch (error) {
-                console.error(error);
-                setLocalToast({ message: error.message, type: 'error' });
-            }
-        };
+            const provider = new GoogleAuthProvider();
+            try {
+                // Apenas inicie o redirecionamento. O 'await' não é estritamente
+                // necessário aqui, pois a página irá navegar.
+                signInWithRedirect(auth, provider); 
+            } catch (error) {
+                // Erros de inicialização (ex: config errada) serão pegos aqui
+                console.error(error);
+                setLocalToast({ message: error.message, type: 'error' });
+            }
+        };
 
         return (
             <div className="min-h-screen bg-gray-100 text-gray-900 font-sans antialiased flex items-center justify-center p-5">
@@ -520,9 +781,6 @@
         // Estado de Notificação
         const [toast, setToast] = useState(null);
 
-        const [lastGainedXP, setLastGainedXP] = useState(0);
-        const [practiceResult, setPracticeResult] = useState(null); // 'correct' ou 'incorrect'
-
         // --- EFEITOS (Restaurados) ---
         // Efeito: Observador de Autenticação
         useEffect(() => {
@@ -532,6 +790,29 @@
             });
             return () => unsubscribe(); // Limpa ao desmontar
         }, []);
+
+        useEffect(() => {
+            // Verifica se o usuário está voltando de um login por redirect
+            const checkRedirect = async () => {
+                try {
+                    const result = await getRedirectResult(auth);
+                    if (result) {
+                        // Login bem-sucedido. O onAuthStateChanged
+                        // também será disparado, mas podemos por um toast aqui.
+                        setToast({ message: `Bem-vindo, ${result.user.displayName}!`, type: 'success' });
+                    }
+                } catch (error) {
+                    // Trata erros do redirect (ex: email já em uso com outro método)
+                    console.error("Erro ao obter resultado do redirect:", error);
+                    setToast({ message: "Erro no login: " + error.message, type: 'error' });
+                }
+            };
+            
+            // Só executa quando a verificação de auth inicial estiver pronta
+            if (isAuthChecked) {
+                checkRedirect();
+            }
+        }, [isAuthChecked, auth, getRedirectResult]); // Adicione as dependências
 
         // Efeito: Carregar Dados do Usuário e Trilha
         useEffect(() => {
@@ -645,9 +926,9 @@
                                 lives: 5,
                                 completedLessons: [],
                                 lastCompletedLessonDate: null,
+                                lastLifeResetDate: new Date().setHours(0,0,0,0)
                             },
-                            cooldownUntil: null,
-                            lastLifeResetDate: new Date().setHours(0,0,0,0)
+                            cooldownUntil: null
                         };
                         await set(userRef, newUser);
                         setUserProgress(newUser.gamification);
@@ -674,7 +955,7 @@
                 offUserProgress();
             };
         // Adicionada a importação de 'get' que estava faltando
-        }, [userId, db, auth]); // Adicionado 'get'
+        }, [userId, db, auth, get]); // Adicionado 'get'
 
         // --- Funções de Handler (Restauradas) ---
         const handleLogout = async () => {
@@ -689,34 +970,23 @@
         };
 
         const startLesson = (trail, lesson) => {
-            if (userProgress.lives <= 0) {
-                setCurrentView('noLives');
-                return;
-            }
-            setSelectedTrail(trail);
-            setCurrentLesson(lesson);
-            setCurrentQuestion(0);
-            setAnsweredQuestions([]);
-            setShowResult(false);
-            setSelectedAnswer(null);
-            setPracticeResult(null); // <-- Limpa o resultado anterior
-            
-            // --- LÓGICA ATUALIZADA ---
-            if (lesson.type === 'article') {
-                setCurrentView('article');
-            
-            } else if (lesson.videoId) { 
-                setCurrentView('video'); 
-            
-            } else if (lesson.type === 'practice') {
-                // NOVO: Direciona para a view de Prática
-                setCurrentView('practice');
-            
-            } else { 
-                // Quiz (lesson, theory)
-                setCurrentView('lesson');
-            }
-        };
+            if (userProgress.lives <= 0) {
+                setCurrentView('noLives');
+                return;
+            }
+            setSelectedTrail(trail);
+            setCurrentLesson(lesson);
+            setCurrentQuestion(0);
+            setAnsweredQuestions([]);
+            setShowResult(false);
+            setSelectedAnswer(null);
+            
+            if (lesson.type === 'article') {
+                setCurrentView('article');
+            } else {
+                setCurrentView('lesson');
+            }
+        };
         
         const getContentTypeInfo = useCallback((type) => {
             switch (type) {
@@ -753,86 +1023,76 @@
         }, [showResult, currentLesson, currentQuestion, userProgress.lives, userId, db]);
         
         // --- LÓGICA DE OFENSIVA (STREAK) CORRIGIDA ---
-       const handleLessonCompletion = (lessonId, lessonXP) => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
-            
-            const lastCompletedDate = userProgress.lastCompletedLessonDate ? new Date(userProgress.lastCompletedLessonDate) : null;
-            if (lastCompletedDate) {
-                lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
-            }
+        const handleLessonCompletion = (lessonId, lessonXP) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
+            
+            const lastCompletedDate = userProgress.lastCompletedLessonDate ? new Date(userProgress.lastCompletedLessonDate) : null;
+            if (lastCompletedDate) {
+                lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
+            }
 
-            let newStreak = userProgress.streak;
-            // Só incrementa a ofensiva se a última lição foi ANTES de hoje
-            if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
-                newStreak += 1;
-                console.log("Ofensiva incrementada!");
-            } else {
-                console.log("Lição completada hoje, ofensiva mantida.");
-            }
+            let newStreak = userProgress.streak;
+            // Só incrementa a ofensiva se a última lição foi ANTES de hoje
+            if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
+                newStreak += 1;
+                console.log("Ofensiva incrementada!");
+            } else {
+                console.log("Lição completada hoje, ofensiva mantida.");
+            }
 
-            // --- INÍCIO DA LÓGICA DE REVISÃO ---
-            const isAlreadyCompleted = (userProgress.completedLessons || []).includes(lessonId);
-            let gainedXP = 0; // Por padrão, não ganha XP
+            const newXP = (Number(userProgress.totalXP) || 0) + (Number(lessonXP) || 0);
+            const newLevel = Math.floor(newXP / 100) + 1;
+            const completed = [...(userProgress.completedLessons || [])];
+            if (!completed.includes(lessonId)) {
+                completed.push(lessonId);
+            }
 
-            const completed = [...(userProgress.completedLessons || [])];
-            
-            if (!isAlreadyCompleted) {
-                // Se for a primeira vez, ganha XP e adiciona à lista
-                gainedXP = Number(lessonXP) || 0;
-                completed.push(lessonId);
-                console.log("Primeira vez completando! XP Ganhos:", gainedXP);
-            } else {
-                // Se for revisão, não ganha XP
-                console.log("Revisão de lição. Nenhum XP ganho.");
-            }
-            // --- FIM DA LÓGICA DE REVISÃO ---
+            const updates = {
+                totalXP: newXP,
+                level: newLevel,
+                streak: newStreak,
+                lastCompletedLessonDate: new Date().toISOString(), // Salva a data E hora exata
+                completedLessons: completed
+            };
 
-            const newTotalXP = (Number(userProgress.totalXP) || 0) + gainedXP;
-            const newLevel = Math.floor(newTotalXP / 100) + 1;
-        };
-
-    
+            update(ref(db, `users/${userId}/gamification`), updates);
+            update(ref(db, `leaderboard/${userId}`), { totalXP: newXP, streak: newStreak });
+            
+            return newXP;
+        };
 
         const nextQuestion = useCallback(() => {
-            setShowResult(false);
-            setSelectedAnswer(null);
-            setAiExplanation('');
+            setShowResult(false);
+            setSelectedAnswer(null);
+            setAiExplanation('');
 
-            if (currentQuestion < currentLesson.questions.length - 1) {
-                setCurrentQuestion(prev => prev + 1);
-            } else {
-                // Lição concluída
-                const correctAnswers = answeredQuestions.filter(a => a.isCorrect).length;
-                const totalQuestions = currentLesson.questions.length;
-                
-                if (correctAnswers === totalQuestions) {
-                    // Chama a nova função centralizada
-                    const { gainedXP } = handleLessonCompletion(currentLesson.id, currentLesson.xp);
-                    setLastGainedXP(gainedXP); // <-- Salva o XP ganho
-                    setCurrentView('completion');
-                } else {
-                    // Falhou na lição
-                    setLastGainedXP(0); // <-- Garante que é 0 se falhar
-                    setCurrentView('completion'); // Mostra os resultados mesmo se falhar
-                }
-            }
-        }, [currentQuestion, currentLesson, answeredQuestions, userProgress, userId, db]);
+            if (currentQuestion < currentLesson.questions.length - 1) {
+                setCurrentQuestion(prev => prev + 1);
+            } else {
+                // Lição concluída
+                const correctAnswers = answeredQuestions.filter(a => a.isCorrect).length;
+                const totalQuestions = currentLesson.questions.length;
+                
+                if (correctAnswers === totalQuestions) {
+                    // Chama a nova função centralizada
+                    handleLessonCompletion(currentLesson.id, currentLesson.xp);
+                    setCurrentView('completion');
+                } else {
+                    // Falhou na lição
+                    setCurrentView('completion'); // Mostra os resultados mesmo se falhar
+                }
+            }
+        }, [currentQuestion, currentLesson, answeredQuestions, userProgress, userId, db]);
         
         const handleArticleCompletion = useCallback(() => {
-            // Chama a nova função centralizada
-            const { gainedXP } = handleLessonCompletion(currentLesson.id, currentLesson.xp);
-            
-            setCurrentView('home'); // Volta para a home
-            
-            // Toast condicional
-            if (gainedXP > 0) {
-                setToast({ message: `Concluído! +${gainedXP} XP`, type: 'success' });
-            } else {
-                setToast({ message: "Conteúdo revisado!", type: 'success' });
-            }
-            
-        }, [currentLesson, userProgress, userId, db]);
+            // Chama a nova função centralizada
+            const newXP = handleLessonCompletion(currentLesson.id, currentLesson.xp);
+            
+            setCurrentView('home'); // Volta para a home
+            setToast({ message: `Artigo concluído! +${currentLesson.xp} XP`, type: 'success' });
+            
+        }, [currentLesson, userProgress, userId, db]);
         
         
         const handleRefillLives = useCallback(() => {
@@ -894,56 +1154,6 @@
             </header>
             );
         });
-
-        const checkPracticeAnswer = useCallback((userQueryParts) => {
-            if (showResult) return;
-
-            const correctQuery = currentLesson.queryParts.join(' ');
-            const userQuery = userQueryParts.join(' ');
-            const isCorrect = userQuery === correctQuery;
-            
-            setShowResult(true);
-
-            if (isCorrect) {
-                setPracticeResult('correct');
-            } else {
-                setPracticeResult('incorrect');
-                // Lógica de perder vida
-                const newLives = userProgress.lives - 1;
-                setUserProgress(prev => ({ ...prev, lives: newLives }));
-                update(ref(db, `users/${userId}/gamification`), { lives: newLives });
-                
-                if (newLives <= 0) {
-                    const cooldownTime = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 horas
-                    setUserProgress(prev => ({ ...prev, cooldownUntil: cooldownTime.toISOString() }));
-                    update(ref(db, `users/${userId}`), { cooldownUntil: cooldownTime.toISOString() });
-                }
-            }
-        }, [showResult, currentLesson, userProgress.lives, userId, db]);
-
-        const nextPracticeStep = useCallback(() => {
-            setShowResult(false);
-            
-            if (practiceResult === 'correct') {
-                // Acertou -> Completa a lição e vai para a tela de conclusão
-                const { gainedXP } = handleLessonCompletion(currentLesson.id, currentLesson.xp);
-                setLastGainedXP(gainedXP);
-                // ATENÇÃO: A tela 'completion' é para quizzes (mostra % de acerto)
-                // O ideal seria criar uma 'PracticeCompletionView', mas por agora
-                // vamos apenas para a home com um toast.
-                if (gainedXP > 0) {
-                    setToast({ message: `Prática concluída! +${gainedXP} XP`, type: 'success' });
-                } else {
-                    setToast({ message: "Prática revisada!", type: 'success' });
-                }
-                setCurrentView('home');
-            } else {
-                // Errou -> Reseta a lição prática (o 'useEffect' no PracticeView vai cuidar disso)
-                setPracticeResult(null);
-                // Força o 'PracticeView' a recarregar o state resetando o 'currentLesson' para si mesmo
-                setCurrentLesson({...currentLesson}); 
-            }
-        }, [practiceResult, currentLesson, userProgress, userId, db]);
 
         const HomeView = memo(({ userProgress, studyTrails, onSelectTrail, onGenerateChallenge }) => (
             <main className="max-w-6xl mx-auto px-6 py-6 animate-fade-in">
@@ -1101,12 +1311,12 @@
             );
         });
         
-        const ArticleView = memo(({ currentLesson, onNavigate }) => {
+        const ArticleView = memo(({ currentLesson, onComplete, onBack }) => {
             return (
                 <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col animate-fade-in">
                     <header className="bg-white/10 border-b border-white/20">
                         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
+                            <button onClick={onBack} className="text-white/80 hover:text-white"><ArrowLeft/></button>
                             <div className="w-full bg-white/20 h-4 rounded-full"><div className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full rounded-full" style={{width: '100%'}} /></div>
                         </div>
                     </header>
@@ -1121,178 +1331,16 @@
                     <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
                         <div className="max-w-4xl mx-auto">
                             <button
-                                onClick={onNavigate}
-                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform"
-                            >
-                                Concluir Artigo
-                            </button>
+                            onClick={onComplete}
+                            ...
+                            >
+                            Concluir Artigo
+                        </button>
                         </div>
                     </footer>
                 </div>
             );
         });
-
-        const VideoView = memo(({ currentLesson, onNavigate, onComplete }) => {
-            // Cria a URL de "embed" correta para o YouTube
-            const videoSrc = `https://www.youtube.com/embed/${currentLesson.videoId}`;
-            
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col animate-fade-in">
-                    <header className="bg-white/10 border-b border-white/20">
-                        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                            {/* Botão de voltar para os detalhes da trilha */}
-                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
-                            <div className="flex-1">
-                                <h3 className="text-white font-bold truncate">{currentLesson.title}</h3>
-                            </div>
-                        </div>
-                    </header>
-                    <main className="max-w-4xl mx-auto px-6 py-8 flex-1 w-full">
-                        {/* Box com aspect-ratio de 16:9 para o vídeo */}
-                        <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                            <iframe 
-                                className="absolute top-0 left-0 w-full h-full rounded-lg"
-                                src={videoSrc}
-                                title={currentLesson.title}
-                                frameBorder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                allowFullScreen
-                            ></iframe>
-                        </div>
-                    </main>
-                    <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
-                        <div className="max-w-4xl mx-auto">
-                            <button
-                                onClick={onComplete} // Reutiliza a função de completar
-                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform"
-                            >
-                                Concluir Vídeo
-                            </button>
-                        </div>
-                    </footer>
-                </div>
-            );
-        });
-
-        const PracticeView = memo(({ 
-            currentLesson, 
-            userProgress, 
-            onNavigate, 
-            onCheckPractice, 
-            onNext,
-            showResult, 
-            practiceResult
-        }) => {
-            const [userQueryParts, setUserQueryParts] = useState([]);
-            const [availableParts, setAvailableParts] = useState([]);
-
-            // Reseta e embaralha as partes quando a lição muda
-            useEffect(() => {
-                if (currentLesson && currentLesson.queryParts) {
-                    // Embaralha o array de 'queryParts' para criar o banco de opções
-                    const shuffled = [...currentLesson.queryParts].sort(() => Math.random() - 0.5);
-                    setAvailableParts(shuffled);
-                    setUserQueryParts([]);
-                }
-            }, [currentLesson]);
-
-            // Adiciona uma parte à query do usuário
-            const handleSelectPart = (part, index) => {
-                if (showResult) return;
-                const newAvailable = [...availableParts];
-                newAvailable.splice(index, 1); // Remove do banco
-                setAvailableParts(newAvailable);
-                setUserQueryParts([...userQueryParts, part]); // Adiciona à query
-            };
-            
-            // Remove uma parte da query do usuário
-            const handleRemovePart = (part, index) => {
-                if (showResult) return;
-                const newQuery = [...userQueryParts];
-                newQuery.splice(index, 1); // Remove da query
-                setUserQueryParts(newQuery);
-                setAvailableParts([...availableParts, part]); // Devolve ao banco
-            };
-            
-            const isCorrect = practiceResult === 'correct';
-
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col">
-                    <header className="bg-white/10 border-b border-white/20">
-                        <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><X/></button>
-                            <h3 className="text-white font-bold truncate">{currentLesson.title}</h3>
-                            <div className="flex items-center gap-2 text-red-400 ml-auto"> <Heart /> <span className="font-bold">{userProgress.lives}</span> </div>
-                        </div>
-                    </header>
-
-                    <main className="max-w-3xl mx-auto px-6 py-8 flex-1 w-full">
-                        <h2 className="text-xl md:text-2xl font-bold mb-4">{currentLesson.description}</h2>
-                        <pre className="bg-black/20 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap mb-6"><code>{currentLesson.schema}</code></pre>
-
-                        {/* Área da Query (onde o usuário monta) */}
-                        <div className="bg-black/20 border-2 border-dashed border-white/20 rounded-lg min-h-[120px] p-3 flex flex-wrap gap-2">
-                            {userQueryParts.map((part, index) => (
-                                <button 
-                                    key={index}
-                                    onClick={() => handleRemovePart(part, index)}
-                                    disabled={showResult}
-                                    className="bg-cyan-600 text-white font-mono font-bold px-3 py-2 rounded-md hover:bg-cyan-700"
-                                >
-                                    {part}
-                                </button>
-                          ))}
-                        </div>
-
-                        {/* Banco de Opções */}
-                        <div className="mt-8 p-3 flex flex-wrap justify-center gap-2">
-                            {availableParts.map((part, index) => (
-                                <button 
-                                    key={index}
-                                    onClick={() => handleSelectPart(part, index)}
-                                    disabled={showResult}
-                                    className="bg-gray-700/80 text-white font-mono font-bold px-3 py-2 rounded-md hover:bg-gray-600"
-                                >
-                                    {part}
-                                </button>
-                            ))}
-                        </div>
-                    </main>
-                    
-                  {/* Footer de Resultado/Ação */}
-                    {showResult ? (
-                        <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0 animate-fade-in">
-                            <div className="max-w-3xl mx-auto">
-                                <div className="flex items-center gap-3 mb-3">
-                                    {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
-                                </div>
-                                <p className="text-white/90 mb-4">
-                                    {isCorrect ? 'Excelente! Você construiu a query corretamente.' : 'Ops! Essa não é a query correta. Tente de novo.'}
-                                </p>
-                                <button
-                                    onClick={() => onNext(userQueryParts)} // Passa a query para onNext
-                                    className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
-                                >
-                                    {isCorrect ? 'Continuar' : 'Tentar Novamente'}
-                                </button>
-                            </div>
-                        </footer>
-                    ) : (
-                        <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
-                            <div className="max-w-3xl mx-auto">
-                                <button
-                                    onClick={() => onCheckPractice(userQueryParts)}
-                                    disabled={userQueryParts.length === 0}
-                                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
-                                >
-                                    Verificar
-                                </button>
-                            </div>
-                        </footer>
-                    )}
-                </div>
-            );
-        });
         
         const LessonView = memo(({ currentLesson, currentQuestion, userProgress, onCheckAnswer, onNextQuestion, onNavigate, showResult, answeredQuestions, selectedAnswer, setSelectedAnswer, onGetAiExplanation, aiExplanation, isAiExplanationLoading }) => {
             const question = currentLesson.questions[currentQuestion];
@@ -1382,52 +1430,47 @@
             );
         });
         
-        const CompletionView = memo(({ answeredQuestions, currentLesson, onNavigate, lastGainedXP }) => {
-            const correctAnswers = answeredQuestions.filter(a => a.isCorrect).length;
-            const totalQuestions = currentLesson.questions.length;
-            const isSuccess = correctAnswers === totalQuestions;
-            
-            // Usa o prop 'lastGainedXP' em vez de recalcular
-            const xpGained = lastGainedXP; 
-            
-            return (
-                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col items-center justify-center p-6 text-center animate-fade-in">
-                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 max-w-2xl w-full">
-                        <div className="text-8xl mb-6">{isSuccess ? '🎉' : '🤔'}</div>
-                        <h2 className="text-3xl font-bold mb-4">{isSuccess ? 'Lição Concluída!' : 'Quase lá!'}</h2>
-                        <p className="text-white/80 text-lg mb-6">
-                            {/* Mensagem atualizada */}
-                            {isSuccess ? 
-                                (xpGained > 0 ? `Você ganhou +${xpGained} XP e manteve sua ofensiva!` : `Lição revisada com sucesso!`) 
-                                : 'Você não acertou todas as perguntas. Revise o material e tente novamente!'}
-                        </p>
-                        
-                        <div className="bg-white/5 rounded-xl p-6 mb-8 text-left divide-y divide-white/10">
-                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">Precisão</span><span className={`font-bold text-2xl ${isSuccess ? 'text-green-400' : 'text-red-400'}`}>{((correctAnswers / totalQuestions) * 100).toFixed(0)}%</span></div>
-                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">Perguntas Corretas</span><span className="font-bold text-2xl">{correctAnswers} de {totalQuestions}</span></div>
-                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">XP Ganhos</span><span className="font-bold text-2xl">{xpGained}</span></div>
-                        </div>
-                        
-                        <div className="flex gap-4">
-                            {!isSuccess && (
-                                <button
-                                    onClick={() => onNavigate('lesson')}
-                                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-                                >
-                                   Tentar Novamente
-                                </button>
-                            )}
-                            <button
-                              onClick={() => onNavigate('home')}
-                                className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"
-                            >
-                                Continuar
-                            </button>
-                       </div>
-                    </div>
-                </div>
-            );
-        });
+        const CompletionView = memo(({ answeredQuestions, currentLesson, onNavigate }) => {
+            const correctAnswers = answeredQuestions.filter(a => a.isCorrect).length;
+            const totalQuestions = currentLesson.questions.length;
+            const xpGained = correctAnswers === totalQuestions ? currentLesson.xp : 0;
+            const isSuccess = correctAnswers === totalQuestions;
+            
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col items-center justify-center p-6 text-center animate-fade-in">
+                    <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20 max-w-2xl w-full">
+                        <div className="text-8xl mb-6">{isSuccess ? '🎉' : '🤔'}</div>
+                        <h2 className="text-3xl font-bold mb-4">{isSuccess ? 'Lição Concluída!' : 'Quase lá!'}</h2>
+                        <p className="text-white/80 text-lg mb-6">
+                            {isSuccess ? `Você ganhou +${xpGained} XP e manteve sua ofensiva!` : 'Você não acertou todas as perguntas. Revise o material e tente novamente!'}
+                        </p>
+                        
+                        <div className="bg-white/5 rounded-xl p-6 mb-8 text-left divide-y divide-white/10">
+                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">Precisão</span><span className={`font-bold text-2xl ${isSuccess ? 'text-green-400' : 'text-red-400'}`}>{((correctAnswers / totalQuestions) * 100).toFixed(0)}%</span></div>
+                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">Perguntas Corretas</span><span className="font-bold text-2xl">{correctAnswers} de {totalQuestions}</span></div>
+                            <div className="py-4 flex justify-between items-center"><span className="text-white/70">XP Ganhos</span><span className="font-bold text-2xl">{xpGained}</span></div>
+                        </div>
+                        
+                        <div className="flex gap-4">
+                            {!isSuccess && (
+                                <button
+                                    onClick={() => onNavigate('lesson')}
+                                    className="flex-1 bg-white/10 hover:bg-white/20 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                                >
+                                    Tentar Novamente
+                                </button>
+                            )}
+                            <button
+                                onClick={() => onNavigate('home')}
+                                className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"
+                            >
+                                Continuar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            );
+        });
 
         const NoLivesView = memo(({ userProgress, onRefillWithGems, onCooldownEnd, onNavigate }) => {
             const [timeLeft, setTimeLeft] = useState('');
@@ -1825,24 +1868,9 @@
             switch (currentView) {
                 case 'home': return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge} />;
                 case 'trailDetail': return <TrailDetailView selectedTrail={selectedTrail} userProgress={userProgress} onStartLesson={startLesson} onBack={handleBackToTrails} getContentTypeInfo={getContentTypeInfo} filterType={filterType} onFilterChange={setFilterType} />;
-                case 'article': return <ArticleView currentLesson={currentLesson} onNavigate={handleArticleCompletion} />;
-                
-                {/* --- ADICIONEI ESTA LINHA --- */}
-                case 'video': return <VideoView currentLesson={currentLesson} onNavigate={handleNavigate} onComplete={handleArticleCompletion} />; 
-
-                {/* --- ADICIONE ESTE CASE --- */}
-                case 'practice': return <PracticeView 
-                    currentLesson={currentLesson}
-                    userProgress={userProgress}
-                    onNavigate={handleNavigate}
-                    onCheckPractice={checkPracticeAnswer}
-                    onNext={nextPracticeStep}
-                    showResult={showResult}
-                    practiceResult={practiceResult}
-                />;
-                    
+                case 'article': return <ArticleView currentLesson={currentLesson} onComplete={handleArticleCompletion} onBack={() => setCurrentView('trailDetail')} />;
                 case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
-                case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} lastGainedXP={lastGainedXP} />;
+                case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} />;
                 case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
                 case 'ranking': return <RankingView leaderboard={leaderboard} currentUserId={userId} isLoading={isRankingLoading} />;
                 case 'profile': return <ProfileView userProgress={userProgress} onLogout={handleLogout} onSaveProfile={handleSaveProfile} />;
@@ -1871,6 +1899,7 @@
             </div>
         );
     }
+    
     // Novo Componente para o Desafio de IA
     const ChallengeView = memo(({ challenge, onBack, onGenerateChallenge }) => {
         const [selectedAnswer, setSelectedAnswer] = useState(null);
