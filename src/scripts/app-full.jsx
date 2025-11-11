@@ -518,7 +518,8 @@
                             { question: 'Qual comando você usaria para encontrar clientes que fizeram pedidos?', options: ['SELECT nome FROM clientes WHERE id IN (SELECT cliente_id FROM pedidos)', 'SELECT nome FROM clientes WHERE EXISTS pedidos', 'SELECT nome FROM clientes JOIN pedidos', 'SELECT nome FROM clientes AND pedidos'], correct: 0, explanation: '...' }
                         ]} 
                     ]
-                };
+                }
+        };
 
     
     const getInitials = (name) => {
