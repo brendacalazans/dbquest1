@@ -686,21 +686,237 @@
        
         
         {
-                    id: 'trail4', // <-- ID MUDADO DE 'trail3' PARA 'trail4'
-                    icon: '🌌',
-                    color: 'from-pink-500 to-rose-500',
-                    title: 'SQL Avançado',
-                    description: 'Domine subconsultas, índices e otimização de performance.',
-                    lessons: [
-                        { id: 't4-l1-article', title: 'Subconsultas (Subqueries)', type: 'article', duration: '10 min', xp: 40, content: '...' }, // <-- ID DA LIÇÃO MUDADO
-                        { id: 't4-l2-theory', title: 'Prática de Subconsulta', // <-- ID MUDADO
-                          type: 'theory', // <-- TIPO CORRIGIDO (era 'practice' mas usava 'questions')
-                          duration: '20 min', xp: 100, 
-                          questions: [
-                            { question: 'Qual comando você usaria para encontrar clientes que fizeram pedidos?', options: ['SELECT nome FROM clientes WHERE id IN (SELECT cliente_id FROM pedidos)', 'SELECT nome FROM clientes WHERE EXISTS pedidos', 'SELECT nome FROM clientes JOIN pedidos', 'SELECT nome FROM clientes AND pedidos'], correct: 0, explanation: '...' }
-                        ]} 
+            id: 'trail4',
+            icon: '🏆', // Ícone para "Projetos Avançados"
+            color: 'from-yellow-500 to-orange-400', // Nova cor
+            title: 'Projetos Avançados',
+            description: 'Aplique o conhecimento em um projeto completo.',
+            lessons: [
+                // --- UNIDADE 0: INTRODUÇÃO ---
+                { 
+                    id: 't4-l0-video', 
+                    title: 'Vídeo: Introdução a Projetos Avançados', 
+                    type: 'lesson', 
+                    videoId: 'kpeH8FWR3Qw',
+                    duration: '5 min', 
+                    xp: REWARD_CONFIG.lesson.xp 
+                },
+                { 
+                    id: 't4-l0-article', 
+                    title: 'Introdução: Eficiência e Organização', 
+                    type: 'article',
+                    duration: '3 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: "Ao nível de projetos avançados, o foco não é apenas fazer a consulta funcionar, mas fazê-la de forma eficiente, organizada e segura, preparando a estrutura para o crescimento do negócio. Isso significa ir além dos comandos básicos de SELECT, INSERT, UPDATE e DELETE e explorar ferramentas que otimizam a lógica, a legibilidade e a performance das suas operações com dados."
+                },
+                // --- UNIDADE 1: CTEs E SUBCONSULTAS ---
+                { 
+                    id: 't4-l1-article', 
+                    title: 'Resumo: Organizando com CTEs e Subconsultas', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: "Para problemas complexos que exigem múltiplos passos, as Subconsultas e as CTEs (Common Table Expressions) são indispensáveis. Elas permitem quebrar uma lógica complexa em partes menores.\n\n**Subconsultas:** É uma consulta SELECT aninhada dentro de outra. Ela executa primeiro e seu resultado é usado pela consulta externa. Vantagens: Simplicidade para problemas pontuais. Desvantagens: Podem se tornar difíceis de ler.\n\n**CTEs (Common Table Expressions):** Introduzidas pela cláusula WITH, são uma forma mais elegante de quebrar uma consulta complexa em blocos lógicos nomeados. Elas funcionam como 'tabelas temporárias' que existem apenas durante a execução. Vantagens: Legibilidade, Reutilização e capacidade de Recursividade."
+                },
+                { 
+                    id: 't4-l1-theory', 
+                    title: 'Teste: CTEs vs. Subconsultas', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'O que é uma Subconsulta (ou Subquery)?', options: ['Um comando INSERT que usa dados de outra tabela.', 'Uma consulta SELECT aninhada dentro de outra consulta (externa).', 'Um nome alternativo para a cláusula WHERE.', 'Uma tabela temporária que só existe durante a consulta.'], correct: 1, explanation: "Uma subconsulta é uma consulta SELECT aninhada dentro de outra consulta SQL principal." },
+                        { question: "No exemplo `WHERE preco > (SELECT AVG(preco) FROM Produtos)`, o que acontece primeiro?", options: ['A consulta externa seleciona todos os produtos.', 'O SGBD pede ao usuário para inserir a média.', 'A subconsulta (SELECT AVG(preco)...) é executada primeiro, calculando a média.', 'A consulta falha porque não se pode usar uma função (AVG) dentro de um WHERE.'], correct: 2, explanation: "A subconsulta (interna) sempre executa primeiro, e seu resultado é usado pela consulta externa." },
+                        { question: 'O que são CTEs (Common Table Expressions), introduzidas pela cláusula WITH?', options: ['São índices automáticos criados pelo SGBD para otimizar JOINs.', 'São restrições de segurança que definem quem pode ver os dados.', 'São comandos DML usados para atualizar dados em múltiplas tabelas.', "São 'tabelas temporárias' nomeadas que existem apenas durante a execução da consulta, melhorando a legibilidade."], correct: 3, explanation: "CTEs (cláusula WITH) funcionam como 'tabelas temporárias' nomeadas que existem apenas durante a execução da consulta." },
+                        { question: 'Qual é uma vantagem de usar CTEs em vez de Subconsultas complexas?', options: ['CTEs são a única maneira de filtrar dados usando WHERE.', 'Legibilidade (dividem a lógica em blocos), reutilização (podem ser referenciadas várias vezes) e capacidade de recursão.', 'CTEs sempre rodam mais devagar, mas usam menos memória.', 'Subconsultas não podem ser usadas na cláusula FROM, apenas CTEs.'], correct: 1, explanation: 'As principais vantagens das CTEs são a legibilidade, a capacidade de reutilizar o bloco lógico várias vezes e a capacidade de realizar consultas recursivas.' }
                     ]
-                }
+                },
+                // --- UNIDADE 2: FUNÇÕES DE JANELA ---
+                { 
+                    id: 't4-l2-article', 
+                    title: 'Resumo: Análise com Funções de Janela', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: "Funções de Janela (Window Functions) permitem realizar cálculos de agregação (como SUM()) sobre um conjunto de linhas... sem agrupar o resultado. Elas mantêm o detalhe de cada linha original.\n\nA sintaxe usa a cláusula `OVER()`, que pode conter:\n•`PARTITION BY`: Divide o conjunto de resultados em partições (grupos) onde a função é aplicada. É como um GROUP BY, mas sem colapsar as linhas.\n•`ORDER BY`: Define a ordem das linhas dentro da partição, crucial para funções como `RANK()` ou `ROW_NUMBER()`.\n\nOutras funções úteis incluem `DENSE_RANK()` (ranking sem pular números), `LAG()` (valor da linha anterior) e `LEAD()` (valor da linha posterior)."
+                },
+                { 
+                    id: 't4-l2-theory', 
+                    title: 'Teste: Funções de Janela e OVER()', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual é a principal característica das Funções de Janela (Window Functions)?', options: ['Elas agrupam o resultado, colapsando as linhas (como um GROUP BY).', 'Elas só podem ser usadas para criar novas tabelas (DDL).', 'Elas realizam cálculos (como SUM, AVG) sobre um conjunto de linhas, mas mantêm o detalhe de cada linha original no resultado.', 'Elas abrem uma nova "janela" de aplicativo no cliente SQL (DBeaver).'], correct: 2, explanation: "Funções de Janela realizam agregações (como SUM, AVG) sobre uma 'janela' de dados, mas retornam o resultado em cada linha original, mantendo a granularidade." },
+                        { question: "Qual cláusula define a 'janela' ou o conjunto de linhas sobre o qual a função de janela será aplicada?", options: ['GROUP BY', 'OVER()', 'WINDOW()', 'ANALYZE()'], correct: 1, explanation: "A sintaxe básica de uma função de janela envolve a cláusula OVER(), que define a 'janela' de dados." },
+                        { question: 'O que a cláusula PARTITION BY faz dentro de um OVER()?', options: ['Define a ordem da classificação (ASC ou DESC).', 'Divide o conjunto de resultados em partições (grupos) onde a função é aplicada independentemente.', 'Exclui fisicamente os dados da tabela.', 'Filtra as linhas antes da função de janela ser aplicada.'], correct: 1, explanation: "PARTITION BY divide os dados em grupos (partições), e a função de janela é aplicada a cada grupo separadamente, de forma similar a um GROUP BY, mas sem colapsar as linhas." },
+                        { question: 'Qual função de janela é usada para atribuir um ranking (ex: 1°, 2º, 3º) aos produtos dentro de uma categoria?', options: ['SUM() OVER (...)', 'NTILE() OVER (...)', 'RANK() OVER (PARTITION BY ... ORDER BY ...)', 'LEAD() OVER (...)'], correct: 2, explanation: "RANK() OVER (PARTITION BY ... ORDER BY ...) é a sintaxe exata para criar um ranking de linhas dentro de grupos específicos." }
+                    ]
+                },
+                // --- UNIDADE 3: DDL ---
+                { 
+                    id: 't4-l3-article', 
+                    title: 'Resumo: Construindo a Estrutura (DDL)', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: "A DDL (Data Definition Language) lida com a criação (CREATE), modificação (ALTER) e exclusão (DROP) da estrutura dos objetos do banco de dados.\n\n**CREATE TABLE:** Define colunas, tipos de dados e restrições.\n•Tipos Comuns: `INT`, `SERIAL` (auto-incremento), `VARCHAR(tamanho)` (texto com limite), `NUMERIC(10, 2)` (para dinheiro), `TIMESTAMP` (data e hora).\n•Constraints Comuns: `PRIMARY KEY`, `FOREIGN KEY`, `NOT NULL`, `UNIQUE`, `DEFAULT`, `CHECK` (regra).\n•Regras ON DELETE: `ON DELETE RESTRICT` (impede a exclusão do 'pai' se houver 'filhos'), `ON DELETE CASCADE` (exclui 'filhos' automaticamente).\n\n**ALTER TABLE:** É a ferramenta de 'reforma' para modificar uma tabela existente (ex: adicionar uma nova coluna) sem perder dados."
+                },
+                { 
+                    id: 't4-l3-theory', 
+                    title: 'Teste: DDL (CREATE, ALTER, Constraints)', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'O que é DDL (Data Definition Language)?', options: ['A parte do SQL usada para consultar dados (SELECT).', "A parte do SQL que lida com a estrutura dos objetos (ex: CREATE TABLE, ALTER TABLE, DROP TABLE).", 'A parte do SQL usada para manipular dados (INSERT, UPDATE).', 'A parte do SQL usada para segurança (GRANT, REVOKE).'], correct: 1, explanation: "DDL (Data Definition Language) é a parte do SQL que lida com a definição da estrutura dos objetos, como tabelas (CREATE, ALTER, DROP)." },
+                        { question: 'Ao criar uma tabela, qual restrição (Constraint) garante que a coluna não possa conter valores nulos?', options: ['PRIMARY KEY (apenas, pois UNIQUE permite nulos)', 'UNIQUE', 'CHECK', 'NOT NULL'], correct: 3, explanation: "A restrição NOT NULL garante especificamente que uma coluna não pode conter valores nulos." },
+                        { question: "No comando `...FOREIGN KEY (id_pedido) REFERENCES Pedidos (id_pedido) ON DELETE CASCADE`, o que `ON DELETE CASCADE` fará?", options: ['Impedirá que o Pedido seja excluído se houver Itens_Pedido.', 'Se um Pedido for excluído, todos os Itens_Pedido relacionados a ele serão automaticamente excluídos também.', 'Se um Pedido for excluído, o id_pedido nos Itens_Pedido se tornará NULL.', 'Enviará um alerta ao administrador antes de excluir.'], correct: 1, explanation: "ON DELETE CASCADE exclui automaticamente os registros 'filhos' (Itens_Pedido) quando o registro 'pai' (Pedido) é excluído." },
+                        { question: "Qual comando DDL é usado para 'reformar' ou modificar a estrutura de uma tabela existente (ex: adicionar uma nova coluna)?", options: ['UPDATE TABLE', 'MODIFY TABLE', 'ALTER TABLE', 'CREATE OR REPLACE TABLE'], correct: 2, explanation: "O comando ALTER TABLE é usado para modificar a estrutura de uma tabela existente, como adicionar, remover ou alterar colunas." }
+                    ]
+                },
+                // --- UNIDADE 4: VIEWS ---
+                { 
+                    id: 't4-l4-article', 
+                    title: 'Resumo: Simplificando Acesso com Views', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: "Views (Visões) são 'tabelas virtuais' que representam uma consulta SQL armazenada. Elas não armazenam dados fisicamente, mas atuam como 'atalhos' para consultas complexas.\n\n**Por que usar Views?**\n1. **Simplificação:** Encapsulam JOINs e lógicas complexas.\n2. **Segurança:** Você pode conceder permissão à View (mostrando dados limitados) em vez das tabelas base.\n3. **Consistência:** Garante que todos usem a mesma lógica de negócio.\n\n**Views Materializadas:** Armazenam fisicamente o resultado da consulta e precisam ser atualizadas. Elas melhoram drasticamente a performance de relatórios complexos."
+                },
+                { 
+                    id: 't4-l4-theory', 
+                    title: 'Teste: Views (Visões)', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'O que é uma View (Visão)?', options: ['Um backup físico de uma tabela.', "Uma 'tabela virtual' que representa uma consulta SELECT armazenada; ela não armazena dados fisicamente.", 'Um índice usado para acelerar consultas SELECT.', 'Um tipo de dado especial para armazenar imagens (VARCHAR).'], correct: 1, explanation: "Views são tabelas virtuais que atuam como 'atalhos' para consultas SQL armazenadas; elas não armazenam os dados fisicamente." },
+                        { question: 'Como as Views ajudam na Segurança?', options: ['Elas criptografam os dados automaticamente.', 'Você pode conceder permissão a uma View (que mostra colunas limitadas) em vez de dar acesso às tabelas base (com dados sensíveis).', 'Elas impedem todos os comandos DELETE e UPDATE.', 'Elas criam cópias dos dados, protegendo os originais.'], correct: 1, explanation: "Views permitem restringir o acesso, concedendo permissão apenas à View (que pode mostrar colunas limitadas) em vez das tabelas base." },
+                        { question: 'Qual é a principal diferença entre uma View comum e uma View Materializada (Materialized View)?', options: ['Views comuns são mais rápidas que Views Materializadas.', 'Views comuns podem usar JOINs, enquanto Materializadas não.', 'Views Materializadas armazenam fisicamente o resultado da consulta e precisam ser atualizadas, enquanto Views comuns executam a consulta toda vez.', 'Apenas Views Materializadas podem ser usadas para segurança.'], correct: 2, explanation: "Views Materializadas armazenam o resultado fisicamente (melhorando a performance) e precisam ser atualizadas, enquanto Views comuns executam a consulta a cada acesso." }
+                    ]
+                },
+                // --- UNIDADE 5: SEGURANÇA E PERFORMANCE ---
+                { 
+                    id: 't4-l5-article', 
+                    title: 'Resumo: Segurança e Performance', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: "Um projeto profissional exige segurança e eficiência.\n\n**Transações (ACID):** Garantem a consistência. São uma sequência de operações executadas como uma unidade (Tudo ou Nada).\n•`Atomicidade`: Ou todas as operações funcionam (COMMIT), ou nenhuma funciona (ROLLBACK).\n•`COMMIT` salva permanentemente as mudanças.\n•`ROLLBACK` desfaz todas as operações.\n\n**Índices:** Aceleram drasticamente a recuperação de dados (leitura). Pense neles como o índice de um livro. Use em colunas de `WHERE`, `JOIN`, e `ORDER BY`. A desvantagem (overhead) é que podem desacelerar a escrita (INSERT, UPDATE, DELETE).\n\n**Boas Práticas:**\n•Evite `SELECT *` em produção; liste colunas explícitas.\n•Use ALIAS (apelidos) para tabelas em JOINs.\n•Monitore consultas lentas (EXPLAIN ANALYZE)."
+                },
+                { 
+                    id: 't4-l5-theory', 
+                    title: 'Teste: Transações e Índices', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: "O que significa a 'Atomicidade' (o 'A' de ACID) em uma transação?", options: ['A transação é isolada de outras transações.', 'As mudanças são permanentes após o COMMIT.', "A transação é uma unidade indivisível: ou todas as operações funcionam (COMMIT), ou nenhuma funciona (ROLLBACK).", 'A transação leva o banco de um estado válido para outro.'], correct: 2, explanation: "Atomicidade significa que a transação é 'Tudo ou Nada'. Ou todas as operações são confirmadas (COMMIT), ou todas são desfeitas (ROLLBACK)." },
+                        { question: 'Quais comandos são usados para controlar uma transação de transferência bancária?', options: ['CREATE TRANSACTION..., UPDATE..., DROP TRANSACTION.', 'START TRANSACTION;, UPDATE..., UPDATE..., COMMIT; (ou ROLLBACK;).', 'BEGIN..., ALTER..., SAVE;.', 'SELECT FOR UPDATE..., COMMIT....'], correct: 1, explanation: "A sequência padrão é START TRANSACTION, seguida pelas operações (UPDATEs), e finalizada com COMMIT (para salvar) ou ROLLBACK (para desfazer)." },
+                        { question: 'Qual é a principal função de um Índice (Index) no banco de dados?', options: ['Garantir que os dados não possam ser excluídos (Integridade Referencial).', 'Armazenar dados de forma segura (Criptografia).', 'Acelerar a recuperação de dados (leitura/SELECT), como o índice remissivo de um livro.', 'Definir o tipo de dado de uma coluna (DDL).'], correct: 2, explanation: "Índices são estruturas de pesquisa, como o índice de um livro, que aceleram drasticamente a recuperação de dados (consultas SELECT)." },
+                        { question: 'Embora Índices acelerem a leitura (SELECT), qual é a sua principal desvantagem (overhead)?', options: ['Eles usam muita CPU durante as consultas SELECT.', 'Eles podem desacelerar operações de escrita (INSERT, UPDATE, DELETE), pois o índice também precisa ser atualizado.', 'Eles não podem ser usados em colunas de texto (VARCHAR).', 'Eles tornam as transações impossíveis de reverter (ROLLBACK).'], correct: 1, explanation: "A desvantagem (overhead) dos índices é que eles precisam ser atualizados a cada operação de escrita (INSERT, UPDATE, DELETE), o que torna essas operações mais lentas." },
+                        { question: 'Qual é uma boa prática de performance mencionada no texto?', options: ['Sempre usar SELECT * para garantir que todos os dados sejam carregados.', 'Evitar o uso de ALIAS (apelidos) pois eles confundem o SGBD.', 'Criar índices em todas as colunas de todas as tabelas.', 'Evitar SELECT * em produção e listar explicitamente apenas as colunas necessárias.'], correct: 3, explanation: "Listar colunas explicitamente (em vez de SELECT *) reduz a carga na rede e no banco de dados, sendo uma prática de performance crucial." }
+                    ]
+                },
+                // --- UNIDADE 6: EXERCÍCIOS PRÁTICOS ---
+                { 
+                    id: 't4-p1', 
+                    title: 'Prática: Subconsulta na Cláusula WHERE', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Selecione o nome_produto e preco dos produtos onde o preco é maior que a média (AVG) de todos os preços na tabela.",
+                    schema: "CREATE TABLE Produtos (id_produto INT, nome_produto VARCHAR(50), preco NUMERIC(10,2));",
+                    correctQuery: "SELECT nome_produto, preco FROM Produtos WHERE preco > (SELECT AVG(preco) FROM Produtos);",
+                    queryParts: ['SELECT', 'nome_produto', ',', 'preco', 'FROM', 'Produtos', 'WHERE', 'preco', '>', '(', 'SELECT', 'AVG(preco)', 'FROM', 'Produtos', ')', ';']
+                },
+                { 
+                    id: 't4-p2', 
+                    title: 'Prática: Organizando com CTE', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Use uma CTE chamada MediaPreco para calcular o valor_medio e, em seguida, faça um SELECT na tabela Produtos que usa esse valor para filtrar.",
+                    schema: "CREATE TABLE Produtos (id_produto INT, nome_produto VARCHAR(50), preco NUMERIC(10,2));",
+                    correctQuery: "WITH MediaPreco AS (SELECT AVG(preco) AS valor_medio FROM Produtos) SELECT P.nome_produto, P.preco FROM Produtos AS P, MediaPreco AS MP WHERE P.preco > MP.valor_medio;",
+                    queryParts: ['WITH', 'MediaPreco', 'AS', '(', 'SELECT', 'AVG(preco)', 'AS', 'valor_medio', 'FROM', 'Produtos', ')', 'SELECT', 'P.nome_produto', ',', 'P.preco', 'FROM', 'Produtos', 'AS P', ',', 'MediaPreco', 'AS MP', 'WHERE', 'P.preco', '>', 'MP.valor_medio', ';']
+                },
+                { 
+                    id: 't4-p3', 
+                    title: 'Prática: Função de Janela (PARTITION BY)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Mostre o id_pedido, o valor do item (quantidade * preco_unitario) e use a função SUM() OVER (PARTITION BY...) para mostrar o valor_total_pedido.",
+                    schema: "CREATE TABLE Itens_Pedido (id_item_pedido INT, id_pedido INT, quantidade INT, preco_unitario NUMERIC(10,2));",
+                    correctQuery: "SELECT id_pedido, (quantidade * preco_unitario) AS valor_item, SUM(quantidade * preco_unitario) OVER (PARTITION BY id_pedido) AS valor_total_pedido FROM Itens_Pedido;",
+                    queryParts: ['SELECT', 'id_pedido', ',', '(', 'quantidade', '*', 'preco_unitario', ')', 'AS', 'valor_item', ',', 'SUM(quantidade * preco_unitario)', 'OVER', '(', 'PARTITION BY', 'id_pedido', ')', 'AS', 'valor_total_pedido', 'FROM', 'Itens_Pedido', ';']
+                },
+            	{ 
+  	              id: 't4-p4', 
+  	              title: 'Prática: Função de Janela (RANK)', 
+  	              type: 'practice',
+  	              duration: '10 min',
+  	              xp: REWARD_CONFIG.practice.xp,
+  	          	  description: "Escreva um SELECT que mostre o nome_produto, categoria, preco e o ranking (RANK()) dos produtos, particionado por categoria e ordenado por preco DESC.",
+  	          	  schema: "CREATE TABLE Produtos (nome_produto VARCHAR(50), categoria VARCHAR(50), preco NUMERIC(10,2));",
+  	          	  correctQuery: "SELECT nome_produto, categoria, preco, RANK() OVER (PARTITION BY categoria ORDER BY preco DESC) AS rank_por_categoria FROM Produtos ORDER BY categoria, rank_por_categoria;",
+  	          	  queryParts: ['SELECT', 'nome_produto', ',', 'categoria', ',', 'preco', ',', 'RANK()', 'OVER', '(', 'PARTITION BY', 'categoria', 'ORDER BY', 'preco', 'DESC', ')', 'AS', 'rank_por_categoria', 'FROM', 'Produtos', 'ORDER BY', 'categoria', ',', 'rank_por_categoria', ';']
+            	},
+            	{ 
+    	            id: 't4-p5', 
+    	            title: 'Prática: DDL (CREATE TABLE)', 
+    	            type: 'practice',
+    	            duration: '7 min',
+    	            xp: REWARD_CONFIG.practice.xp,
+    	            description: "Crie a tabela Produtos com: id_produto (SERIAL PRIMARY KEY), nome_produto (VARCHAR(150) NOT NULL), e preco (NUMERIC(10, 2) NOT NULL CHECK (preco >= 0)).",
+    	            schema: "",
+    	            correctQuery: "CREATE TABLE Produtos (id_produto SERIAL PRIMARY KEY, nome_produto VARCHAR(150) NOT NULL, preco NUMERIC(10, 2) NOT NULL CHECK (preco >= 0));",
+    	            queryParts: ['CREATE TABLE', 'Produtos', '(', 'id_produto', 'SERIAL', 'PRIMARY KEY', ',', 'nome_produto', 'VARCHAR(150)', 'NOT NULL', ',', 'preco', 'NUMERIC(10, 2)', 'NOT NULL', 'CHECK', '(', 'preco', '>=', '0', ')', ')', ';']
+            	},
+            	{ 
+                    id: 't4-p6-theory', 
+                    title: 'Teste: DDL (Restrições ON DELETE)', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: "Tabelas: Clientes (ID 1), Pedidos (ID 101, FK ID 1, com ON DELETE RESTRICT). O que acontece se você executar `DELETE FROM Clientes WHERE id_cliente = 1;`?", options: ["O Cliente e o Pedido são excluídos.", "O Cliente é excluído, e o Pedido tem o id_cliente alterado para NULL.", "ERRO: A exclusão falha, pois a regra ON DELETE RESTRICT impede a exclusão de um 'pai' (Cliente) que ainda tem 'filhos' (Pedidos).", "Apenas o Cliente é excluído, o Pedido 101 fica órfão."], correct: 2, explanation: "A exclusão falha porque ON DELETE RESTRICT (na tabela Pedidos) impede que um Cliente seja excluído se ele ainda tiver Pedidos." }
+                    ]
+                },
+            	{ 
+                    id: 't4-p7', 
+                    title: 'Prática: Usando uma View', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Assumindo que a View `relatorio_vendas_detalhado` (que une 4 tabelas) já foi criada, escreva um SELECT para ver o relatório apenas da cliente 'Ana Silva'.",
+                    schema: "CREATE VIEW relatorio_vendas_detalhado AS ... (une Clientes, Pedidos, Itens_Pedido, Produtos)",
+                    correctQuery: "SELECT * FROM relatorio_vendas_detalhado WHERE nome_cliente = 'Ana Silva';",
+                    queryParts: ['SELECT', '*', 'FROM', 'relatorio_vendas_detalhado', 'WHERE', 'nome_cliente', '=', "'Ana Silva'", ';']
+                },
+            	{ 
+                    id: 't4-p8-theory', 
+                    title: 'Teste: Transações (COMMIT/ROLLBACK)', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: "Você executa `START TRANSACTION;`, depois `UPDATE Contas SET saldo = 400 WHERE id_conta = 1;`. Se você executar `ROLLBACK;` em seguida, qual será o saldo da Conta 1?", options: ["400 (a mudança é temporária)", "NULL", "O saldo original (ex: 500), pois a transação foi desfeita.", "O SGBD retornará um erro."], correct: 2, explanation: "ROLLBACK desfaz todas as operações desde o START TRANSACTION, restaurando o banco de dados ao seu estado original antes da transação." }
+                    ]
+            	},
+            	// --- UNIDADE 7: REVISÃO ---
+            	{ 
+                    id: 't4-l6-review', 
+                    title: 'Revisão: Projetos Avançados', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: "Em projetos avançados, o foco é eficiência e segurança.\n\n1. **CTEs e Subconsultas:** Use Subconsultas para cálculos simples e CTEs (cláusula WITH) para quebrar lógicas complexas em blocos legíveis e reutilizáveis.\n\n2. **Funções de Janela:** Permitem cálculos (SUM, RANK) sobre partições (PARTITION BY) sem colapsar as linhas, mantendo o detalhe.\n\n3. **DDL:** Use `CREATE TABLE` para definir a estrutura (tipos de dados e constraints) e `ALTER TABLE` para 'reformar' tabelas existentes.\n\n4. **Views:** São 'tabelas virtuais' ou atalhos para consultas complexas. Elas simplificam o acesso e aumentam a segurança.\n\n5. **Segurança e Performance:**\n•**Transações (ACID):** Garantem o 'Tudo ou Nada' (COMMIT/ROLLBACK).\n•**Índices:** Aceleram buscas (SELECT) em colunas de WHERE e JOIN.\n•**Práticas:** Evite `SELECT *` em produção."
+            	}
+            ]
+        }
         ];
 
     
