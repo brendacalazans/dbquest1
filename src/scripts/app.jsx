@@ -104,7 +104,7 @@
                         { question: 'O comando `INSERT` pertence a qual subconjunto do SQL?', options: ['DML', 'DDL', 'DCL', 'TCL'], correct: 0, explanation: 'DML (Data Manipulation Language) é usada para manipular os dados, o que inclui inserir (INSERT) novas linhas.' },
                         { question: 'Para salvar permanentemente uma transação, qual comando TCL você usaria?', options: ['GRANT', 'ROLLBACK', 'COMMIT', 'UPDATE'], correct: 2, explanation: 'O comando COMMIT (parte do TCL) é usado para salvar as mudanças de uma transação permanentemente.' }
                     ]
-              S  },
+                },
                 // Unidade 3: Artigo Modelo Relacional
                 { 
                     id: 't1-l3-article', 
@@ -212,18 +212,38 @@
                     correctQuery: 'SELECT Nome, Preco FROM produtos ORDER BY Preco DESC LIMIT 3;',
                     queryParts: ['SELECT', 'Nome', ',', 'Preco', 'FROM', 'produtos', 'ORDER BY', 'Preco', 'DESC', 'LIMIT', '3', ';'] 
                 },
-                { 
-                    id: 't1-p5',i, 'daniel.p@email.com', 'Curitiba');",
-                    queryParts: ['INSERT INTO', 'clientes', '(', 'ID_Cliente', ',', 'Nome', ',', 'Sobrenome', ',', 'Email', ',', 'Cidade', ')', 'VALUES', '(', '4', ',', "'Daniel'", ',', "'Pereira'", ',', "'daniel.p@email.com'", ',', "'Curitiba'", ')', ';'] 
+                { 
+                    id: 't1-p5',
+                    title: 'Prática: Inserção (INSERT)',
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Tabela: `clientes`. Escreva o comando para inserir um novo cliente: ID 4, Nome 'Daniel', Sobrenome 'Pereira', Email 'daniel.p@email.com', Cidade 'Curitiba'.",
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Sobrenome VARCHAR(50),\n  Email VARCHAR(100),\n  Cidade VARCHAR(50)\n);',
+                    correctQuery: "INSERT INTO clientes (ID_Cliente, Nome, Sobrenome, Email, Cidade) VALUES (4, 'Daniel', 'Pereira', 'daniel.p@email.com', 'Curitiba');",
+                    queryParts: ['INSERT INTO', 'clientes', '(', 'ID_Cliente', ',', 'Nome', ',', 'Sobrenome', ',', 'Email', ',', 'Cidade', ')', 'VALUES', '(', '4', ',', "'Daniel'", ',', "'Pereira'", ',', "'daniel.p@email.com'", ',', "'Curitiba'", ')', ';'] 
                 },
-                { 
-                    id: 't1-p6',tualizar o `Email` para \'ana.costa.novo@email.com\', especificamente para o cliente com `ID_Cliente` igual a 1.',
-                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Email VARCHAR(100)\n);',
+                { 
+                    id: 't1-p6',
+                    title: 'Prática: Atualização (UPDATE)',
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para atualizar o `Email` para \'ana.costa.novo@email.com\', especificamente para o cliente com `ID_Cliente` igual a 1.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50),\n  Email VARCHAR(100)\n);',
                     correctQuery: 'UPDATE clientes SET Email = \'ana.costa.novo@email.com\' WHERE ID_Cliente = 1;',
-                    queryParts: ['UPDATE', 'clientes', 'SET', 'Email', '=', "'ana.costa.novo@email.com'", 'WHERE', 'ID_Cliente', '=', '1', ';']s` onde o `ID_Cliente` seja 4.',
-                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50)\n);',
+                    queryParts: ['UPDATE', 'clientes', 'SET', 'Email', '=', "'ana.costa.novo@email.com'", 'WHERE', 'ID_Cliente', '=', '1', ';']
+                },
+                { 
+                    id: 't1-p7',
+                    title: 'Prática: Deleção (DELETE)',
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `clientes`. Escreva o comando para deletar o registro da tabela `clientes` onde o `ID_Cliente` seja 4.',
+                    schema: 'CREATE TABLE clientes (\n  ID_Cliente INT,\n  Nome VARCHAR(50)\n);',
                     correctQuery: 'DELETE FROM clientes WHERE ID_Cliente = 4;',
-                    queryParts: ['DELETE FROM', 'clientes', 'WHERE', 'ID_Cliente', '=', '4', ';'] 
+                    queryParts: ['DELETE FROM', 'clientes', 'WHERE', 'ID_Cliente', '=', '4', ';'] 
                 }
             ]
         },
@@ -856,7 +876,7 @@
                 offUserProgress();
             };
         // Adicionada a importação de 'get' que estava faltando
-        }, [userId, db, auth]); // Adicionado 'get'
+        }, [userId, db, auth, get]); // Adicionado 'get'
 
         // --- Funções de Handler (Restauradas) ---
         const handleLogout = async () => {
@@ -1212,12 +1232,12 @@
             );
         });
         
-        const ArticleView = memo(({ currentLesson, onNavigate }) => {
+        const ArticleView = memo(({ currentLesson, onComplete, onBack }) => {
             return (
                 <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col animate-fade-in">
                     <header className="bg-white/10 border-b border-white/20">
                         <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                            <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><ArrowLeft/></button>
+                            <button onClick={onBack} className="text-white/80 hover:text-white"><ArrowLeft/></button>
                             <div className="w-full bg-white/20 h-4 rounded-full"><div className="bg-gradient-to-r from-cyan-400 to-blue-500 h-full rounded-full" style={{width: '100%'}} /></div>
                         </div>
                     </header>
@@ -1232,11 +1252,11 @@
                     <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
                         <div className="max-w-4xl mx-auto">
                             <button
-                                onClick={onNavigate}
-                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform"
-                            >
-                                Concluir Artigo
-                            </button>
+                            onClick={onComplete}
+                            ...
+                            >
+                            Concluir Artigo
+                        </button>
                         </div>
                     </footer>
                 </div>
@@ -1769,7 +1789,7 @@
             switch (currentView) {
                 case 'home': return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge} />;
                 case 'trailDetail': return <TrailDetailView selectedTrail={selectedTrail} userProgress={userProgress} onStartLesson={startLesson} onBack={handleBackToTrails} getContentTypeInfo={getContentTypeInfo} filterType={filterType} onFilterChange={setFilterType} />;
-                case 'article': return <ArticleView currentLesson={currentLesson} onNavigate={handleArticleCompletion} />;
+                case 'article': return <ArticleView currentLesson={currentLesson} onComplete={handleArticleCompletion} onBack={() => setCurrentView('trailDetail')} />;
                 case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
                 case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} />;
                 case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
