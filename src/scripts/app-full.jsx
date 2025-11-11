@@ -1314,11 +1314,11 @@
                     <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
                         <div className="max-w-4xl mx-auto">
                             <button
-                            onClick={onComplete}
-                            ...
-                            >
-                            Concluir Artigo
-                        </button>
+                                onClick={onComplete}
+                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform"
+                            >
+                                Concluir Artigo
+                            </button>
                         </div>
                     </footer>
                 </div>
