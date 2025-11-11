@@ -228,65 +228,227 @@
             ]
         },
                 {
-                    id: 'trail2',
-// ... (INÍCIO DA trail2 - TUDO CERTO ATÉ A t2-p4-practice)
-                        { 
-                            id: 't2-p4-practice', 
-                            title: 'Prática: Inserindo em Tabela de Ligação (N:M)', 
-                            type: 'practice',
-                            duration: '10 min',
-                            xp: REWARD_CONFIG.practice.xp, // <--- CORRIGIDO (Faltava "xp:")
-                            description: "Escreva o comando INSERT para adicionar uma nova linha na tabela Matriculas, ligando a aluna 'Ana' (id_aluno 1) à disciplina 'História' (id_disciplina 11).",
-                            schema: "CREATE TABLE Alunos ( id_aluno INT PRIMARY KEY, nome_aluno VARCHAR(100) );\nCREATE TABLE Disciplinas ( id_disciplina INT PRIMARY KEY, nome_disciplina VARCHAR(100) );\nCREATE TABLE Matriculas ( id_aluno INT, id_disciplina INT );\nINSERT INTO Alunos VALUES (1, 'Ana');\nINSERT INTO Alunos VALUES (2, 'Bruno');\nINSERT INTO Disciplinas VALUES (10, 'Matemática');\nINSERT INTO Disciplinas VALUES (11, 'História');\nINSERT INTO Matriculas VALUES (1, 10);\nINSERT INTO Matriculas VALUES (2, 10);",
-                            correctQuery: "INSERT INTO Matriculas (id_aluno, id_disciplina) VALUES (1, 11);",
-                            queryParts: ['INSERT INTO', 'Matriculas', '(', 'id_aluno', ',', 'id_disciplina', ')', 'VALUES', '(', '1', ',', '11', ')', ';']
-                        }, // <--- CORRIGIDO (Removido o "B" extra)
-                        { 
-                            id: 't2-p5-practice', 
-                            title: 'Prática: Consultando Relação N:M (JOIN Triplo)', 
-                            type: 'practice',
-                            duration: '10 min',
-                            xp: REWARD_CONFIG.practice.xp, // <--- CORRIGIDO (Removido o "A" extra)
-                            description: "Escreva o SELECT que 'atravessa' a tabela de ligação para buscar os nomes de ambas as tabelas principais.",
-                            schema: "CREATE TABLE Alunos ( id_aluno INT PRIMARY KEY, nome_aluno VARCHAR(100) );\nCREATE TABLE Disciplinas ( id_disciplina INT PRIMARY KEY, nome_disciplina VARCHAR(100) );\nCREATE TABLE Matriculas ( id_aluno INT, id_disciplina INT );\nINSERT INTO Alunos VALUES (1, 'Ana');\nINSERT INTO Alunos VALUES (2, 'Bruno');\nINSERT INTO Disciplinas VALUES (10, 'Matemática');\nINSERT INTO Disciplinas VALUES (11, 'História');\nINSERT INTO Matriculas VALUES (1, 10);\nINSERT INTO Matriculas VALUES (2, 10);\nINSERT INTO Matriculas VALUES (1, 11);",
-                            correctQuery: "SELECT T1.nome_aluno, T3.nome_disciplina FROM Alunos AS T1 JOIN Matriculas AS T2 ON T1.id_aluno = T2.id_aluno JOIN Disciplinas AS T3 ON T2.id_disciplina = T3.id_disciplina;",
-                            queryParts: ['SELECT', 'T1.nome_aluno', ',', 'T3.nome_disciplina', 'FROM', 'Alunos', 'AS', 'T1', 'JOIN', 'Matriculas', 'AS', 'T2', 'ON', 'T1.id_aluno', '=', 'T2.id_aluno', 'JOIN', 'Disciplinas', 'AS', 'T3', 'ON', 'T2.id_disciplina', '=', 'T3.id_disciplina', ';']
-                        }, // <--- CORRIGIDO (Removido o "C" extra)
-                        { 
-                            id: 't2-p6-practice', 
-                            title: 'Prática: O Problema da 1FN (Não Atômico)', 
-                            type: 'practice',
-                            duration: '5 min',
-                            xp: REWARD_CONFIG.practice.xp,
-                            description: "O gerente pede: 'Quero ver todos os pedidos que contêm um Teclado'. Escreva o SELECT para tentar buscar essa informação.",
-                            // <--- INÍCIO DA CORREÇÃO GRANDE
-                            // O texto de "Resposta Esperada" das outras lições foi colado aqui por engano.
-                            // O conteúdo correto para t2-p6-practice, t2-p7-practice e o resumo final foi restaurado abaixo.
-                            schema: "CREATE TABLE Pedidos_Nao_Normalizados (\n  id_pedido INT PRIMARY KEY,\n  id_cliente INT,\n  produtos VARCHAR(255)\n);\nINSERT INTO Pedidos_Nao_Normalizados VALUES (101, 1, 'Notebook, Mouse');\nINSERT INTO Pedidos_Nao_Normalizados VALUES (102, 2, 'Teclado');\nINSERT INTO Pedidos_Nao_Normalizados VALUES (103, 1, 'Monitor, Teclado, Câmera');",
-                            correctQuery: "SELECT * FROM Pedidos_Nao_Normalizados WHERE produtos LIKE '%Teclado%';",
-                            queryParts: ['SELECT', '*', 'FROM', 'Pedidos_Nao_Normalizados', 'WHERE', 'produtos', 'LIKE', "'%Teclado%'", ';']
-                        },
-                        { 
-                            id: 't2-p7-practice', 
-                            title: 'Prática: Anomalia da 3FN (UPDATE)', 
-                            type: 'practice',
-                            duration: '7 min',
-to-teal-400',
-                            xp: REWARD_CONFIG.practice.xp,
-                            description: "O estado de 'São Paulo' mudou a sigla para 'SP-BR'. Escreva o comando UPDATE para corrigir isso no banco de dados.",
-                            schema: "CREATE TABLE Clientes_Nao_3FN (\n  id_cliente INT PRIMARY KEY,\n  nome VARCHAR(100),\n  id_cidade INT,\n  nome_cidade VARCHAR(100),\n  estado VARCHAR(2)\n);\nINSERT INTO Clientes_Nao_3FN VALUES (1, 'Ana Silva', 10, 'São Paulo', 'SP');\nINSERT INTO Clientes_Nao_3FN VALUES (2, 'Bruno Luz', 20, 'Rio de Janeiro', 'RJ');\nINSERT INTO Clientes_Nao_3FN VALUES (3, 'Carla Dias', 10, 'São Paulo', 'SP');",
-                            correctQuery: "UPDATE Clientes_Nao_3FN SET estado = 'SP-BR' WHERE nome_cidade = 'São Paulo';",
-                            queryParts: ['UPDATE', 'Clientes_Nao_3FN', 'SET', 'estado', '=', "'SP-BR'", 'WHERE', 'nome_cidade', '=', "'São Paulo'", ';']
-                        },
-                        { 
-                            id: 't2-l5-review', 
-                            title: 'Revisão: A Planta Baixa Completa', 
-                            type: 'article',
-                            duration: '5 min',
-á" visual que mostra todas as tabelas, seus atributos e as regras de cardinalidade.'
-                        }
-                    ]
-                },
+            id: 'trail2',
+            icon: '📐', // Ícone para "Arquitetura" ou "Modelagem"
+            color: 'from-purple-500 to-indigo-400', // Reutilizando a cor da trilha 2
+            title: 'Modelagem e Normalização',
+            description: 'Aprenda a arquitetar bancos de dados eficientes.',
+            lessons: [
+                // Unidade 0: Introdução
+                { 
+                    id: 't2-l0-article', 
+                    title: 'Resumo: O que é Modelagem de Dados?', 
+                    type: 'article',
+                    duration: '3 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Antes de construir um prédio, você precisa de uma Planta Baixa Oficial. A Modelagem de Dados é exatamente isso: a arte de desenhar o mapa do seu "mundo de dados", definindo as estruturas e como elas se conectarão, antes de escrever qualquer código.\n\nÉ a fase conceitual e lógica onde se planeja como os dados serão armazenados, organizados e relacionados para atender aos requisitos de um sistema.\n\Uma boa modelagem de dados é crucial porque ela impacta diretamente a performance, a escalabilidade, a integridade e a facilidade de manutenção do banco de dados. Um projeto bem modelado evita redundâncias, inconsistências e problemas de desempenho no futuro.'
+                },
+                { 
+                    id: 't2-l0-video', 
+                    title: 'Vídeo: A Planta Baixa dos Dados', 
+                    type: 'lesson', 
+                    videoId: 'E24jFtgNroM', 
+                    duration: '6 min', 
+                    xp: REWARD_CONFIG.lesson.xp 
+                },
+                { 
+                    id: 't2-l0-theory', 
+                    title: 'Teste: Fundamentos da Modelagem', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'O texto compara a Modelagem de Dados a uma "Planta Baixa Oficial" porque ela:', options: ['Define as cores e o design visual do sistema final.', 'É a arte de desenhar o mapa dos dados, definindo estruturas e conexões antes de codificar.', 'Determina qual linguagem de programação será usada.', 'Foca apenas na performance e velocidade do banco de dados.'], correct: 1, explanation: 'A modelagem é a "planta baixa" que define a estrutura e as conexões dos dados antes da codificação.' },
+                        { question: 'Qual é a principal função da modelagem de dados?', options: ['Definir a aparência visual do sistema.', 'Otimizar a navegação entre páginas de um site.', 'Organizar como os dados serão armazenados, organizados e relacionados.', 'Escrever os primeiros códigos SQL do projeto.'], correct: 2, explanation: 'A função principal é planejar a organização e o relacionamento dos dados.' },
+                        { question: 'Segundo o texto, uma boa modelagem de dados é crucial para evitar problemas futuros, como:', options: ['Falhas de rede e lentidão de internet.', 'Redundâncias, inconsistências e problemas de desempenho.', 'Baixa resolução de imagem no aplicativo.', 'Erros de sintaxe na linguagem de programação.'], correct: 1, explanation: 'Uma boa modelagem evita redundância, inconsistência e problemas de performance.' }
+                    ]
+                },
+
+                // Unidade 1: Blocos de Construção
+                { 
+                    id: 't2-l1-article', 
+                    title: 'Resumo: Blocos de Construção', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'A modelagem se baseia em três conceitos:\n\n**Entidades (Os Edifícios):** São as "coisas" ou "conceitos" principais que você quer guardar informações (ex: Cliente, Produto, Aluno). Elas se tornarão Tabelas no banco de dados.\n\n**Atributos (As Características):** São as propriedades que descrevem uma entidade (ex: Nome, Email, Preço). Elas se tornarão Colunas na tabela.\n\n**Relacionamentos (As Estradas):** Definem como as entidades interagem (ex: Um Cliente *faz* um Pedido). Eles conectam as tabelas.\n\nPara visualizar isso, usamos um Diagrama Entidade-Relacionamento (DER), que é a "planta baixa" visual do banco de dados.'
+                },
+                { 
+                    id: 't2-l1-theory', 
+                    title: 'Teste: Blocos de Construção', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Em um sistema escolar, "Aluno", "Professor" e "Disciplina" são exemplos de:', options: ['Atributos', 'Entidades', 'Relacionamentos', 'Chaves Primárias'], correct: 1, explanation: 'Entidades são os "substantivos" ou conceitos principais do sistema, como Aluno, Professor e Disciplina.' },
+                        { question: 'As características que descrevem uma entidade, como "Nome" e "Email" para um "Cliente", são chamadas de:', options: ['Atributos', 'Entidades', 'Relacionamentos', 'Chaves Estrangeiras'], correct: 0, explanation: 'Atributos são as propriedades ou características que descrevem uma entidade.' },
+                        { question: 'No banco de dados final, as Entidades e os Atributos se materializam, respectivamente, como:', options: ['Colunas e Tabelas', 'Tabelas e Colunas', 'Tabelas e Relacionamentos', 'Colunas e Chaves'], correct: 1, explanation: 'A entidade (ex: Cliente) vira uma Tabela, e os atributos (ex: Nome, Email) viram Colunas.' },
+                        { question: 'O que representa um "Relacionamento" na modelagem de dados?', options: ['O identificador único de uma tabela.', 'A descrição detalhada de uma entidade.', 'A conexão lógica ou interação entre duas ou mais entidades.', 'O diagrama visual que mostra o banco de dados.'], correct: 2, explanation: 'Relacionamentos são os "verbos" que conectam as entidades, como "Cliente FAZ Pedido".' }
+                    ]
+                },
+
+                // Unidade 2: Chaves
+                { 
+                    id: 't2-l2-article', 
+                    title: 'Resumo: As Chaves do Reino (PK e FK)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Chaves são a espinha dorsal dos relacionamentos.\n\n**Chave Primária (Primary Key - PK):** É o identificador único e exclusivo de cada linha (ex: `id_cliente`). Ela não pode ter valores duplicados e não pode ser nula (NOT NULL). Pense nela como o CPF de um registro.\n\n**Chave Estrangeira (Foreign Key - FK):** É a "cola" que conecta as tabelas. É uma coluna em uma tabela que faz referência à Chave Primária de outra tabela (ex: a coluna `id_cliente` na tabela `Pedidos`).\n\nA FK garante a **Integridade Referencial**, que impede a criação de "registros órfãos" (como um Pedido que aponta para um Cliente que não existe).'
+                },
+                { 
+                    id: 't2-l2-theory', 
+                    title: 'Teste: Chaves e Integridade', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual é a definição correta de uma Chave Primária (PK)?', options: ['Uma coluna que armazena nomes de clientes.', 'Uma coluna que conecta duas tabelas diferentes.', 'Uma coluna (ou conjunto) que serve como identificador único e exclusivo para cada linha da tabela.', 'Uma coluna que pode ter valores repetidos, mas não nulos.'], correct: 2, explanation: 'A PK é o identificador único e exclusivo de uma linha (registro).' },
+                        { question: 'Uma das características essenciais que uma Chave Primária (PK) deve ter é:', options: ['Deve ser um texto longo.', 'Deve permitir valores duplicados.', 'Deve ser "Não Nula" (NOT NULL).', 'Deve ser sempre um número.'], correct: 2, explanation: 'A Chave Primária deve ser única e não nula (NOT NULL).' },
+                        { question: 'Qual é a principal função da Chave Estrangeira (FK)?', options: ['Garantir que cada linha da tabela seja única.', 'Ser a "cola" que conecta tabelas, fazendo referência à Chave Primária de outra tabela.', 'Armazenar dados calculados.', 'Ser o atributo principal de uma entidade.'], correct: 1, explanation: 'A FK é a "cola" que estabelece o vínculo entre tabelas, referenciando uma PK.' },
+                        { question: 'Na relação Clientes e Pedidos, a tabela Pedidos possui uma coluna id_cliente. Esta coluna é uma:', options: ['Chave Primária (PK)', 'Chave Estrangeira (FK)', 'Entidade', 'Dependência Transitiva'], correct: 1, explanation: 'A coluna `id_cliente` na tabela Pedidos é uma Chave Estrangeira que aponta para a PK da tabela Clientes.' },
+                        { question: 'O que é "Integridade Referencial"?', options: ['Impede que existam "registros órfãos" (como um pedido sem cliente).', 'Garante que todas as tabelas tenham o mesmo número de colunas.', 'Garante que os dados sejam armazenados em ordem alfabética.', 'Impede que a Chave Primária seja um número.'], correct: 0, explanation: 'Integridade Referencial é a regra que impede que uma FK aponte para um registro que não existe, evitando "registros órfãos".' }
+                    ]
+                },
+
+                // Unidade 3: Cardinalidade
+                { 
+                    id: 't2-l3-article', 
+                    title: 'Resumo: Regras de Trânsito (Cardinalidade)', 
+                    type: 'article',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Cardinalidade define as "regras de trânsito" de como as tabelas se conectam.\n\n**Um-para-Muitos (1:N):** O tipo mais comum. (Ex: Um Cliente pode ter Muitos Pedidos). A Chave Estrangeira (FK) é sempre colocada na tabela do lado "Muitos" (N). (Ex: `id_cliente` fica na tabela `Pedidos`).\n\n**Muitos-para-Muitos (N:M):** (Ex: Um Aluno cursa Muitas Disciplinas; Uma Disciplina tem Muitos Alunos). Este relacionamento não pode ser implementado diretamente.\n\n**Solução N:M:** Cria-se uma **Tabela de Ligação** (ex: `Matriculas`) que atua como uma "rotatória", quebrando o N:M em dois relacionamentos 1:N. Esta tabela conterá as FKs de ambas as tabelas (ex: `id_aluno` e `id_disciplina`).\n\n**Um-para-Um (1:1):** O tipo menos comum. (Ex: Um Funcionário tem um Detalhe_Funcionario). Geralmente usado para separar dados sensíveis ou opcionais.'
+                },
+                { 
+                    id: 't2-l3-theory', 
+                    title: 'Teste: Cardinalidade e Tabelas de Ligação', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'O que a "Cardinalidade" define?', options: ['O número total de tabelas.', 'O número de instâncias (registros) de uma entidade que podem se associar a instâncias de outra.', 'O número de colunas que uma entidade pode ter.', 'A velocidade máxima da conexão.'], correct: 1, explanation: 'Cardinalidade define as regras numéricas do relacionamento (quantos registros se conectam a quantos).' },
+                        { question: 'Em um relacionamento Um-para-Muitos (1:N), como "Cliente (1) faz Pedidos (N)", onde a FK deve ficar?', options: ['Na tabela do lado "1" (Clientes).', 'Na tabela do lado "N" (Pedidos).', 'Em ambas as tabelas.', 'Em uma tabela de ligação separada.'], correct: 1, explanation: 'A Chave Estrangeira (FK) é sempre colocada na tabela do lado "Muitos" (N).' },
+                        { question: 'Qual relacionamento exige uma "Tabela de Ligação"?', options: ['Um-para-Um (1:1)', 'Um-para-Muitos (1:N)', 'Muitos-para-Muitos (N:M)', 'Um-para-Nenhum (1:0)'], correct: 2, explanation: 'Relacionamentos Muitos-para-Muitos (N:M) não podem ser implementados diretamente e exigem uma tabela de ligação.' },
+                        { question: 'Como implementar a relação N:M "Aluno cursa Disciplinas"?', options: ['Colocando a FK de Disciplina em Aluno.', 'Colocando a FK de Aluno em Disciplina.', 'Criando uma tabela de ligação "Matricula" com as FKs de Aluno e Disciplina.', 'Permitindo que a coluna id_disciplina armazene múltiplos valores.'], correct: 2, explanation: 'Uma tabela de ligação (ex: Matricula) é criada contendo as FKs de ambas as tabelas (id_aluno, id_disciplina) para resolver o N:M.' }
+                    ]
+                },
+
+                // Unidade 4: Normalização
+                { 
+                    id: 't2-l4-article', 
+                    title: 'Resumo: A Arte de Organizar (Normalização)', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Normalização é o processo de organizar tabelas para minimizar a redundância (repetição) de dados e melhorar a integridade.\n\n**Primeira Forma Normal (1FN):** Garante que todos os atributos sejam "atômicos". (Ex: Não armazenar \'Notebook, Mouse\' em uma única célula. Você deve separar em linhas diferentes em uma tabela de ligação).\n\n**Segunda Forma Normal (2FN):** Resolve a "dependência parcial". (Ex: Em uma tabela `Itens_Pedido (id_pedido, id_produto)`, o `nome_produto` não pode estar ali, pois ele depende apenas do `id_produto`. Ele deve ir para a tabela `Produtos`).\n\n**Terceira Forma Normal (3FN):** Resolve a "dependência transitiva". (Ex: Em uma tabela `Clientes (id_cliente, nome, nome_cidade, estado)`, o `estado` depende do `nome_cidade`, que depende do `id_cliente`. Isso é transitivo. A solução é criar uma tabela `Cidades` separada).\n\n**Benefícios:** Redução da redundância e melhora da integridade dos dados.'
+                },
+                { 
+                    id: 't2-l4-theory', 
+                    title: 'Teste: Formas Normais', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual é o objetivo principal da Normalização de dados?', options: ['Aumentar a redundância para facilitar consultas rápidas.', 'Minimizar a redundância de dados e melhorar a integridade.', 'Tornar o banco de dados visualmente mais bonito.', 'Garantir que todas as tabelas tenham pelo menos 10 colunas.'], correct: 1, explanation: 'O objetivo principal é minimizar a redundância (repetição) e melhorar a integridade dos dados.' },
+                        { question: 'A Primeira Forma Normal (1FN) exige que:', options: ['Todas as tabelas tenham uma Chave Estrangeira.', 'Todos os atributos sejam "atômicos" (indivisíveis).', 'O banco de dados esteja totalmente livre de redundâncias.', 'Não existam relacionamentos do tipo 1:N.'], correct: 1, explanation: '1FN exige que todos os atributos sejam atômicos, ou seja, não contenham múltiplos valores em uma única célula.' },
+                        { question: 'Qual problema a Segunda Forma Normal (2FN) resolve?', options: ['Impede dependências transitivas.', 'Impede atributos multivalorados.', 'Impede que atributos não-chave dependam apenas de *parte* de uma Chave Primária composta.', 'Impede o uso de Chaves Estrangeiras.'], correct: 2, explanation: '2FN foca em chaves primárias compostas, garantindo que todos os atributos dependam da chave inteira, não de apenas parte dela.' },
+                        { question: 'Uma "dependência transitiva" (resolvida pela 3FN) ocorre quando:', options: ['Um atributo não-chave depende de outro atributo não-chave, em vez de depender da PK.', 'Uma tabela depende de si mesma.', 'Uma Chave Estrangeira aponta para a Chave Primária errada.', 'A tabela possui múltiplos valores em uma única coluna.'], correct: 0, explanation: 'Dependência transitiva é quando um atributo não-chave depende de outro atributo não-chave (ex: Estado depende de Cidade, que depende do id_cliente).' },
+                        { question: 'Na tabela `Clientes(id_cliente [PK], nome, id_cidade, nome_cidade, estado)`, a dependência `id_cliente -> id_cidade -> estado` é um exemplo de:', options: ['Primeira Forma Normal (1FN)', 'Chave Estrangeira (FK)', 'Dependência Transitiva (problema da 3FN)', 'Cardinalidade (1:N)'], correct: 2, explanation: 'Este é um exemplo clássico de dependência transitiva, onde `estado` depende de `id_cidade`, que por sua vez depende da PK `id_cliente`.' },
+                        { question: 'Quais são os benefícios diretos da Normalização?', options: ['Aumento da velocidade da internet.', 'Redução da redundância, melhora da integridade dos dados e maior flexibilidade.', 'Aumento do espaço de armazenamento.', 'Eliminação total da necessidade de usar Chaves Estrangeiras.'], correct: 1, explanation: 'A normalização reduz a redundância, melhora a integridade e torna o banco de dados mais flexível.' }
+                    ]
+                },
+
+                // Unidade 5: Exercícios Práticos
+                { 
+                    id: 't2-p1', 
+                    title: 'Prática: Testando Chave Primária (PK)', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `Clientes (id_cliente PK, nome, email)`. Tente inserir \'Carla Dias\' com `id_cliente` 2, que já está em uso.',
+                    schema: 'CREATE TABLE Clientes (\n  id_cliente INT PRIMARY KEY,\n  nome VARCHAR(100),\n  email VARCHAR(100)\n);',
+                    correctQuery: 'INSERT INTO Clientes (id_cliente, nome, email) VALUES (2, \'Carla Dias\', \'carla@email.com\');',
+                    queryParts: ['INSERT INTO', 'Clientes', '(', 'id_cliente', ',', 'nome', ',', 'email', ')', 'VALUES', '(', '2', ',', "'Carla Dias'", ',', "'carla@email.com'", ')', ';']
+                },
+                { 
+                    id: 't2-p2', 
+                    title: 'Prática: Testando Chave Estrangeira (FK)', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabelas: `Clientes (id_cliente PK)` e `Pedidos (id_cliente FK)`. Tente inserir um pedido para o `id_cliente` 5, que não existe.',
+                    schema: 'CREATE TABLE Clientes (\n  id_cliente INT PRIMARY KEY\n);\nCREATE TABLE Pedidos (\n  id_pedido INT PRIMARY KEY,\n  data_pedido DATE,\n  id_cliente INT,\n  FOREIGN KEY (id_cliente) REFERENCES Clientes(id_cliente)\n);',
+                    correctQuery: 'INSERT INTO Pedidos (id_pedido, data_pedido, id_cliente) VALUES (102, \'2023-10-27\', 5);',
+                    queryParts: ['INSERT INTO', 'Pedidos', '(', 'id_pedido', ',', 'data_pedido', ',', 'id_cliente', ')', 'VALUES', '(', '102', ',', "'2023-10-27'", ',', '5', ')', ';']
+                },
+                { 
+                    id: 't2-p3', 
+                    title: 'Prática: Consultando Relação 1:N (JOIN)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabelas: `Clientes` e `Pedidos`. Escreva um `SELECT` que junte as tabelas e mostre o `nome` do cliente e a `data_pedido`.',
+                    schema: 'CREATE TABLE Clientes (\n  id_cliente INT PRIMARY KEY,\n  nome VARCHAR(100)\n);\nCREATE TABLE Pedidos (\n  id_pedido INT PRIMARY KEY,\n  data_pedido DATE,\n  id_cliente INT\n);',
+                    correctQuery: 'SELECT T1.nome, T2.data_pedido FROM Clientes AS T1 JOIN Pedidos AS T2 ON T1.id_cliente = T2.id_cliente;',
+                    queryParts: ['SELECT', 'T1.nome', ',', 'T2.data_pedido', 'FROM', 'Clientes', 'AS T1', 'JOIN', 'Pedidos', 'AS T2', 'ON', 'T1.id_cliente', '=', 'T2.id_cliente', ';']
+                },
+                { 
+                    id: 't2-p4', 
+                    title: 'Prática: Inserindo em Tabela de Ligação (N:M)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabelas: `Alunos`, `Disciplinas`, `Matriculas`. Insira um registro em `Matriculas` para ligar o aluno 1 à disciplina 11.',
+                    schema: 'CREATE TABLE Alunos (id_aluno INT PRIMARY KEY);\nCREATE TABLE Disciplinas (id_disciplina INT PRIMARY KEY);\nCREATE TABLE Matriculas (\n  id_aluno INT,\n  id_disciplina INT\n);',
+                    correctQuery: 'INSERT INTO Matriculas (id_aluno, id_disciplina) VALUES (1, 11);',
+                    queryParts: ['INSERT INTO', 'Matriculas', '(', 'id_aluno', ',', 'id_disciplina', ')', 'VALUES', '(', '1', ',', '11', ')', ';']
+                },
+                { 
+                    id: 't2-p5', 
+                    title: 'Prática: Consultando Relação N:M (JOIN Triplo)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabelas: `Alunos`, `Disciplinas`, `Matriculas`. Escreva um `SELECT` que mostre o `nome_aluno` e o `nome_disciplina`.',
+                    schema: 'CREATE TABLE Alunos (id_aluno INT, nome_aluno VARCHAR(100));\nCREATE TABLE Disciplinas (id_disciplina INT, nome_disciplina VARCHAR(100));\nCREATE TABLE Matriculas (id_aluno INT, id_disciplina INT);',
+                    correctQuery: 'SELECT T1.nome_aluno, T3.nome_disciplina FROM Alunos AS T1 JOIN Matriculas AS T2 ON T1.id_aluno = T2.id_aluno JOIN Disciplinas AS T3 ON T2.id_disciplina = T3.id_disciplina;',
+                    queryParts: ['SELECT', 'T1.nome_aluno', ',', 'T3.nome_disciplina', 'FROM', 'Alunos', 'AS T1', 'JOIN', 'Matriculas', 'AS T2', 'ON', 'T1.id_aluno', '=', 'T2.id_aluno', 'JOIN', 'Disciplinas', 'AS T3', 'ON', 'T2.id_disciplina', '=', 'T3.id_disciplina', ';']
+                },
+                { 
+                    id: 't2-p6', 
+                    title: 'Prática: O Problema da 1FN (LIKE)', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `Pedidos_Nao_Normalizados (produtos)`. Escreva um `SELECT` para encontrar pedidos que contenham \'Teclado\'.',
+                    schema: 'CREATE TABLE Pedidos_Nao_Normalizados (\n  id_pedido INT,\n  id_cliente INT,\n  produtos VARCHAR(255)\n);',
+                    correctQuery: 'SELECT * FROM Pedidos_Nao_Normalizados WHERE produtos LIKE \'%Teclado%\';',
+                    queryParts: ['SELECT', '*', 'FROM', 'Pedidos_Nao_Normalizados', 'WHERE', 'produtos', 'LIKE', "'%Teclado%'", ';']
+                },
+                { 
+                    id: 't2-p7', 
+                    title: 'Prática: Anomalia da 3FN (UPDATE)', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: 'Tabela: `Clientes_Nao_3FN`. O estado de \'São Paulo\' mudou a sigla para \'SP-BR\'. Escreva o `UPDATE` para corrigir isso.',
+                    schema: 'CREATE TABLE Clientes_Nao_3FN (\n  id_cliente INT,\n  nome VARCHAR(100),\n  id_cidade INT,\n  nome_cidade VARCHAR(100),\n  estado VARCHAR(2)\n);',
+                    correctQuery: 'UPDATE Clientes_Nao_3FN SET estado = \'SP-BR\' WHERE nome_cidade = \'São Paulo\';',
+                    queryParts: ['UPDATE', 'Clientes_Nao_3FN', 'SET', 'estado', '=', "'SP-BR'", 'WHERE', 'nome_cidade', '=', "'São Paulo'", ';']
+                },
+                
+                // Unidade 7: Resumo Final
+                { 
+                    id: 't2-l5-review', 
+                    title: 'Revisão: A Planta Baixa Completa', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'Antes de construir um prédio, você precisa de uma Planta Baixa Oficial. A Modelagem de Dados é exatamente isso: a arte de desenhar o mapa do seu "mundo de dados", definindo as estruturas e como elas se conectarão, antes de escrever qualquer código.\n\n**1. Blocos de Construção da Arquitetura**\nA modelagem define três conceitos principais:\n• Entidades (Os Edifícios): As "coisas" ou "conceitos" principais que você quer guardar (ex: Cliente, Produto, Pedido). Entidades se tornam tabelas.\n• Atributos (As Características): As propriedades de uma entidade (ex: para o Cliente, os atributos são Nome, Email, Endereço). Atributos se tornam colunas.\n• Relacionamentos (As Estradas): A forma como as entidades interagem (ex: um Cliente faz um Pedido).\n\n**2. As Chaves do Reino (Identificação)**\nPara que os relacionamentos funcionem, precisamos de um sistema de códigos infalível.\n• Chave Primária (PK): É o identificador único e exclusivo de cada linha (ex: CPF). Deve ser única e nunca nula.\n• Chave Estrangeira (FK): É a "cola" que conecta as tabelas. É a cópia da PK de uma tabela, inserida como coluna em outra para criar o vínculo (ex: `id_cliente` na tabela `pedidos`).\n\n**3. As Regras de Trânsito (Cardinalidade)**\nA cardinalidade define as regras de negócio:\n• Um-para-Muitos (1:N): O tipo mais comum. (Ex: Um cliente faz muitos pedidos). A FK é colocada na tabela do lado "Muitos" (pedidos).\n• Muitos-para-Muitos (N:M): (Ex: Um pedido tem muitos produtos). Para resolver isso, cria-se uma Tabela de Ligação (como `itens_pedido`), que atua como uma "rotatória", contendo as FKs de ambas as tabelas.\n\n**4. Normalização: Organização e Integridade**\nNormalização é o processo de organizar as tabelas para evitar a repetição de dados (redundância) e garantir a integridade. A ideia é simples: garantir que cada tabela trate de apenas um assunto.\n\n**5. O Mapa Visual (DER)**\nO Diagrama de Entidade-Relacionamento (DER) é a "planta baixa" visual que mostra todas as tabelas, seus atributos e as regras de cardinalidade.'
+                }
+            ]
+        },
                 {
                     id: 'trail3',
                     icon: '🌌',
