@@ -476,8 +476,8 @@
             id: 'trail3',
             icon: '⚡', // Novo ícone para "SQL na Prática"
             color: 'from-green-500 to-emerald-400', // Nova cor
-[cite_start]            title: 'SQL na Prática', // [cite: 1]
-            [cite_start]description: 'Domine a linguagem SQL com desafios do mundo real.', // [cite: 2]
+            title: 'SQL na Prática', // [cite: 1]
+            description: 'Domine a linguagem SQL com desafios do mundo real.', // [cite: 2]
             lessons: [
                 // --- UNIDADE 0 ---
                 { 
