@@ -470,20 +470,73 @@
                 }
             ]
         },
-                {
-                    id: 'trail3',
-                    icon: '🌌',
-                    color: 'from-pink-500 to-rose-500',
-                    title: 'SQL Avançado',
-                    description: 'Domine subconsultas, índices e otimização de performance.',
-                    lessons: [
-                        { id: 'l3-1', title: 'Subconsultas (Subqueries)', type: 'article', duration: '10 min', xp: 40, content: 'Uma subconsulta é uma consulta SQL aninhada dentro de outra consulta SQL. Elas podem ser usadas em cláusulas WHERE, FROM ou SELECT para realizar operações complexas e filtrar dados com base nos resultados de outra consulta.' },
-                        { id: 'l3-2', title: 'Prática de Subconsulta', type: 'practice', duration: '20 min', xp: 100, questions: [
-                            { question: 'Qual comando você usaria para encontrar clientes que fizeram pedidos?', options: ['SELECT nome FROM clientes WHERE id IN (SELECT cliente_id FROM pedidos)', 'SELECT nome FROM clientes WHERE EXISTS pedidos', 'SELECT nome FROM clientes JOIN pedidos', 'SELECT nome FROM clientes AND pedidos'], correct: 0, explanation: 'Usar `IN` com uma subconsulta `(SELECT cliente_id FROM pedidos)` é uma maneira eficaz de encontrar clientes que existem na tabela de pedidos.' }
-                        ]}
-                    ]
-                }
-            ];
+                Ah, peço desculpas! Agora entendi perfeitamente. Você quer manter todos os seus módulos existentes (Fundamentos, Modelagem, SQL Avançado) e adicionar o novo módulo "SQL Intermediário" da imagem.
+
+O seu código está correto, mas ele não contém o módulo "SQL Intermediário" (o do 🧩). Ele está pulando direto do "Modelagem" para o "SQL Avançado".
+
+Para corrigir isso, você precisa inserir o novo módulo "SQL Intermediário" entre o seu trail2 (Modelagem) e o seu trail3 (SQL Avançado).
+
+Aqui está a única parte que você precisa alterar.
+
+Correção no trailsData
+No seu array trailsData, encontre o final do objeto trail2 (Modelagem) e cole o novo bloco trail3 (SQL Intermediário) logo depois dele. Em seguida, renomeie o seu "SQL Avançado" para trail4.
+
+JavaScript
+
+// ... (Este é o fim do seu módulo 'trail2' - Modelagem e Normalização)
+                }
+            ]
+        },
+
+// --- INICIO DA CORREÇÃO ---
+// 1. COLE ESTE NOVO MÓDULO "SQL INTERMEDIÁRIO" AQUI
+        {
+            id: 'trail3', // Este é o NOVO trail3
+            icon: '🧩', // Ícone da imagem
+            color: 'from-purple-500 to-indigo-400', // Cor da imagem
+            title: 'SQL Intermediário', // Título da imagem
+            description: 'Aprofunde-se com JOINs, GROUP BY e funções agregadas.', // Descrição da imagem
+            lessons: [
+                // Duas lições para bater com o "0/2" da imagem
+                { 
+                    id: 't3-l1-article', // ID da lição atualizado para t3
+                    title: 'Resumo: Conectando Tabelas (JOINs)', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: 'O INNER JOIN é o tipo mais comum. Ele retorna apenas os registros que têm valores correspondentes em AMBAS as tabelas...'
+                },
+                { 
+                    id: 't3-l2-theory', // ID da lição atualizado para t3
+                    title: 'Teste: Agregando Dados (GROUP BY)', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual comando é usado para agrupar linhas que têm os mesmos valores em colunas especificadas?', options: ['ORDER BY', 'GROUP BY', 'WHERE', 'JOIN'], correct: 1, explanation: 'GROUP BY é usado para agrupar linhas baseadas em um valor comum.' },
+                        { question: 'Qual função de agregação conta o número de linhas?', options: ['SUM()', 'AVG()', 'COUNT()', 'MAX()'], correct: 2, explanation: 'COUNT() é usada para contar o número de linhas.' }
+                    ]
+                }
+            ]
+        },
+        
+            // 2. PEGUE O SEU MÓDULO ANTIGO "trail3" E MUDE O ID DELE PARA "trail4"
+        {
+                    id: 'trail4', // <-- ID MUDADO DE 'trail3' PARA 'trail4'
+                    icon: '🌌',
+                    color: 'from-pink-500 to-rose-500',
+                    title: 'SQL Avançado',
+                    description: 'Domine subconsultas, índices e otimização de performance.',
+                    lessons: [
+                        { id: 't4-l1-article', title: 'Subconsultas (Subqueries)', type: 'article', duration: '10 min', xp: 40, content: '...' }, // <-- ID DA LIÇÃO MUDADO
+                        { id: 't4-l2-theory', title: 'Prática de Subconsulta', // <-- ID MUDADO
+                          type: 'theory', // <-- TIPO CORRIGIDO (era 'practice' mas usava 'questions')
+                          duration: '20 min', xp: 100, 
+                          questions: [
+                            { question: 'Qual comando você usaria para encontrar clientes que fizeram pedidos?', options: ['SELECT nome FROM clientes WHERE id IN (SELECT cliente_id FROM pedidos)', 'SELECT nome FROM clientes WHERE EXISTS pedidos', 'SELECT nome FROM clientes JOIN pedidos', 'SELECT nome FROM clientes AND pedidos'], correct: 0, explanation: '...' }
+                        ]} 
+                    ]
+                };
 
     
     const getInitials = (name) => {
