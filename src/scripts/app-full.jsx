@@ -473,36 +473,218 @@
                 
 // 1. COLE ESTE NOVO MÓDULO "SQL INTERMEDIÁRIO" AQUI
         {
-            id: 'trail3', // Este é o NOVO trail3
-            icon: '🧩', // Ícone da imagem
-            color: 'from-purple-500 to-indigo-400', // Cor da imagem
-            title: 'SQL Intermediário', // Título da imagem
-            description: 'Aprofunde-se com JOINs, GROUP BY e funções agregadas.', // Descrição da imagem
+            id: 'trail3',
+            icon: '⚡', // Novo ícone para "SQL na Prática"
+            color: 'from-green-500 to-emerald-400', // Nova cor
+[cite_start]            title: 'SQL na Prática', // [cite: 1]
+            [cite_start]description: 'Domine a linguagem SQL com desafios do mundo real.', // [cite: 2]
             lessons: [
-                // Duas lições para bater com o "0/2" da imagem
+                // --- UNIDADE 0 ---
                 { 
-                    id: 't3-l1-article', // ID da lição atualizado para t3
-                    title: 'Resumo: Conectando Tabelas (JOINs)', 
-                    type: 'article',
-                    duration: '10 min',
-                    xp: REWARD_CONFIG.article.xp,
-                    content: 'O INNER JOIN é o tipo mais comum. Ele retorna apenas os registros que têm valores correspondentes em AMBAS as tabelas...'
+                    id: 't3-l0-video', 
+                    title: 'Vídeo: Introdução ao SQL na Prática', 
+                    type: 'lesson', 
+                    videoId: 'nTrI9HiuzSE', //
+                    duration: '4 min', 
+                    xp: REWARD_CONFIG.lesson.xp 
                 },
                 { 
-                    id: 't3-l2-theory', // ID da lição atualizado para t3
-                    title: 'Teste: Agregando Dados (GROUP BY)', 
+                    id: 't3-l0-theory', 
+                    title: 'Teste: Conceitos DQL e DML', 
                     type: 'theory',
                     duration: '5 min',
                     xp: REWARD_CONFIG.theory.xp,
                     questions: [
-                        { question: 'Qual comando é usado para agrupar linhas que têm os mesmos valores em colunas especificadas?', options: ['ORDER BY', 'GROUP BY', 'WHERE', 'JOIN'], correct: 1, explanation: 'GROUP BY é usado para agrupar linhas baseadas em um valor comum.' },
-                        { question: 'Qual função de agregação conta o número de linhas?', options: ['SUM()', 'AVG()', 'COUNT()', 'MAX()'], correct: 2, explanation: 'COUNT() é usada para contar o número de linhas.' }
+                        { question: 'A SQL é usada principalmente para:', options: ['Controlar redes de computadores.', 'Interagir com bancos de dados para consultar e manipular informações.', 'Criar interfaces gráficas.', 'Configurar servidores web.'], correct: 1, explanation: "SQL é a ferramenta essencial para interagir com bancos de dados, permitindo consultar (DQL) e manipular (DML) informações." }, //
+                        { question: 'Qual a diferença entre DQL e DML?', options: ['DQL define a estrutura (CREATE TABLE) e DML manipula (INSERT).', 'DQL recupera dados (SELECT) e DML modifica dados (INSERT, UPDATE, DELETE).', 'DQL é para consultas rápidas (SELECT) e DML é para consultas lentas (JOIN).', 'DQL é para administradores (GRANT) e DML é para usuários (SELECT).'], correct: 1, explanation: "DQL (Data Query Language) foca em recuperar dados com SELECT, enquanto DML (Data Manipulation Language) modifica dados com INSERT, UPDATE, e DELETE." } //
                     ]
+                },
+                // --- UNIDADE 1 ---
+                { 
+                    id: 't3-l1-article', 
+                    title: 'Resumo: Consultando Dados (DQL)', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+[cite_start]                    content: "A Data Query Language (DQL) é a parte do SQL dedicada à recuperação de dados. [cite: 7] [cite_start]O comando SELECT é o coração da DQL. [cite: 8] [cite_start]A consulta fundamental é O QUÊ (SELECT), DE ONDE (FROM) e COM QUAIS CONDIÇÕES (WHERE). [cite: 9, 10][cite_start]\n\n•SELECT: Especifica quais colunas você deseja ver. [cite: 11][cite_start]\n•FROM: Indica de qual tabela os dados serão recuperados. [cite: 12][cite_start]\n•WHERE: É a cláusula utilizada para filtrar as linhas. [cite: 13][cite_start]\n\nRefinando o Filtro:\n•AND/OR/NOT: Permitem combinar múltiplas condições. [cite: 47, 48, 49][cite_start]\n•LIKE: Usado para buscar padrões em texto, com '%' (zero ou mais) e '_' (um) caracteres. [cite: 50, 51, 52][cite_start]\n\nOrganizando e Resumindo:\n•ORDER BY: Classifica os resultados (ASC/DESC). [cite: 83][cite_start]\n•Funções de Agregação: Realizam cálculos (COUNT, SUM, AVG, MAX, MIN). [cite: 84-89][cite_start]\n•GROUP BY: Agrupa linhas para aplicar funções de agregação a cada grupo. [cite: 90, 91][cite_start]\n•HAVING: Filtra os grupos criados pelo GROUP BY (diferente do WHERE, que filtra linhas individuais). [cite: 92]"
+                },
+                { 
+                    id: 't3-l1-theory', 
+                    title: 'Teste: DQL (SELECT, WHERE, GROUP BY)', 
+                    type: 'theory',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+[cite_start]                        { question: 'Qual é a estrutura de uma consulta básica para filtrar dados?', options: ['SELECT colunas WHERE condição FROM tabela;', 'SELECT * FROM tabela ORDER BY condição;', 'SELECT colunas FROM tabela WHERE condição;', 'FROM tabela SELECT colunas LIMIT condição;'], correct: 2, explanation: "A ordem correta é SELECT (colunas) [cite: 11][cite_start], FROM (tabela) [cite: 12][cite_start], e depois WHERE (condição). [cite: 13]" }, //
+                        { question: "Para quais produtos a condição WHERE categoria = 'Eletrônicos' AND estoque < 20 retornaria TRUE?", options: ["Um produto de 'Acessórios' com estoque 10.", "Um produto 'Eletrônico' com estoque 15.", "Um produto 'Eletrônico' com estoque 25.", "Qualquer produto com estoque 15."], correct: 1, explanation: "O operador AND exige que AMBAS as condições (categoria = 'Eletrônicos' E estoque < 20) sejam verdadeiras." }, //
+                        { question: 'Para quais produtos a condição WHERE preco < 100.00 OR estoque > 50 retornaria TRUE?', options: ['Um produto de R$ 150,00 com estoque 20.', 'Apenas produtos que custam menos de R$ 100,00.', 'Um produto de R$ 150,00 com estoque 70 (pois uma condição é verdadeira).', 'Apenas produtos que atendem às duas condições simultaneamente.'], correct: 2, explanation: "O operador OR exige que APENAS UMA das condições (preco < 100 OU estoque > 50) seja verdadeira." }, //
+                        { question: "O que faz o operador LIKE 'M%'?", options: ["Procura por produtos que contenham a letra 'M' em qualquer lugar.", "Procura por produtos que terminem com a letra 'M'.", "Procura por produtos que tenham 'M' como a segunda letra.", "Procura por produtos cujo nome começa com a letra 'M'."], correct: 3, explanation: "O caractere curinga '%' representa zero ou mais caracteres, então 'M%' busca qualquer texto que comece com 'M'." }, //
+                        { question: 'A cláusula ORDER BY serve para:', options: ['Agrupar dados.', 'Filtrar linhas.', 'Classificar os resultados (ex: do menor para o maior).', 'Contar registros.'], correct: 2, explanation: 'ORDER BY é usado para classificar os resultados, seja em ordem ascendente (ASC) ou descendente (DESC).' }, //
+                        { question: 'Qual função de agregação é usada para calcular a média de uma coluna numérica?', options: ['COUNT()', 'SUM()', 'MAX()', 'AVG()'], correct: 3, explanation: 'AVG() é a função de agregação padrão para calcular a média (average) de valores numéricos.' }, //
+                        { question: 'Qual é a diferença entre WHERE e HAVING?', options: ['WHERE filtra colunas e HAVING filtra linhas.', 'WHERE é usado para números e HAVING é usado para texto.', 'WHERE e HAVING são idênticos e podem ser trocados.', 'WHERE filtra linhas antes do agrupamento (GROUP BY), e HAVING filtra os grupos depois do agrupamento.'], correct: 3, explanation: 'WHERE atua em linhas individuais antes do GROUP BY; HAVING atua sobre os grupos resultantes das funções de agregação.' } //
+                    ]
+                },
+                // --- UNIDADE 2 ---
+                { 
+                    id: 't3-l2-article', 
+                    title: 'Resumo: Conectando Dados (JOINs)', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+[cite_start]                    content: "JOINs são operações fundamentais no SQL para ligar os pontos entre as tabelas relacionadas. [cite: 98][cite_start]\n\n•INNER JOIN: Retorna apenas as linhas que têm valores correspondentes (o 'amigo em comum') em ambas as tabelas. [cite: 106] [cite_start]Registros sem correspondência são excluídos. [cite: 107][cite_start]\n\n•LEFT JOIN: Retorna todas as linhas da tabela da 'esquerda', e as correspondentes da 'direita'. [cite: 116] [cite_start]Se não houver correspondência, as colunas da direita terão valores NULL. [cite: 117] [cite_start]É crucial para encontrar dados 'ausentes' (como clientes que nunca compraram). [cite: 119]\n\n•RIGHT JOIN: Oposto do LEFT JOIN. [cite_start]Retorna todas as linhas da tabela da 'direita' e as correspondentes da 'esquerda'. [cite: 130] [cite_start]Colunas da esquerda ficarão NULL se não houver correspondência. [cite: 131][cite_start]\n\n•FULL JOIN: Combina os resultados de LEFT e RIGHT JOIN. [cite: 141] [cite_start]Retorna todas as linhas de ambas as tabelas; colunas ficam NULL onde não há correspondência. [cite: 142][cite_start]\n\n•JOINs em Cadeia: Múltiplos JOINs em sequência para conectar três ou mais tabelas (ex: Clientes -> Pedidos -> Itens_Pedido -> Produtos). [cite: 150, 157, 158, 159]"
+                },
+                { 
+                    id: 't3-l2-theory', 
+                    title: 'Teste: JOINs (INNER, LEFT, RIGHT, FULL)', 
+                    type: 'theory',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Qual é a principal finalidade de um JOIN?', options: ['Acelerar a velocidade de consultas SELECT *.', 'Excluir dados de múltiplas tabelas ao mesmo tempo.', 'Combinar informações de duas ou mais tabelas baseando-se em colunas relacionadas (como PK e FK).', 'Criar novas tabelas baseadas em filtros WHERE.'], correct: 2, explanation: "JOINs são usados para combinar informações de tabelas que se relacionam, geralmente através de chaves Primárias (PK) e Estrangeiras (FK)." }, //
+                        { question: 'O INNER JOIN retorna:', options: ['Todas as linhas das duas tabelas, mesmo sem correspondência.', 'Apenas as linhas que possuem valores correspondentes em ambas as tabelas.', 'Somente as linhas da tabela da esquerda (a primeira).', 'Todas as linhas da tabela da direita (a segunda).'], correct: 1, explanation: "O INNER JOIN retorna apenas o 'amigo em comum', ou seja, registros que têm correspondência em ambas as tabelas." }, //
+[cite_start]                        { question: 'Qual é a diferença entre um LEFT JOIN e um RIGHT JOIN?', options: ['LEFT JOIN é mais rápido que RIGHT JOIN.', 'LEFT JOIN retorna todos os registros da tabela da esquerda (e os correspondentes da direita), enquanto RIGHT JOIN retorna todos da direita (e os correspondentes da esquerda).', 'LEFT JOIN usa a PK e RIGHT JOIN usa a FK.', 'Não há diferença; são sinônimos.'], correct: 1, explanation: "LEFT JOIN prioriza a tabela da esquerda (retornando todos os seus registros) [cite: 116][cite_start], e RIGHT JOIN prioriza a da direita. [cite: 130]" }, //
+                        { question: 'Qual JOIN retornaria todos os clientes (mesmo os sem pedidos) e todos os pedidos (mesmo os sem clientes)?', options: ['INNER JOIN', 'LEFT JOIN', 'RIGHT JOIN', 'FULL JOIN'], correct: 3, explanation: 'O FULL JOIN combina os resultados de um LEFT JOIN e um RIGHT JOIN, incluindo registros sem correspondência de ambos os lados.' }, //
+                        { question: "O que é um 'JOIN em Cadeia' (encadeamento de joins)?", options: ['Um JOIN que se auto-referencia na mesma tabela.', 'O uso de múltiplos JOINs em sequência para conectar três ou mais tabelas (ex: Clientes -> Pedidos -> Itens_Pedido -> Produtos).', 'Um JOIN que usa a cláusula WHERE para filtrar.', 'Um nome antigo para o FULL JOIN.'], correct: 1, explanation: "É a prática de usar múltiplos JOINs em sequência para conectar uma cadeia de tabelas relacionadas." } //
+                    ]
+                },
+                // --- UNIDADE 3 ---
+                { 
+                    id: 't3-l3-article', 
+                    title: 'Resumo: Manipulando Dados (DML)', 
+                    type: 'article',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.article.xp,
+[cite_start]                    content: "A Data Manipulation Language (DML) é responsável por adicionar (INSERT), modificar (UPDATE) e remover (DELETE) dados. [cite: 165][cite_start]\n\n•INSERT INTO: Adiciona novas linhas (registros) a uma tabela. [cite: 170] [cite_start]A forma mais segura é especificar explicitamente as colunas (ex: INSERT INTO Clientes (coluna1, ...)). [cite: 181, 182][cite_start]\n\n•UPDATE: Modifica dados existentes. [cite: 191] [cite_start]Atenção crítica: Use SEMPRE a cláusula WHERE para especificar quais linhas alterar. [cite: 200] [cite_start]Sem ela, você altera toda a tabela. [cite: 201, 202][cite_start]\n\n•DELETE FROM: Remove registros permanentemente. [cite: 206] [cite_start]Atenção máxima: Use SEMPRE a cláusula WHERE. [cite: 215, 216] [cite_start]Sem ela, você apaga toda a tabela. [cite: 217][cite_start]\n\n•Regra da Dependência: Ao deletar dados com FKs, você deve apagar primeiro os dados das tabelas 'filhas' (com a FK) antes de apagar os dados da tabela 'mãe' (com a PK) para manter a integridade referencial. [cite: 223]"
+                },
+                { 
+                    id: 't3-l3-theory', 
+                    title: 'Teste: DML (INSERT, UPDATE, DELETE)', 
+                    type: 'theory',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.theory.xp,
+                    questions: [
+                        { question: 'Quais são os três principais comandos da DML?', options: ['CREATE, ALTER, DROP', 'SELECT, FROM, WHERE', 'INSERT, UPDATE, DELETE', 'JOIN, GROUP BY, ORDER BY'], correct: 2, explanation: 'Os comandos DML são INSERT, UPDATE e DELETE, usados para manipular os dados.' }, //
+                        { question: 'Qual é a forma mais segura e recomendada de usar INSERT INTO?', options: ['Omitir a lista de colunas e fornecer valores para tudo.', 'Especificar explicitamente as colunas nas quais os dados serão inseridos (ex: INSERT INTO Clientes (coluna1, coluna2)...).', 'Usar INSERT INTO e WHERE ao mesmo tempo.', 'Inserir dados de múltiplas tabelas de uma só vez.'], correct: 1, explanation: 'Especificar as colunas é a forma mais segura, pois evita erros se a ordem das colunas mudar.' }, //
+                        { question: "Qual comando alteraria a cidade do cliente com ID 4 para 'Curitiba'?", options: ["INSERT INTO Clientes SET cidade = 'Curitiba' WHERE id_cliente = 4;", "SELECT Clientes SET cidade = 'Curitiba' WHERE id_cliente = 4;", "UPDATE Clientes SET cidade = 'Curitiba' WHERE id_cliente = 4;", "UPDATE Clientes WHERE id_cliente = 4 SET cidade = 'Curitiba';"], correct: 2, explanation: 'A sintaxe correta é UPDATE [tabela] SET [coluna=valor] WHERE [condição].' }, //
+                        { question: 'Por que a cláusula WHERE é fundamental nos comandos UPDATE e DELETE?', options: ['Ela acelera a velocidade da consulta.', 'Sem ela, o comando será aplicado a todas as linhas da tabela, causando perda de dados em massa.', 'Ela é opcional e serve apenas para organizar o resultado.', 'Ela garante que a tabela esteja na Terceira Forma Normal (3FN).'], correct: 1, explanation: 'Sem a cláusula WHERE, o UPDATE ou DELETE será aplicado a TODOS os registros da tabela.' }, //
+                        { question: 'Se a cláusula WHERE for esquecida em um comando DELETE FROM Clientes;, o que acontece?', options: ['Nenhuma linha será excluída.', 'Somente a primeira linha será removida.', 'Todas as linhas da tabela Clientes serão excluídas permanentemente.', 'O SGBD retornará um erro de sintaxe.'], correct: 2, explanation: 'Omitir o WHERE em um DELETE é perigoso, pois apaga todos os registros da tabela.' }, //
+                        { question: 'Qual é a "Regra da Dependência" (Integridade Referencial) ao excluir dados?', options: ['Você deve sempre excluir a tabela "mãe" (PK) antes da tabela "filha" (FK).', 'Você deve excluir os dados da tabela "filha" (ex: Pedidos) antes de excluir o dado correspondente na tabela "mãe" (ex: Clientes).', 'Você só pode excluir registros que tenham NULL em suas colunas.', 'Você deve usar UPDATE em vez de DELETE se houver uma FK.'], correct: 1, explanation: 'Para manter a integridade, os registros dependentes (filhos, com FK) devem ser removidos antes do registro principal (mãe, com PK).' }, //
+                        { question: 'Qual é a sequência correta para excluir um Cliente (id 1) que possui Pedidos, que por sua vez possui Itens_Pedido?', options: ['1. Deletar de Clientes; 2. Deletar de Pedidos; 3. Deletar de Itens_Pedido.', '1. Deletar de Clientes; 2. Deletar de Itens_Pedido. (Pedidos é ignorado).', '1. Deletar de Itens_Pedido (filho); 2. Deletar de Pedidos (pai); 3. Deletar de Clientes (avô).', 'O SGBD não permite essa exclusão.'], correct: 2, explanation: 'A exclusão deve seguir a ordem da dependência, do "neto" (Itens_Pedido) para o "avô" (Clientes).' } //
+                    ]
+                },
+                // --- EXERCÍCIOS PRÁTICOS ---
+                { 
+                    id: 't3-p1', 
+                    title: 'Prática: DQL (WHERE com AND e OR)', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Selecione o nome_produto, preco e estoque de todos os produtos que são da categoria 'Eletrônicos' E custam mais de R$ 1000, OU produtos que tenham mais de 75 unidades no estoque.", //
+                    schema: "CREATE TABLE Produtos (\n  id_produto INT,\n  nome_produto VARCHAR(50),\n  categoria VARCHAR(50),\n  preco DECIMAL(10, 2),\n  estoque INT\n);",
+                    correctQuery: "SELECT nome_produto, preco, estoque FROM Produtos WHERE (categoria = 'Eletrônicos' AND preco > 1000) OR (estoque > 75);", //
+                    queryParts: ['SELECT', 'nome_produto', ',', 'preco', ',', 'estoque', 'FROM', 'Produtos', 'WHERE', '(', 'categoria', '=', "'Eletrônicos'", 'AND', 'preco', '>', '1000', ')', 'OR', '(', 'estoque', '>', '75', ')', ';']
+                },
+                { 
+                    id: 't3-p2', 
+                    title: 'Prática: DQL (GROUP BY e Funções)', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Agrupe por categoria e mostre a categoria, o AVG(preco) (preço médio) e o SUM(estoque) (estoque total).", //
+                    schema: "CREATE TABLE Produtos (\n  id_produto INT,\n  nome_produto VARCHAR(50),\n  categoria VARCHAR(50),\n  preco DECIMAL(10, 2),\n  estoque INT\n);",
+                    correctQuery: "SELECT categoria, AVG(preco) AS preco_medio, SUM(estoque) AS estoque_total FROM Produtos GROUP BY categoria;", //
+                    queryParts: ['SELECT', 'categoria', ',', 'AVG(preco)', 'AS', 'preco_medio', ',', 'SUM(estoque)', 'AS', 'estoque_total', 'FROM', 'Produtos', 'GROUP BY', 'categoria', ';']
+                },
+                { 
+                    id: 't3-p3', 
+                    title: 'Prática: DQL (HAVING vs. WHERE)', 
+                    type: 'practice',
+                    duration: '7 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Agrupe por categoria, calcule o AVG(preco), mas use a cláusula HAVING para filtrar e mostrar apenas os grupos com média de preço superior a 1000.", //
+                    schema: "CREATE TABLE Produtos (\n  id_produto INT,\n  nome_produto VARCHAR(50),\n  categoria VARCHAR(50),\n  preco DECIMAL(10, 2),\n  estoque INT\n);",
+                    correctQuery: "SELECT categoria, AVG(preco) AS preco_medio FROM Produtos GROUP BY categoria HAVING AVG(preco) > 1000;", //
+                    queryParts: ['SELECT', 'categoria', ',', 'AVG(preco)', 'AS', 'preco_medio', 'FROM', 'Produtos', 'GROUP BY', 'categoria', 'HAVING', 'AVG(preco)', '>', '1000', ';']
+                },
+                { 
+                    id: 't3-p4', 
+                    title: 'Prática: JOIN (LEFT JOIN)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Escreva um LEFT JOIN que liste o nome_cliente e o id_pedido. O resultado deve incluir os clientes que não têm pedidos (eles aparecerão com NULL no id_pedido).", //
+                    schema: "CREATE TABLE Clientes (id_cliente INT, nome_cliente VARCHAR(50));\nCREATE TABLE Pedidos (id_pedido INT, id_cliente INT);",
+                    correctQuery: "SELECT C.nome_cliente, P.id_pedido FROM Clientes AS C LEFT JOIN Pedidos AS P ON C.id_cliente = P.id_cliente;", //
+                    queryParts: ['SELECT', 'C.nome_cliente', ',', 'P.id_pedido', 'FROM', 'Clientes', 'AS C', 'LEFT JOIN', 'Pedidos', 'AS P', 'ON', 'C.id_cliente', '=', 'P.id_cliente', ';']
+                },
+                { 
+                    id: 't3-p5', 
+                    title: 'Prática: JOIN (RIGHT JOIN)', 
+                    type: 'practice',
+                    duration: '10 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Escreva um RIGHT JOIN que liste o nome_cliente e o id_pedido. O resultado deve incluir pedidos que não têm clientes (eles aparecerão com NULL no nome_cliente).", //
+                    schema: "CREATE TABLE Clientes (id_cliente INT, nome_cliente VARCHAR(50));\nCREATE TABLE Pedidos (id_pedido INT, id_cliente INT);",
+                    correctQuery: "SELECT C.nome_cliente, P.id_pedido FROM Clientes AS C RIGHT JOIN Pedidos AS P ON C.id_cliente = P.id_cliente;", //
+                    queryParts: ['SELECT', 'C.nome_cliente', ',', 'P.id_pedido', 'FROM', 'Clientes', 'AS C', 'RIGHT JOIN', 'Pedidos', 'AS P', 'ON', 'C.id_cliente', '=', 'P.id_cliente', ';']
+                },
+                { 
+                    id: 't3-p6', 
+                    title: 'Prática: JOIN (JOIN em Cadeia)', 
+                    type: 'practice',
+                    duration: '12 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Escreva um SELECT com três INNER JOINs para buscar nome_cliente, nome_produto e quantidade (Clientes -> Pedidos -> Itens_Pedido -> Produtos).", //
+                    schema: "CREATE TABLE Clientes (id_cliente INT, nome_cliente VARCHAR(50));\nCREATE TABLE Pedidos (id_pedido INT, id_cliente INT);\nCREATE TABLE Itens_Pedido (id_pedido INT, id_produto INT, quantidade INT);\nCREATE TABLE Produtos (id_produto INT, nome_produto VARCHAR(50));",
+                    correctQuery: "SELECT C.nome_cliente, PR.nome_produto, IP.quantidade FROM Clientes AS C INNER JOIN Pedidos AS P ON C.id_cliente = P.id_cliente INNER JOIN Itens_Pedido AS IP ON P.id_pedido = IP.id_pedido INNER JOIN Produtos AS PR ON IP.id_produto = PR.id_produto ORDER BY C.nome_cliente;", //
+                    queryParts: ['SELECT', 'C.nome_cliente', ',', 'PR.nome_produto', ',', 'IP.quantidade', 'FROM', 'Clientes', 'AS C', 'INNER JOIN', 'Pedidos', 'AS P', 'ON', 'C.id_cliente', '=', 'P.id_cliente', 'INNER JOIN', 'Itens_Pedido', 'AS IP', 'ON', 'P.id_pedido', '=', 'IP.id_pedido', 'INNER JOIN', 'Produtos', 'AS PR', 'ON', 'IP.id_produto', '=', 'PR.id_produto', 'ORDER BY', 'C.nome_cliente', ';']
+                },
+                { 
+                    id: 't3-p7', 
+                    title: 'Prática: DML (INSERT)', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Escreva o comando SQL para inserir o novo cliente: id_cliente: 5, nome_cliente: 'Fernanda Costa', cidade: 'Porto Alegre'.", //
+                    schema: "CREATE TABLE Clientes (id_cliente INT, nome_cliente VARCHAR(50), cidade VARCHAR(50));",
+                    correctQuery: "INSERT INTO Clientes (id_cliente, nome_cliente, cidade) VALUES (5, 'Fernanda Costa', 'Porto Alegre');", //
+                    queryParts: ['INSERT INTO', 'Clientes', '(', 'id_cliente', ',', 'nome_cliente', ',', 'cidade', ')', 'VALUES', '(', '5', ',', "'Fernanda Costa'", ',', "'Porto Alegre'", ')', ';']
+                },
+                { 
+                    id: 't3-p8', 
+                    title: 'Prática: DML (UPDATE)', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Escreva o comando UPDATE para alterar a cidade para 'Curitiba', especificamente para o cliente com id_cliente 4.", //
+                    schema: "CREATE TABLE Clientes (id_cliente INT, nome_cliente VARCHAR(50), cidade VARCHAR(50));",
+                    correctQuery: "UPDATE Clientes SET cidade = 'Curitiba' WHERE id_cliente = 4;", //
+                    queryParts: ['UPDATE', 'Clientes', 'SET', 'cidade', '=', "'Curitiba'", 'WHERE', 'id_cliente', '=', '4', ';']
+                },
+                { 
+                    id: 't3-p9', 
+                    title: 'Prática: DML (DELETE e Dependência)', 
+                    type: 'practice',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.practice.xp,
+                    description: "Escreva o comando DELETE para tentar remover o cliente com id_cliente 1. (Isso deve falhar se a FK estiver ativa, mas o exercício pede o comando).", //
+                    schema: "CREATE TABLE Clientes (id_cliente INT PRIMARY KEY);\nCREATE TABLE Pedidos (id_pedido INT, id_cliente INT, FOREIGN KEY (id_cliente) REFERENCES Clientes(id_cliente));",
+                    correctQuery: "DELETE FROM Clientes WHERE id_cliente = 1;", //
+                    queryParts: ['DELETE FROM', 'Clientes', 'WHERE', 'id_cliente', '=', '1', ';']
+                },
+                // --- UNIDADE 4 (REVISÃO) ---
+                { 
+                    id: 't3-l4-review', 
+                    title: 'Revisão: DQL, JOINs e DML', 
+                    type: 'article',
+                    duration: '5 min',
+                    xp: REWARD_CONFIG.article.xp,
+                    content: "Revisão Rápida:\n\n1. Consultando Dados (DQL):\n•A consulta fundamental é O QUÊ (SELECT), DE ONDE (FROM) e COM QUAIS CONDIÇÕES (WHERE).\n•Use AND/OR para filtros complexos e LIKE para buscar padrões.\n•ORDER BY classifica os resultados.\n•Funções de Agregação (COUNT, SUM, AVG) calculam valores.\n•GROUP BY agrupa linhas para as funções de agregação.\n•HAVING filtra os grupos (diferente do WHERE, que filtra linhas).\n\n2. Conectando Dados (JOINs):\n•INNER JOIN: Retorna apenas correspondências em ambas as tabelas.\n•LEFT JOIN: Retorna tudo da tabela da esquerda e preenche com NULL onde não há correspondência na direita (ótimo para achar 'clientes sem pedidos').\n•JOINs em Cadeia: Conectam múltiplas tabelas em sequência.\n\n3. Manipulando Dados (DML):\n•INSERT INTO: Adiciona novas linhas.\n•UPDATE: Modifica linhas existentes. (Use WHERE!)\n•DELETE FROM: Remove linhas. (Use WHERE!)\n•Regra da Dependência: Delete primeiro os dados das tabelas 'filhas' (FK) antes de deletar da 'mãe' (PK)." //
                 }
             ]
         },
+       
         
-            // 2. PEGUE O SEU MÓDULO ANTIGO "trail3" E MUDE O ID DELE PARA "trail4"
         {
                     id: 'trail4', // <-- ID MUDADO DE 'trail3' PARA 'trail4'
                     icon: '🌌',
