@@ -34,6 +34,8 @@
             signInWithEmailAndPassword,
             GoogleAuthProvider,
             signInWithPopup,
+            signInWithRedirect, // <-- ADICIONE AQUI
+            getRedirectResult,  // <-- ADICIONE AQUI
             updateProfile,
             signOut
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -62,10 +64,24 @@
         const db = getDatabase(app);
 
         window.FB = {
-            auth, db, onAuthStateChanged, createUserWithEmailAndPassword,
-            signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
-            updateProfile, signOut, ref, onValue, set, update, increment, get
-        };
+            auth, 
+            db, 
+            onAuthStateChanged, 
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword, 
+            GoogleAuthProvider, 
+            signInWithPopup,
+            signInWithRedirect, // <-- ADICIONE AQUI
+            getRedirectResult,  // <-- ADICIONE AQUI
+            updateProfile, 
+            signOut, 
+            ref, 
+            onValue, 
+            set, 
+            update, 
+            increment, 
+            get
+        };
 
         // Define qual página renderizar
         window.PAGE_TO_RENDER = 'home';
