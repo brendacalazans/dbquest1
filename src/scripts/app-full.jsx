@@ -2347,20 +2347,106 @@
     }
     
     // Novo Componente para o Desafio de IA
-    const ChallengeView = memo(({ challenge, onBack, onGenerateChallenge }) => {
-        const [selectedAnswer, setSelectedAnswer] = useState(null);
-        const [showResult, setShowResult] = useState(false);
+    const ChallengeView = memo(({ challenge, onBack, onGenerateChallenge }) => {
+        const [selectedAnswer, setSelectedAnswer] = useState(null);
+        const [showResult, setShowResult] = useState(false);
 
-        const handleCheckAnswer = () => {
-            setShowResult(true);
-        };
-        
-        const handleNext = () => {
-            setSelectedAnswer(null);
-            setShowResult(false);
-            onGenerateChallenge();
-        };
+        const handleCheckAnswer = () => {
+            setShowResult(true);
+        };
+        
+        const handleNext = () => {
+            setSelectedAnswer(null);
+            setShowResult(false);
+            onGenerateChallenge();
+        };
 
+        const getOptionClasses = (index) => {
+            if (showResult) {
+                if (index === challenge.correctIndex) {
+                    return `bg-green-500/30 border-green-400 text-white`;
+                }
+                if (selectedAnswer === index) {
+                    return `bg-red-500/30 border-red-400 text-white`;
+                }
+                return `bg-white/5 border-white/10 opacity-60 cursor-not-allowed`;
+            }
+
+            if (selectedAnswer === index) {
+                return `bg-cyan-500/30 border-cyan-400`;
+            }
+            
+            return `bg-gray-800/50 border-white/20 text-gray-200 hover:bg-gray-800/70 hover:border-white/30`;
+        };
+        
+        if (!challenge) {
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+                    <button onClick={onBack} className="absolute top-6 left-6 flex items-center gap-2 text-white/60 hover:text-white"><ArrowLeft /> Voltar</button>
+                    <p className="text-white/80">Nenhum desafio encontrado.</p>
+                </div>
+            );
+        }
+
+        const isCorrect = selectedAnswer === challenge.correctIndex;
+
+        return (
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-gray-900 flex flex-col text-white animate-fade-in">
+            <header className="bg-white/10 border-b border-white/20">
+            <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+                <button onClick={onBack} className="text-white/80 hover:text-white"><ArrowLeft/></button>
+                <h1 className="text-xl font-bold flex items-center gap-2"><Sparkles className="text-purple-400"/> Desafio Rápido de SQL</h1>
+            </div>
+            </header>
+    
+            <main className="flex-1 flex flex-col justify-between p-6">
+            <div className="max-w-3xl w-full mx-auto">
+                <div className="bg-black/20 p-6 rounded-xl border border-white/10 mb-6">
+                    <p className="text-lg text-white/90 mb-4">{challenge.description}</p>
+                    <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{challenge.schema}</code></pre>
+                </div>
+                <h2 className="text-xl font-bold text-center mb-6">{challenge.question}</h2>
+                <div className="space-y-3">
+                    {challenge.options.map((option, index) => (
+                        <button key={index} onClick={() => !showResult && setSelectedAnswer(index)} disabled={showResult} className={`w-full transition-all text-left font-mono text-sm p-4 rounded-xl border-2 ${getOptionClasses(index)}`}>
+                            <code>{option}</code>
+                        </button>
+                    ))}
+                </div>
+            </div>
+                <footer className="mt-8">
+                    {showResult && (
+                    <div className={`max-w-3xl w-full mx-auto p-5 rounded-xl mb-4 animate-fade-in ${isCorrect ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                        <div className="flex items-center gap-3 mb-3">{isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto! 🎉</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}</div>
+                        <p className="text-white/90">{challenge.explanation}</p>
+                    </div>
+                )}
+                <div className="max-w-3xl w-full mx-auto">
+                    {!showResult ? (
+                    <button onClick={handleCheckAnswer} disabled={selectedAnswer === null} className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform">Verificar</button>
+                    ) : (
+                    <button onClick={handleNext} className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}>Gerar Novo Desafio</button>
+                    )}
+                </div>
+                </footer>
+            </main>
+        </div>
+        );
+    });
+
+    // --- NOVO COMPONENTE PARA EXERCÍCIOS PRÁTICOS ---
+    const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
+        const [userQueryParts, setUserQueryParts] = useState([]);
+        const [showResult, setShowResult] = useState(false);
+
+        // Progresso simples (ou está 0% ou 100%)
+        const progress = showResult ? 100 : 0; 
+        
+        // Normaliza a query para comparação (remove espaços extras, ponto e vírgula final, e ignora maiúsculas/minúsculas)
+        const normalizeQuery = (query) => {
+            if (!query) return "";
+            return query.replace(/;$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+        };
         
         const builtQuery = userQueryParts.join(' ');
         const isCorrect = normalizeQuery(builtQuery) === normalizeQuery(currentLesson.correctQuery);
@@ -2393,7 +2479,7 @@
                         <div className="flex items-center gap-2 text-red-400"> <Heart /> <span className="font-bold">{userProgress.lives}</span> </div>
                     </div>
                 </header>
-                
+               
                 <main className="max-w-4xl mx-auto px-6 py-8 flex-1 w-full">
                     <h2 className="text-2xl md:text-3xl font-bold mb-4">{currentLesson.title}</h2>
                     <p className="text-lg text-white/80 mb-6">{currentLesson.description}</p>
@@ -2409,14 +2495,14 @@
                         {builtQuery || <span className="text-white/50">...</span>}
                     </div>
 
-                    {/* Parts bank */}
+                 {/* Parts bank */}
                     <div className="flex flex-wrap gap-3 justify-center">
                         {currentLesson.queryParts.map((part, index) => (
                             <button key={index} onClick={() => handlePartClick(part)} disabled={showResult} className="bg-white/10 hover:bg-white/20 text-white font-mono px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
                                 {part}
                             </button>
                         ))}
-                        <button onClick={handleUndo} disabled={showResult || userQueryParts.length === 0} className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                       <button onClick={handleUndo} disabled={showResult || userQueryParts.length === 0} className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
                             Desfazer
                         </button>
                     </div>
@@ -2427,120 +2513,33 @@
                     <div className="max-w-4xl mx-auto">
                         {!showResult ? (
                             <button
-                                onClick={handleCheck}
+                           onClick={handleCheck}
                                 disabled={userQueryParts.length === 0}
                                 className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
-                         >
+                           >
                                 Verificar
                             </button>
-                        ) : (
+                       ) : (
                             <div className="animate-fade-in">
                                 <div className="flex items-center gap-3 mb-3">
                                     {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
                                 </div>
                                 <p className="text-white/90 mb-4 font-mono">
                                     {isCorrect ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.` : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
-                                </p>
+                           </p>
                                 <button
-                                    onClick={handleContinue}
+                                 onClick={handleContinue}
                                     className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
                                 >
                                     Continuar
                                 </button>
-                         </div>
+                        </div>
                         )}
                     </div>
-                </footer>
+               </footer>
             </div>
         );
     });
-
-        const getOptionClasses = (index) => {
-            if (showResult) {
-                if (index === challenge.correctIndex) {
-                    return `bg-green-500/30 border-green-400 text-white`;
-                }
-                if (selectedAnswer === index) {
-                    return `bg-red-500/30 border-red-400 text-white`;
-                }
-                return `bg-white/5 border-white/10 opacity-60 cursor-not-allowed`;
-            }
-
-            if (selectedAnswer === index) {
-                return `bg-cyan-500/30 border-cyan-400`;
-            }
-            
-            return `bg-gray-800/50 border-white/20 text-gray-200 hover:bg-gray-800/70 hover:border-white/30`;
-        };
-        
-        if (!challenge) {
-            return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-                    <button onClick={onBack} className="absolute top-6 left-6 flex items-center gap-2 text-white/60 hover:text-white"><ArrowLeft /> Voltar</button>
-                    <p className="text-white/80">Nenhum desafio encontrado.</p>
-                </div>
-            );
-        }
-
-        const isCorrect = selectedAnswer === challenge.correctIndex;
-
-        return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-gray-900 flex flex-col text-white animate-fade-in">
-            <header className="bg-white/10 border-b border-white/20">
-            <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                <button onClick={onBack} className="text-white/80 hover:text-white"><ArrowLeft/></button>
-                <h1 className="text-xl font-bold flex items-center gap-2"><Sparkles className="text-purple-400"/> Desafio Rápido de SQL</h1>
-            </div>
-            </header>
-    
-            <main className="flex-1 flex flex-col justify-between p-6">
-            <div className="max-w-3xl w-full mx-auto">
-                <div className="bg-black/20 p-6 rounded-xl border border-white/10 mb-6">
-                    <p className="text-lg text-white/90 mb-4">{challenge.description}</p>
-                    <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{challenge.schema}</code></pre>
-                </div>
-                <h2 className="text-xl font-bold text-center mb-6">{challenge.question}</h2>
-                <div className="space-y-3">
-                    {challenge.options.map((option, index) => (
-                        <button key={index} onClick={() => !showResult && setSelectedAnswer(index)} disabled={showResult} className={`w-full transition-all text-left font-mono text-sm p-4 rounded-xl border-2 ${getOptionClasses(index)}`}>
-                            <code>{option}</code>
-                        </button>
-                    ))}
-                </div>
-            </div>
-                <footer className="mt-8">
-                    {showResult && (
-                    <div className={`max-w-3xl w-full mx-auto p-5 rounded-xl mb-4 animate-fade-in ${isCorrect ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                        <div className="flex items-center gap-3 mb-3">{isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto! 🎉</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}</div>
-                        <p className="text-white/90">{challenge.explanation}</p>
-                    </div>
-                )}
-                <div className="max-w-3xl w-full mx-auto">
-                    {!showResult ? (
-                    <button onClick={handleCheckAnswer} disabled={selectedAnswer === null} className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform">Verificar</button>
-                    ) : (
-                    <button onClick={handleNext} className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}>Gerar Novo Desafio</button>
-                    )}
-                </div>
-                </footer>
-            </main>
-        </div>
-        );
-    });
-
-    // --- NOVO COMPONENTE PARA EXERCÍCIOS PRÁTICOS ---
-    const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
-        const [userQueryParts, setUserQueryParts] = useState([]);
-        const [showResult, setShowResult] = useState(false);
-
-        // Progresso simples (ou está 0% ou 100%)
-        const progress = showResult ? 100 : 0; 
-        
-        // Normaliza a query para comparação (remove espaços extras, ponto e vírgula final, e ignora maiúsculas/minúsculas)
-        const normalizeQuery = (query) => {
-            if (!query) return "";
-            return query.replace(/;$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
-        };
 
 
     const container = document.getElementById('root');
