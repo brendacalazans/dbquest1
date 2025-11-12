@@ -52,6 +52,8 @@ window.FB = {
     signInWithEmailAndPassword, 
     GoogleAuthProvider, 
     signInWithPopup,
+    signInWithRedirect, // <-- ADICIONE AQUI
+    getRedirectResult,  // <-- ADICIONE AQUI
     updateProfile, 
     signOut, 
     ref, 
