@@ -2361,19 +2361,6 @@
             onGenerateChallenge();
         };
 
-        // --- NOVO COMPONENTE PARA EXERCÍCIOS PRÁTICOS ---
-    const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
-        const [userQueryParts, setUserQueryParts] = useState([]);
-        const [showResult, setShowResult] = useState(false);
-
-        // Progresso simples (ou está 0% ou 100%)
-        const progress = showResult ? 100 : 0; 
-        
-        // Normaliza a query para comparação (remove espaços extras, ponto e vírgula final, e ignora maiúsculas/minúsculas)
-        const normalizeQuery = (query) => {
-            if (!query) return "";
-            return query.replace(/;$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
-        };
         
         const builtQuery = userQueryParts.join(' ');
         const isCorrect = normalizeQuery(builtQuery) === normalizeQuery(currentLesson.correctQuery);
@@ -2540,6 +2527,20 @@
         </div>
         );
     });
+
+    // --- NOVO COMPONENTE PARA EXERCÍCIOS PRÁTICOS ---
+    const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
+        const [userQueryParts, setUserQueryParts] = useState([]);
+        const [showResult, setShowResult] = useState(false);
+
+        // Progresso simples (ou está 0% ou 100%)
+        const progress = showResult ? 100 : 0; 
+        
+        // Normaliza a query para comparação (remove espaços extras, ponto e vírgula final, e ignora maiúsculas/minúsculas)
+        const normalizeQuery = (query) => {
+            if (!query) return "";
+            return query.replace(/;$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+        };
 
 
     const container = document.getElementById('root');
