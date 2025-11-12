@@ -1899,7 +1899,7 @@
                                 onClick={() => onNavigate('home')}
                                 className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-6 rounded-lg transition-colors"
                             >
-                </i>               Continuar
+                               Continuar
                             </button>
                         </div>
                     </div>
