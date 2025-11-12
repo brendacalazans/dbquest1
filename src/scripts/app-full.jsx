@@ -1351,23 +1351,36 @@
         };
 
         const startLesson = (trail, lesson) => {
-            if (userProgress.lives <= 0) {
-                setCurrentView('noLives');
-                return;
-            }
-            setSelectedTrail(trail);
-            setCurrentLesson(lesson);
-            setCurrentQuestion(0);
-            setAnsweredQuestions([]);
-            setShowResult(false);
-            setSelectedAnswer(null);
-            
-            if (lesson.type === 'article') {
-                setCurrentView('article');
-            } else {
-                setCurrentView('lesson');
-            }
-        };
+            if (userProgress.lives <= 0) {
+                setCurrentView('noLives');
+                return;
+            }
+            setSelectedTrail(trail);
+            setCurrentLesson(lesson);
+            setCurrentQuestion(0);
+            setAnsweredQuestions([]);
+            setShowResult(false);
+            setSelectedAnswer(null);
+            
+            // --- LÓGICA DE ROTEAMENTO CORRIGIDA ---
+            if (lesson.type === 'article') {
+                setCurrentView('article');
+            } else if (lesson.type === 'practice') { // <-- ADICIONADO
+                setCurrentView('practice');
+            } else if (lesson.type === 'theory') { // <-- ESPECIFICADO
+                setCurrentView('lesson');
+            } else if (lesson.type === 'lesson') { // <-- ESPECIFICADO (Vídeo)
+                // ATENÇÃO: Você não tem uma 'VideoView'. 
+                // Enviar para 'lesson' (quiz) ou 'article' (texto) vai quebrar.
+                // Por enquanto, vou enviar para 'article' para não quebrar a app,
+                // mas ele não renderizará o vídeo.
+                console.warn("VideoView não implementada. Abrindo como Artigo.");
+                setCurrentView('article'); 
+            } else {
+                // Fallback para tipos desconhecidos
+                setCurrentView('home');
+            }
+        };
         
         const getContentTypeInfo = useCallback((type) => {
             switch (type) {
@@ -2247,18 +2260,29 @@
             }
             
             switch (currentView) {
-                case 'home': return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge} />;
-                case 'trailDetail': return <TrailDetailView selectedTrail={selectedTrail} userProgress={userProgress} onStartLesson={startLesson} onBack={handleBackToTrails} getContentTypeInfo={getContentTypeInfo} filterType={filterType} onFilterChange={setFilterType} />;
-                case 'article': return <ArticleView currentLesson={currentLesson} onComplete={handleArticleCompletion} onBack={() => setCurrentView('trailDetail')} />;
-                case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
-                case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} />;
-                case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
-                case 'ranking': return <RankingView leaderboard={leaderboard} currentUserId={userId} isLoading={isRankingLoading} />;
-                case 'profile': return <ProfileView userProgress={userProgress} onLogout={handleLogout} onSaveProfile={handleSaveProfile} />;
-                case 'challenge': return <ChallengeView challenge={challenge} onBack={() => setCurrentView('home')} onGenerateChallenge={generateSqlChallenge} />;
-                default: return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge}/>;
-            }
-        };
+                case 'home': return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge} />;
+                case 'trailDetail': return <TrailDetailView selectedTrail={selectedTrail} userProgress={userProgress} onStartLesson={startLesson} onBack={handleBackToTrails} getContentTypeInfo={getContentTypeInfo} filterType={filterType} onFilterChange={setFilterType} />;
+                case 'article': return <ArticleView currentLesson={currentLesson} onComplete={handleArticleCompletion} onBack={() => setCurrentView('trailDetail')} />;
+                case 'lesson': return <LessonView currentLesson={currentLesson} currentQuestion={currentQuestion} userProgress={userProgress} onCheckAnswer={checkAnswer} onNextQuestion={nextQuestion} onNavigate={handleNavigate} showResult={showResult} answeredQuestions={answeredQuestions} selectedAnswer={selectedAnswer} setSelectedAnswer={setSelectedAnswer} onGetAiExplanation={getAiExplanation} aiExplanation={aiExplanation} isAiExplanationLoading={isAiExplanationLoading} />;
+                
+                // --- ADICIONE ESTE CASE ---
+                case 'practice':
+                    return <PracticeView
+                        currentLesson={currentLesson}
+                        userProgress={userProgress}
+                        onNavigate={handleNavigate}
+                        onPracticeComplete={handlePracticeCompletion}
+                    />;
+                // --- FIM DA ADIÇÃO ---
+                
+                case 'completion': return <CompletionView answeredQuestions={answeredQuestions} currentLesson={currentLesson} onNavigate={handleNavigate} />;
+                case 'noLives': return <NoLivesView userProgress={userProgress} onRefillWithGems={handleRefillLives} onCooldownEnd={handleCooldownEnd} onNavigate={handleNavigate} />;
+                case 'ranking': return <RankingView leaderboard={leaderboard} currentUserId={userId} isLoading={isRankingLoading} />;
+                case 'profile': return <ProfileView userProgress={userProgress} onLogout={handleLogout} onSaveProfile={handleSaveProfile} />;
+                case 'challenge': return <ChallengeView challenge={challenge} onBack={() => setCurrentView('home')} onGenerateChallenge={generateSqlChallenge} />;
+                default: return <HomeView userProgress={userProgress} studyTrails={studyTrails} onSelectTrail={handleSelectTrail} onGenerateChallenge={generateSqlChallenge}/>;
+            }
+        };
 
         if (!isAuthChecked) {
             return <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center text-white"><h1 className="text-3xl font-bold">A carregar...</h1></div>;
