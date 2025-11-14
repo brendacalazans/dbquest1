@@ -2417,7 +2417,7 @@
         useEffect(() => {
             if (currentLesson && currentLesson.queryParts) {
                 // 1. LIMPA (trim) os espaços invisíveis de cada parte
-                const cleanedParts = currentLesson.queryParts.map(part => part.trim());
+                const cleanedParts = currentLesson.queryParts.map(part => part.replace(/^[\s\u00A0]+|[\s\u00A0]+$/g, ''));
                 // 2. Embaralha as partes limpas
                 setShuffledParts(shuffleArray(cleanedParts));
                 // 3. Reseta o estado
