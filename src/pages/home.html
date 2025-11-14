@@ -24,7 +24,7 @@
 <body class="bg-gray-900">
     <div id="root"></div>
 
-    <!-- Firebase Config -->
+    <!-- Configuração Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { 
@@ -34,8 +34,8 @@
             signInWithEmailAndPassword,
             GoogleAuthProvider,
             signInWithPopup,
-            signInWithRedirect, // <-- ADICIONE AQUI
-            getRedirectResult,  // <-- ADICIONE AQUI
+            signInWithRedirect,
+            getRedirectResult,
             updateProfile,
             signOut
         } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
@@ -64,26 +64,12 @@
         const db = getDatabase(app);
 
         window.FB = {
-            auth, 
-            db, 
-            onAuthStateChanged, 
-            createUserWithEmailAndPassword,
-            signInWithEmailAndPassword, 
-            GoogleAuthProvider, 
-            signInWithPopup,
-            signInWithRedirect, // <-- ADICIONE AQUI
-            getRedirectResult,  // <-- ADICIONE AQUI
-            updateProfile, 
-            signOut, 
-            ref, 
-            onValue, 
-            set, 
-            update, 
-            increment, 
-            get
-        };
+            auth, db, onAuthStateChanged, createUserWithEmailAndPassword,
+            signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup,
+            signInWithRedirect, getRedirectResult,
+            updateProfile, signOut, ref, onValue, set, update, increment, get
+        };
 
-        // Define qual página renderizar
         window.PAGE_TO_RENDER = 'home';
     </script>
     
@@ -91,4 +77,3 @@
     <script type="text/babel" src="../scripts/app-full.jsx"></script>
 </body>
 </html>
-
