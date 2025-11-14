@@ -2517,7 +2517,7 @@
                             >
                                 {part}
                             </button>
-                iOS     ))}
+                     ))}
                     </div>
                     
                 </main>
