@@ -2539,7 +2539,7 @@
                                  onClick={handleCheck}
                              disabled={shuffledParts.length > 0} // Desabilita se ainda houver partes não usadas
                                     className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
-                              </span>
+                            
                                     {shuffledParts.length > 0 ? "Use todas as partes" : "Verificar"}
                                 </button>
                             </div>
