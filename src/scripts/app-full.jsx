@@ -2477,24 +2477,6 @@
         );
     });
 
-    // --- COMPONENTE PRACTICEVIEW (MELHORADO) ---
-
-    // Helper function para embaralhar o array (Fisher-Yates shuffle)
-    const shuffleArray = (array) => {
-        let currentIndex = array.length, randomIndex;
-        const newArray = [...array]; // Cria uma cópia para não mutar o original
-        // Enquanto houver elementos para embaralhar
-        while (currentIndex !== 0) {
-            // Pega um elemento restante
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex--;
-            // E troca com o elemento atual
-            [newArray[currentIndex], newArray[randomIndex]] = [
-                newArray[randomIndex], newArray[currentIndex]];
-        }
-        return newArray;
-    };
-
     // --- COMPONENTE PRACTICEVIEW (CORRIGIDO) ---
 
     // Helper function para embaralhar o array (Fisher-Yates shuffle)
