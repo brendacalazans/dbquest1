@@ -2389,95 +2389,7 @@
         );
     }
     
-    // Novo Componente para o Desafio de IA
-    const ChallengeView = memo(({ challenge, onBack, onGenerateChallenge }) => {
-        const [selectedAnswer, setSelectedAnswer] = useState(null);
-        const [showResult, setShowResult] = useState(false);
-
-        const handleCheckAnswer = () => {
-            setShowResult(true);
-        };
-        
-        const handleNext = () => {
-            setSelectedAnswer(null);
-            setShowResult(false);
-            onGenerateChallenge();
-        };
-
-        const getOptionClasses = (index) => {
-            if (showResult) {
-                if (index === challenge.correctIndex) {
-                    return `bg-green-500/30 border-green-400 text-white`;
-                }
-                if (selectedAnswer === index) {
-                    return `bg-red-500/30 border-red-400 text-white`;
-                }
-                return `bg-white/5 border-white/10 opacity-60 cursor-not-allowed`;
-            }
-
-            if (selectedAnswer === index) {
-                return `bg-cyan-500/30 border-cyan-400`;
-            }
-            
-            return `bg-gray-800/50 border-white/20 text-gray-200 hover:bg-gray-800/70 hover:border-white/30`;
-        };
-        
-        if (!challenge) {
-            return (
-                <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
-                    <button onClick={onBack} className="absolute top-6 left-6 flex items-center gap-2 text-white/60 hover:text-white"><ArrowLeft /> Voltar</button>
-                    <p className="text-white/80">Nenhum desafio encontrado.</p>
-                </div>
-            );
-        }
-
-        const isCorrect = selectedAnswer === challenge.correctIndex;
-
-        return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-gray-900 flex flex-col text-white animate-fade-in">
-            <header className="bg-white/10 border-b border-white/20">
-            <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                <button onClick={onBack} className="text-white/80 hover:text-white"><ArrowLeft/></button>
-                <h1 className="text-xl font-bold flex items-center gap-2"><Sparkles className="text-purple-400"/> Desafio Rápido de SQL</h1>
-            </div>
-            </header>
-    
-            <main className="flex-1 flex flex-col justify-between p-6">
-            <div className="max-w-3xl w-full mx-auto">
-                <div className="bg-black/20 p-6 rounded-xl border border-white/10 mb-6">
-                    <p className="text-lg text-white/90 mb-4">{challenge.description}</p>
-                    <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{challenge.schema}</code></pre>
-                </div>
-                <h2 className="text-xl font-bold text-center mb-6">{challenge.question}</h2>
-                <div className="space-y-3">
-                    {challenge.options.map((option, index) => (
-                        <button key={index} onClick={() => !showResult && setSelectedAnswer(index)} disabled={showResult} className={`w-full transition-all text-left font-mono text-sm p-4 rounded-xl border-2 ${getOptionClasses(index)}`}>
-                            <code>{option}</code>
-                        </button>
-                    ))}
-                </div>
-            </div>
-                <footer className="mt-8">
-                    {showResult && (
-                    <div className={`max-w-3xl w-full mx-auto p-5 rounded-xl mb-4 animate-fade-in ${isCorrect ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                        <div className="flex items-center gap-3 mb-3">{isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto! 🎉</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}</div>
-                        <p className="text-white/90">{challenge.explanation}</p>
-                    </div>
-                )}
-                <div className="max-w-3xl w-full mx-auto">
-                    {!showResult ? (
-                    <button onClick={handleCheckAnswer} disabled={selectedAnswer === null} className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform">Verificar</button>
-                    ) : (
-                    <button onClick={handleNext} className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}>Gerar Novo Desafio</button>
-                    )}
-                </div>
-                </footer>
-            </main>
-        </div>
-        );
-    });
-
-    // --- COMPONENTE PRACTICEVIEW (CORRIGIDO) ---
+    // --- COMPONENTE PRACTICEVIEW (COMPLETO E CORRIGIDO) ---
 
     // Helper function para embaralhar o array (Fisher-Yates shuffle)
     const shuffleArray = (array) => {
@@ -2498,41 +2410,48 @@
     const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
         const [userQueryParts, setUserQueryParts] = useState([]);
         const [showResult, setShowResult] = useState(false);
+        // NOVO ESTADO: Armazena as partes embaralhadas
         const [shuffledParts, setShuffledParts] = useState([]);
 
-        // Embaralha as partes quando a lição carregar
+        // NOVO EFEITO: Embaralha e LIMPA as partes da query
         useEffect(() => {
             if (currentLesson && currentLesson.queryParts) {
-                setShuffledParts(shuffleArray(currentLesson.queryParts));
+                // 1. LIMPA (trim) os espaços invisíveis de cada parte
+                const cleanedParts = currentLesson.queryParts.map(part => part.trim());
+                // 2. Embaralha as partes limpas
+                setShuffledParts(shuffleArray(cleanedParts));
+                // 3. Reseta o estado
                 setUserQueryParts([]);
                 setShowResult(false);
             }
-        }, [currentLesson]);
+        }, [currentLesson]); // Roda sempre que 'currentLesson' mudar
 
+        // Progresso simples (ou está 0% ou 100%)
         const progress = showResult ? 100 : 0; 
         
-        // Normaliza a query para ser robusta contra espaços
+        // CORREÇÃO LÓGICA (VERIFICAÇÃO): Normaliza a query para ser robusta contra espaços
         const normalizeQuery = (query) => {
             if (!query) return "";
             return query
-                .replace(/;$/, '')
-                .replace(/\s*,\s*/g, ',')
-                .replace(/\s*=\s*/g, '=')
-                .replace(/\s*\(\s*/g, '(')
-                .replace(/\s*\)\s*/g, ')')
-                .replace(/\s+/g, ' ')
+                .replace(/;$/, '')      // remove ponto e vírgula final
+                .replace(/\s*,\s*/g, ',') // remove espaços ao redor de vírgulas
+                .replace(/\s*=\s*/g, '=') // remove espaços ao redor de =
+                .replace(/\s*\(\s*/g, '(') // remove espaços depois de (
+                .replace(/\s*\)\s*/g, ')') // remove espaços antes de )
+                .replace(/\s+/g, ' ')   // colapsa múltiplos espaços em um
                 .trim()
                 .toLowerCase();
         };
         
-        // Constrói a string de display de forma inteligente
+        // CORREÇÃO LÓGICA (DISPLAY): Constrói a string de forma inteligente
         const builtQuery = userQueryParts.reduce((acc, part, index) => {
+            // Não adiciona espaço se:
             const noSpaceBefore = 
-                index === 0 ||
-                part === ',' ||
-                part === ';' ||
-                part === ')' ||
-                (index > 0 && userQueryParts[index - 1] === '(');
+                index === 0 ||  // for a primeira parte
+                part === ',' ||  // a parte atual for ,
+                part === ';' ||  // a parte atual for ;
+                part === ')' ||  // a parte atual for )
+                (index > 0 && userQueryParts[index - 1] === '('); // a parte anterior foi (
             
             return acc + (noSpaceBefore ? '' : ' ') + part;
         }, '');
@@ -2548,14 +2467,19 @@
         };
         
         const handlePartClick = (part, index) => {
+            // Adiciona a parte à query do usuário
             setUserQueryParts(prev => [...prev, part]);
+            // Remove a parte do banco de botões embaralhados
             setShuffledParts(prev => prev.filter((_, i) => i !== index));
         };
         
         const handleUndo = () => {
             if (userQueryParts.length === 0) return;
+            // Pega a última parte adicionada
             const lastPart = userQueryParts[userQueryParts.length - 1];
+            // Remove a última parte da query
             setUserQueryParts(prev => prev.slice(0, -1));
+            // Adiciona a parte de volta ao banco de botões embaralhados
             setShuffledParts(prev => [...prev, lastPart]);
         };
 
@@ -2593,11 +2517,11 @@
                                 key={index} 
                                 onClick={() => handlePartClick(part, index)} 
                                 disabled={showResult} 
-                                // CORREÇÃO: Adicionado w-auto
+                                // CORREÇÃO: Classe 'w-auto' garante que o botão tenha a largura do texto
                                 className="w-auto bg-white/10 hover:bg-white/20 text-white font-mono px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
                             >
                                 {part}
-                            </button>
+
                         ))}
                     </div>
                     
@@ -2615,7 +2539,7 @@
                                     onClick={handleUndo} 
                                     disabled={showResult || userQueryParts.length === 0} 
                                     // CORREÇÃO: Adicionado w-full sm:w-auto para responsividade
-                               className="w-full sm:w-auto bg-red-500/20 hover:bg-red-500/40 text-red-300 px-6 py-4 rounded-xl transition-colors disabled:opacity-50 font-semibold"
+                                    className="w-full sm:w-auto bg-red-500/20 hover:bg-red-500/40 text-red-300 px-6 py-4 rounded-xl transition-colors disabled:opacity-50 font-semibold"
                                 >
                                     Desfazer
                                 </button>
@@ -2623,33 +2547,32 @@
                                     onClick={handleCheck}
                                     disabled={shuffledParts.length > 0} // Desabilita se ainda houver partes não usadas
                                     className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
-                         >
+                                >
                                     {shuffledParts.length > 0 ? "Use todas as partes" : "Verificar"}
                                 </button>
                             </div>
                         ) : (
-                       // SE ESTIVER MOSTRANDO RESULTADO, MOSTRA FEEDBACK
-                            <div className="animate-fade-in">
-                             <div className="flex items-center gap-3 mb-3">
+                            // SE ESTIVER MOSTRANDO RESULTADO, MOSTRA FEEDBACK
+                       <div className="animate-fade-in">
+                                <div className="flex items-center gap-3 mb-3">
                                     {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
-                           </div>
-                             <p className="text-white/90 mb-4 font-mono">
+                                </div>
+                           <p className="text-white/90 mb-4 font-mono">
                                     {isCorrect ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.` : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
                                 </p>
-                             <button
+                         <button
                                     onClick={handleContinue}
                                     className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
-                       >
-                                    Continuar
-                     </button>
+                                >
+                                 Continuar
+                                </button>
                             </div>
                         )}
-                    </div>
+               </div>
                 </footer>
             </div>
         );
     });
-
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
     root.render(<App />);
