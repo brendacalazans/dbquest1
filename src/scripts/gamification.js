@@ -1,7 +1,6 @@
 /**
  * Sistema de Gamificação - DBQuest
- * 
- * Contém toda a lógica de gamificação (XP, vidas, streak, etc.)
+ * * Contém toda a lógica de gamificação (XP, vidas, streak, etc.)
  */
 
 /**
@@ -27,12 +26,14 @@ const handleLessonCompletion = (userProgress, lessonId, lessonXP, userId, db, re
         lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
     }
 
-    // CORREÇÃO DA LÓGICA DE STREAK
+    // LÓGICA DE STREAK (A sua lógica está ótima e foi mantida)
     let newStreak = userProgress.streak || 0;
+    let streakIncreasedToday = false; // ✨ Flag para bônus de gema
     
     if (!lastCompletedDate) {
         // Primeira lição do usuário - inicia o streak
         newStreak = 1;
+        streakIncreasedToday = true; // ✨ Streak iniciou
         console.log("Primeira lição! Ofensiva iniciada: 1 dia");
     } else {
         // Calcula ontem para verificar consecutividade
@@ -47,14 +48,17 @@ const handleLessonCompletion = (userProgress, lessonId, lessonXP, userId, db, re
         if (lastCompletedTime === todayTime) {
             // Já completou uma lição hoje - mantém o streak atual
             newStreak = userProgress.streak || 1;
+            streakIncreasedToday = false; // ✨ Sem aumento de streak
             console.log("Lição completada hoje, ofensiva mantida:", newStreak, "dias");
         } else if (lastCompletedTime === yesterdayTime) {
-            // Completou lição ontem - incrementa o streak (consecutividade mantida)
+            // Completou lição ontem - incrementa o streak
             newStreak = (userProgress.streak || 0) + 1;
+            streakIncreasedToday = true; // ✨ Streak aumentou
             console.log("Ofensiva incrementada! Dias consecutivos:", newStreak);
         } else if (lastCompletedTime < yesterdayTime) {
             // Completou há 2 ou mais dias - perdeu o streak, recomeça do 1
             newStreak = 1;
+            streakIncreasedToday = true; // ✨ Streak resetou para 1
             console.log("Ofensiva perdida! Recomeçando do dia 1");
         } else {
             // Caso de segurança (não deveria acontecer)
@@ -67,35 +71,52 @@ const handleLessonCompletion = (userProgress, lessonId, lessonXP, userId, db, re
     const newLevel = Math.floor(newXP / 100) + 1;
     const completed = [...(userProgress.completedLessons || [])];
     
-    if (!completed.includes(lessonId)) {
+    const isNewLesson = !completed.includes(lessonId); // ✨ Verifica se a lição é nova
+    if (isNewLesson) {
         completed.push(lessonId);
     }
+
+    // --- ✨ INÍCIO DA LÓGICA DE GEMAS ---
+    let newGems = Number(userProgress.gems) || 0;
+    let gemsAwarded = 0;
+    const BASE_GEM_REWARD = 5;       // Recompensa base por lição nova
+    const STREAK_BONUS_MILESTONE = 5;  // Bônus a cada 5 dias
+    const STREAK_BONUS_AMOUNT = 25;    // Quantidade do bônus
+
+    // 1. Recompensa base (apenas se a lição for nova)
+    if (isNewLesson) {
+        gemsAwarded += BASE_GEM_REWARD;
+        console.log(`+${BASE_GEM_REWARD} gemas por completar uma nova lição!`);
+    }
+
+    // 2. Bônus de Ofensiva (Streak)
+    // Só dá o bônus se o streak aumentou HOJE (para não dar bônus em toda lição do dia)
+    if (streakIncreasedToday && newStreak > 0 && newStreak % STREAK_BONUS_MILESTONE === 0) {
+        gemsAwarded += STREAK_BONUS_AMOUNT;
+        console.log(`BÔNUS DE OFENSIVA! +${STREAK_BONUS_AMOUNT} gemas por ${newStreak} dias!`);
+    }
+
+    newGems += gemsAwarded;
+    // --- ✨ FIM DA LÓGICA DE GEMAS ---
 
     const updates = {
         totalXP: newXP,
         level: newLevel,
         streak: newStreak,
+        gems: newGems, // ✨ ADICIONADO AO UPDATE
         lastCompletedLessonDate: new Date().toISOString(), // Salva a data E hora exata
         completedLessons: completed
     };
 
     update(ref(db, `users/${userId}/gamification`), updates);
-    update(ref(db, `leaderboard/${userId}`), { totalXP: newXP, streak: newStreak });
+    update(ref(db, `leaderboard/${userId}`), { totalXP: newXP, streak: newStreak, gems: newGems }); // ✨ Atualiza gemas no leaderboard
     
-    return newXP;
+    return newXP; // Mantém o retorno original para compatibilidade com App.js
 };
 
 /**
  * Recarrega vidas usando gemas
- * @param {object} userProgress - Progresso atual do usuário
- * @param {string} userId - ID do usuário
- * @param {object} db - Instância do Firebase Database
- * @param {function} ref - Função ref do Firebase
- * @param {function} update - Função update do Firebase
- * @param {function} setUserProgress - Função para atualizar estado local
- * @param {function} setToast - Função para exibir notificação
- * @param {function} onNavigate - Função de navegação
- * @returns {boolean} Sucesso ou falha
+ * (Nenhuma alteração necessária aqui, mas incluído para integridade)
  */
 const handleRefillLives = (userProgress, userId, db, ref, update, setUserProgress, setToast, onNavigate) => {
     const refillCost = 100; // Custo em gemas
@@ -133,8 +154,7 @@ const handleRefillLives = (userProgress, userId, db, ref, update, setUserProgres
 
 /**
  * Verifica e reseta vidas diariamente
- * @param {object} data - Dados do usuário do Firebase
- * @returns {object} Objeto com updates necessários e flags
+ * (Nenhuma alteração necessária)
  */
 const checkDailyLifeReset = (data) => {
     const today = new Date();
@@ -174,9 +194,7 @@ const checkDailyLifeReset = (data) => {
 
 /**
  * Verifica e reseta streak se necessário
- * CORREÇÃO: Agora verifica corretamente o caminho dos dados da gamificação
- * @param {object} data - Dados do usuário do Firebase
- * @returns {object} Objeto com updates necessários e flag
+ * (Nenhuma alteração necessária)
  */
 const checkStreakReset = (data) => {
     const today = new Date();
@@ -185,7 +203,6 @@ const checkStreakReset = (data) => {
     const updates = {};
     let needsUpdate = false;
     
-    // CORREÇÃO: Verifica se os dados de gamificação existem antes de acessar
     const lastCompleted = data.gamification?.lastCompletedLessonDate 
         ? new Date(data.gamification.lastCompletedLessonDate) 
         : null;
@@ -197,8 +214,6 @@ const checkStreakReset = (data) => {
         yesterday.setDate(yesterday.getDate() - 1);
         yesterday.setHours(0, 0, 0, 0);
         
-        // Se a última lição completada foi ANTES de ontem, zera a ofensiva
-        // Isso significa que o usuário perdeu a consecutividade
         if (lastCompleted.getTime() < yesterday.getTime()) {
             updates['gamification/streak'] = 0;
             needsUpdate = true;
