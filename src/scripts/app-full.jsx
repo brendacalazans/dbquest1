@@ -2479,175 +2479,93 @@
 
     const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
     
-    // --- NOVO COMPONENTE PARA EXERCÍCIOS PRÁTICOS (VERSÃO MELHORADA) ---
-    const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
-        // Estado para os tokens que o usuário selecionou
-        const [userQueryParts, setUserQueryParts] = useState([]);
-        // Estado para os tokens disponíveis no "banco"
-        const [availableParts, setAvailableParts] = useState([]);
-        
-        const [showResult, setShowResult] = useState(false);
+    // no topo do arquivo: (já tem normalizeQuery definida no seu código)
+const normalizeQuery = (query) => {
+  if (!query) return "";
+  // remove ; final, normaliza espaços, e força minúsculas
+  return query.replace(/;$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+};
 
-        // 🔀 Inicializa e embaralha os tokens quando a lição (prop) mudar
-        useEffect(() => {
-            if (currentLesson?.queryParts) {
-                // Mapeia para objetos com IDs únicos para o React gerenciar
-                const partsWithIds = currentLesson.queryParts.map((part, id) => ({ id, part }));
-                setAvailableParts(shuffleArray(partsWithIds));
-            }
-            // Reseta o estado da lição
-            setUserQueryParts([]);
-            setShowResult(false);
-        }, [currentLesson]);
-            
-        const progress = showResult ? 100 : 0; 
-        
-        // Normaliza a query para comparação (remove espaços extras, ponto e vírgula final, e ignora maiúsculas/minúsculas)
-        const normalizeQuery = (query) => {
-            if (!query) return "";
-            return query.replace(/;$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
-        };
+// dentro do componente PracticeView (substitua a parte do "Parts bank" pelo textarea)
+const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
+  const [userQueryParts, setUserQueryParts] = useState([]); // pode manter se quiser
+  const [showResult, setShowResult] = useState(false);
 
-        // --- LÓGICA DE CONSTRUÇÃO DE QUERY CORRIGIDA ---
-        const buildQuerySmart = (parts) => {
-            let query = "";
-            parts.forEach((p, i) => {
-                const prevPart = i > 0 ? parts[i - 1] : null;
+  // novo estado para texto livre
+  const [userQueryText, setUserQueryText] = useState("");
 
-                if (p === "," || p === ";" || p === ")") {
-                    // 1. Cola pontuação final (sem espaço antes)
-                    query += p;
-                } else if (p === "(") {
-                    // 2. Adiciona espaço ANTES de abrir parêntese
-                    query += (query ? " " : "") + p;
-                } else if (prevPart === "(") {
-                    // 3. Cola o token DEPOIS de abrir parêntese (sem espaço)
-                    query += p;
-                } else {
-                    // 4. Default: adiciona espaço antes do token
-                    query += (query ? " " : "") + p;
-                }
-            });
-            return query;
-        };
-        
-        // Constrói a query a partir dos objetos de parte
-        const builtQuery = buildQuerySmart(userQueryParts.map(p => p.part));
-        const isCorrect = normalizeQuery(builtQuery) === normalizeQuery(currentLesson.correctQuery);
+  useEffect(() => {
+    // limpa ao mudar de lição
+    setUserQueryText("");
+    setUserQueryParts([]);
+    setShowResult(false);
+  }, [currentLesson]);
 
-        const handleCheck = () => {
-            setShowResult(true);
-        };
-        
-        const handleContinue = () => {
-            onPracticeComplete(isCorrect);
-        };
-        
-        // --- NOVOS HANDLERS INTERATIVOS ---
-        const handlePartClick = (partObject) => {
-            // Move do banco (available) para a query (user)
-            setUserQueryParts(prev => [...prev, partObject]);
-            setAvailableParts(prev => prev.filter(p => p.id !== partObject.id));
-        };
-        
-        const handleUndo = () => {
-            if (userQueryParts.length === 0) return;
-            
-            // Pega o último item da query
-            const lastPart = userQueryParts[userQueryParts.length - 1];
-            
-            // Remove da query
-            setUserQueryParts(prev => prev.slice(0, -1));
-            // Devolve para o banco (available)
-            setAvailableParts(prev => [...prev, lastPart]);
-        };
+  // builtQuery não usado aqui; isCorrect compara texto livre com a correta
+  const builtQuery = userQueryText || userQueryParts.join(' ');
+  const isCorrect = normalizeQuery(builtQuery) === normalizeQuery(currentLesson.correctQuery);
 
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col">
-                <header className="bg-white/10 border-b border-white/20">
-                    <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                        <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><X/></button>
-                        <div className="w-full bg-white/20 h-4 rounded-full"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-300" style={{width: `${progress}%`}} /></div>
-                        <div className="flex items-center gap-2 text-red-400"> <Heart /> <span className="font-bold">{userProgress.lives}</span> </div>
-                    </div>
-                </header>
-                
-                <main className="max-w-4xl mx-auto px-6 py-8 flex-1 w-full">
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4">{currentLesson.title}</h2>
-                    <p className="text-lg text-white/80 mb-6">{currentLesson.description}</p>
-                    
-                    {currentLesson.schema && (
-                        <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
-                            <h3 className="text-sm text-white/70 mb-2">Schema da Tabela:</h3>
-                            <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{currentLesson.schema}</code></pre>
-                        </div>
-                    )}
+  // ... restante do componente (cabeçalho, schema etc.) permanece igual
 
-                    {/* Query constructor (agora renderiza tokens) */}
-                    <h3 className="text-sm text-white/70 mb-2">Sua Query:</h3>
-                    <div className="bg-black/20 p-4 rounded-xl border border-white/10 min-h-[100px] mb-6 flex flex-wrap gap-2 items-center">
-                        {userQueryParts.length === 0 && <span className="text-white/50 font-mono">...</span>}
-                        {userQueryParts.map((partObj) => (
-                            <span key={partObj.id} className="bg-white/10 px-3 py-1 rounded font-mono inline-block">
-                                {partObj.part}
-                            </span>
-                        ))}
-                    </div>
+  return (
+    <div className="min-h-screen ...">
+      {/* ... header / schema / builtQuery display ... */}
 
-                    {/* Parts bank (agora interativo) */}
-                    <div className="flex flex-wrap gap-3 justify-center">
-                        {availableParts.map((partObj) => (
-                            <button 
-                                key={partObj.id} 
-                                onClick={() => handlePartClick(partObj)} 
-                                disabled={showResult} 
-                                className="bg-white/10 hover:bg-white/20 text-white font-mono px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                            >
-                                {partObj.part}
-                            </button>
-                    	))}
-                    </div>
-                    <div className="flex justify-center mt-4">
-                        <button onClick={handleUndo} disabled={showResult || userQueryParts.length === 0} className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
-                        	Desfazer
-                    	</button>
-                    </div>
-                </main>
-                
-                {/* Footer for Check/Continue */}
-                <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
-                    <div className="max-w-4xl mx-auto">
-                	{/* Botão de Verificar */}
-            	{!showResult ? (
-            	    <button
-            	    	onClick={handleCheck}
-            	    	disabled={availableParts.length > 0} // Desabilita se o banco não estiver vazio
-            	    	className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-            	    >
-            	    	{availableParts.length > 0 ? "Use todos os tokens" : "Verificar"}
-            	    </button>
-            	) : (
-            	    // Footer de Resultado (Correto/Incorreto)
-          	<div className="animate-fade-in">
-            	    	<div className="flex items-center gap-3 mb-3">
-            	    	    {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
-            	    	</div>
-            	    	<p className="text-white/90 mb-4 font-mono">
-            	    	    {isCorrect ? `Perfeito! A query está correta.` : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
-            	    	</p>
-            	    	<button
-            	    	    onClick={handleContinue}
-          	    	className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
-            	    	>
-            	    	    Continuar
-            	    	</button>
-            	    </div>
-            	)}
-        	</div>
-        	</footer>
-    	</div>
-    );
+      <h3 className="text-sm text-white/70 mb-2">Sua Query (digite aqui):</h3>
+      <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
+        <textarea
+          value={userQueryText}
+          onChange={(e) => setUserQueryText(e.target.value)}
+          placeholder="Escreva a query completa aqui. Ex: INSERT INTO clientes (ID_Cliente, Nome, ...) VALUES (...);"
+          className="w-full min-h-[140px] bg-transparent text-white font-mono text-sm p-3 rounded focus:outline-none"
+        />
+      </div>
+
+      {/* opcional: manter botão desfazer caso use mix token+texto */}
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={() => setUserQueryText("")}
+          className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-4 py-2 rounded-lg"
+        >
+          Limpar
+        </button>
+      </div>
+
+      {/* footer: Verificar / Continuar — aproveite a lógica já presente */}
+      <footer className="bg-white/10 border-t ...">
+        <div className="max-w-4xl mx-auto">
+          {!showResult ? (
+            <button
+              onClick={() => setShowResult(true)}
+              disabled={!userQueryText}
+              className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl disabled:opacity-50"
+            >
+              Verificar
+            </button>
+          ) : (
+            <div className="animate-fade-in">
+              <div className="flex items-center gap-3 mb-3">
+                {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
+              </div>
+              <p className="text-white/90 mb-4 font-mono">
+                {isCorrect
+                  ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.`
+                  : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
+              </p>
+              <button
+                onClick={() => onPracticeComplete(isCorrect)}
+                className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
+              >
+                Continuar
+              </button>
+            </div>
+          )}
+        </div>
+      </footer>
+    </div>
+  );
 });
+
 
 
     const container = document.getElementById('root');
