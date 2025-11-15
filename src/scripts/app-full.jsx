@@ -2478,93 +2478,161 @@
     });
 
     const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
+
+    // --- NOVA VERSÃO COMPLETA DO PRACTICEVIEW (TEXTO LIVRE) ---
+    const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
+        const [showResult, setShowResult] = useState(false);
+        const [userQueryText, setUserQueryText] = useState(""); // 🔥 novo: texto da query escrita pelo usuário
     
-    // no topo do arquivo: (já tem normalizeQuery definida no seu código)
-const normalizeQuery = (query) => {
-  if (!query) return "";
-  // remove ; final, normaliza espaços, e força minúsculas
-  return query.replace(/;$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
-};
-
-// dentro do componente PracticeView (substitua a parte do "Parts bank" pelo textarea)
-const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
-  const [userQueryParts, setUserQueryParts] = useState([]); // pode manter se quiser
-  const [showResult, setShowResult] = useState(false);
-
-  // novo estado para texto livre
-  const [userQueryText, setUserQueryText] = useState("");
-
-  useEffect(() => {
-    // limpa ao mudar de lição
-    setUserQueryText("");
-    setUserQueryParts([]);
-    setShowResult(false);
-  }, [currentLesson]);
-
-  // builtQuery não usado aqui; isCorrect compara texto livre com a correta
-  const builtQuery = userQueryText || userQueryParts.join(' ');
-  const isCorrect = normalizeQuery(builtQuery) === normalizeQuery(currentLesson.correctQuery);
-
-  // ... restante do componente (cabeçalho, schema etc.) permanece igual
-
-  return (
-    <div className="min-h-screen ...">
-      {/* ... header / schema / builtQuery display ... */}
-
-      <h3 className="text-sm text-white/70 mb-2">Sua Query (digite aqui):</h3>
-      <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
-        <textarea
-          value={userQueryText}
-          onChange={(e) => setUserQueryText(e.target.value)}
-          placeholder="Escreva a query completa aqui. Ex: INSERT INTO clientes (ID_Cliente, Nome, ...) VALUES (...);"
-          className="w-full min-h-[140px] bg-transparent text-white font-mono text-sm p-3 rounded focus:outline-none"
-        />
-      </div>
-
-      {/* opcional: manter botão desfazer caso use mix token+texto */}
-      <div className="flex gap-3 mb-6">
-        <button
-          onClick={() => setUserQueryText("")}
-          className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-4 py-2 rounded-lg"
-        >
-          Limpar
-        </button>
-      </div>
-
-      {/* footer: Verificar / Continuar — aproveite a lógica já presente */}
-      <footer className="bg-white/10 border-t ...">
-        <div className="max-w-4xl mx-auto">
-          {!showResult ? (
-            <button
-              onClick={() => setShowResult(true)}
-              disabled={!userQueryText}
-              className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl disabled:opacity-50"
-            >
-              Verificar
-            </button>
-          ) : (
-            <div className="animate-fade-in">
-              <div className="flex items-center gap-3 mb-3">
-                {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
-              </div>
-              <p className="text-white/90 mb-4 font-mono">
-                {isCorrect
-                  ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.`
-                  : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
-              </p>
-              <button
-                onClick={() => onPracticeComplete(isCorrect)}
-                className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
-              >
-                Continuar
-              </button>
+        // Normaliza a query para comparação
+        const normalizeQuery = (query) => {
+            if (!query) return "";
+            return query
+                .replace(/;$/, '')            // remove ; final
+                .replace(/\s+/g, ' ')         // normaliza múltiplos espaços
+                .trim()
+                .toLowerCase();               // ignora maiúsculas/minúsculas
+        };
+    
+        // Determina se o usuário acertou
+        const isCorrect =
+            normalizeQuery(userQueryText) === normalizeQuery(currentLesson.correctQuery);
+    
+        // Ao trocar de lição, limpamos tudo
+        useEffect(() => {
+            setShowResult(false);
+            setUserQueryText("");
+        }, [currentLesson]);
+    
+        const progress = showResult ? 100 : 0;
+    
+        const handleCheck = () => setShowResult(true);
+        const handleContinue = () => onPracticeComplete(isCorrect);
+    
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col">
+    
+                {/* HEADER */}
+                <header className="bg-white/10 border-b border-white/20">
+                    <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+                        <button
+                            onClick={() => onNavigate("trailDetail")}
+                            className="text-white/80 hover:text-white"
+                        >
+                            <X />
+                        </button>
+    
+                        {/* PROGRESS BAR */}
+                        <div className="w-full bg-white/20 h-4 rounded-full">
+                            <div
+                                className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-300"
+                                style={{ width: `${progress}%` }}
+                            />
+                        </div>
+    
+                        {/* LIVES */}
+                        <div className="flex items-center gap-2 text-red-400">
+                            <Heart />
+                            <span className="font-bold">{userProgress.lives}</span>
+                        </div>
+                    </div>
+                </header>
+    
+                {/* MAIN */}
+                <main className="max-w-4xl mx-auto px-6 py-8 flex-1 w-full">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">{currentLesson.title}</h2>
+                    <p className="text-lg text-white/80 mb-6">{currentLesson.description}</p>
+    
+                    {/* SCHEMA */}
+                    <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
+                        <h3 className="text-sm text-white/70 mb-2">Schema da Tabela:</h3>
+                        <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap">
+                            <code>{currentLesson.schema}</code>
+                        </pre>
+                    </div>
+    
+                    {/* INPUT DE TEXTO */}
+                    <h3 className="text-sm text-white/70 mb-2">Digite sua Query Completa:</h3>
+                    <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
+                        <textarea
+                            value={userQueryText}
+                            onChange={(e) => setUserQueryText(e.target.value)}
+                            placeholder="Ex: SELECT * FROM clientes;"
+                            className="w-full min-h-[160px] bg-transparent text-white font-mono text-sm p-3 rounded resize-none focus:outline-none"
+                        />
+                    </div>
+    
+                    {/* BOTÃO LIMPAR */}
+                    <button
+                        onClick={() => setUserQueryText("")}
+                        disabled={showResult || userQueryText.length === 0}
+                        className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 mb-6"
+                    >
+                        Limpar
+                    </button>
+                </main>
+    
+                {/* FOOTER */}
+                <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
+                    <div className="max-w-4xl mx-auto">
+    
+                        {/* VERIFICAR */}
+                        {!showResult ? (
+                            <button
+                                onClick={handleCheck}
+                                disabled={userQueryText.trim() === ""}
+                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
+                            >
+                                Verificar
+                            </button>
+                        ) : (
+                            <div className="animate-fade-in">
+    
+                                {/* RESULTADO */}
+                                <div className="flex items-center gap-3 mb-3">
+                                    {isCorrect ? (
+                                        <>
+                                            <Check />
+                                            <span className="text-green-400 font-bold text-lg">
+                                                Correto!
+                                            </span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <X />
+                                            <span className="text-red-400 font-bold text-lg">
+                                                Incorreto
+                                            </span>
+                                        </>
+                                    )}
+                                </div>
+    
+                                {/* EXPLICAÇÃO */}
+                                <p className="text-white/90 mb-4 font-mono">
+                                    {isCorrect
+                                        ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.`
+                                        : `A query correta é: ${currentLesson.correctQuery}`}
+                                </p>
+    
+                                {/* CONTINUAR */}
+                                <button
+                                    onClick={handleContinue}
+                                    className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${
+                                        isCorrect
+                                            ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                                            : "bg-gradient-to-r from-orange-500 to-red-500"
+                                    }`}
+                                >
+                                    Continuar
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </footer>
             </div>
-          )}
-        </div>
-      </footer>
-    </div>
-  );
-});
+        );
+    });
+
 
 
 
