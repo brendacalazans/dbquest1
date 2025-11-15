@@ -2391,8 +2391,7 @@
     
     // --- COMPONENTE PRACTICEVIEW (COMPLETO E CORRIGIDO) ---
 
-    // Helper function para embaralhar o array (Fisher-Yates shuffle)
-    // --- COMPONENTE PRACTICEVIEW (CORRIGIDO PARA REMOVER &nbsp;) ---
+    // --- COMPONENTE PRACTICEVIEW (CORREÇÃO DEFINITIVA PARA &nbsp;) ---
 
     // Helper function para embaralhar o array (Fisher-Yates shuffle)
     const shuffleArray = (array) => {
@@ -2417,8 +2416,9 @@
             if (currentLesson && currentLesson.queryParts) {
                 // 1. LIMPA (trim) os espaços E a string "&nbsp;"
                 const cleanedParts = currentLesson.queryParts.map(part => 
-                    // Esta regex remove espaços, \u00A0, e a string literal &nbsp; do início e fim
-                    part.replace(/^(\s|\u00A0|&nbsp;)+|(\s|\u00A0|&nbsp;)+$/g, '')
+                    // Regex: Substitui globalmente (g) a string literal "&nbsp;" por um espaço
+                    // e também o caractere \u00A0, depois faz o trim.
+                    part.replace(/&nbsp;|\u00A0/g, ' ').trim()
                 );
                 // 2. Embaralha as partes limpas
                 setShuffledParts(shuffleArray(cleanedParts));
@@ -2476,7 +2476,7 @@
             const lastPart = userQueryParts[userQueryParts.length - 1];
             setUserQueryParts(prev => prev.slice(0, -1));
             setShuffledParts(prev => [...prev, lastPart]);
-       };
+        };
 
         return (
             <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col">
@@ -2484,25 +2484,25 @@
                     <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
                         <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><X/></button>
                         <div className="w-full bg-white/20 h-4 rounded-full"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-300" style={{width: `${progress}%`}} /></div>
-                 <div className="flex items-center gap-2 text-red-400"> <Heart /> <span className="font-bold">{userProgress.lives}</span> </div>
+                        <div className="flex items-center gap-2 text-red-400"> <Heart /> <span className="font-bold">{userProgress.lives}</span> </div>
                     </div>
                 </header>
                 
                 <main className="max-w-4xl mx-auto px-6 py-8 flex-1 w-full">
-               <h2 className="text-2xl md:text-3xl font-bold mb-4">{currentLesson.title}</h2>
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">{currentLesson.title}</h2>
                     <p className="text-lg text-white/80 mb-6">{currentLesson.description}</p>
                     
                     {currentLesson.schema && (
-               <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
+                    <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
                         <h3 className="text-sm text-white/70 mb-2">Schema da Tabela:</h3>
                         <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{currentLesson.schema}</code></pre>
                     </div>
                     )}
 
                     {/* Query constructor */}
-                    <h3 className="text-sm text-white/70 mb-2">Sua Query:</h3>
+                 <h3 className="text-sm text-white/70 mb-2">Sua Query:</h3>
                     <div className="bg-black/20 p-4 rounded-xl border border-white/10 min-h-[100px] mb-6 font-mono">
-                   {builtQuery || <span className="text-white/50">...</span>}
+                        {builtQuery || <span className="text-white/50">...</span>}
                     </div>
 
                     {/* Parts bank (renderiza 'shuffledParts') */}
@@ -2510,54 +2510,52 @@
                         {shuffledParts.map((part, index) => (
                             <button 
                                 key={index} 
-                           onClick={() => handlePartClick(part, index)} 
+                                onClick={() => handlePartClick(part, index)} 
                                 disabled={showResult} 
-                                // Classe 'w-auto' garante que o botão tenha a largura do texto
-                       className="w-auto bg-white/10 hover:bg-white/20 text-white font-mono px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                            >
+                                className="w-auto bg-white/10 hover:bg-white/20 text-white font-mono px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                     >
                                 {part}
-                            </button>
-                     ))}
+                   </button>
+                        ))}
                     </div>
-                    
                 </main>
-             
+                
                 {/* Footer (LAYOUT CORRIGIDO) */}
                 <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
                     <div className="max-w-4xl mx-auto">
                         {!showResult ? (
                             // SE NÃO ESTIVER MOSTRANDO RESULTADO, MOSTRA BOTÕES DE AÇÃO
-                         <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="flex flex-col sm:flex-row gap-4">
                                 <button 
                                     onClick={handleUndo} 
-                                 disabled={showResult || userQueryParts.length === 0} 
+                                    disabled={showResult || userQueryParts.length === 0} 
                                     className="w-full sm:w-auto bg-red-500/20 hover:bg-red-500/40 text-red-300 px-6 py-4 rounded-xl transition-colors disabled:opacity-50 font-semibold"
-                                >
+                       >
                                     Desfazer
                                 </button>
-                                <button
-                                 onClick={handleCheck}
+                         <button
+                                    onClick={handleCheck}
                              disabled={shuffledParts.length > 0} // Desabilita se ainda houver partes não usadas
                                     className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
-                                     >
+                       >
                                     {shuffledParts.length > 0 ? "Use todas as partes" : "Verificar"}
-                                </button>
+                         </button>
                             </div>
-                        ) : (
-                       // SE ESTIVER MOSTRANDO RESULTADO, MOSTRA FEEDBACK
+                     ) : (
+                            // SE ESTIVER MOSTRANDO RESULTADO, MOSTRA FEEDBACK
                             <div className="animate-fade-in">
                                 <div className="flex items-center gap-3 mb-3">
-                              nbsp;     {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
+                       {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
                                 </div>
                                 <p className="text-white/90 mb-4 font-mono">
-                       {isCorrect ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.` : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
+                        {isCorrect ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.` : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
                                 </p>
                                 <button
-                                 onClick={handleContinue}
+                           onClick={handleContinue}
                                     className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
-                                >
+                     >
                                     Continuar
-                     </button>
+                                </button>
                             </div>
                         )}
                     </div>
