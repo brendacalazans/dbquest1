@@ -2415,7 +2415,7 @@
         useEffect(() => {
             if (currentLesson && currentLesson.queryParts) {
                 // 1. LIMPA (trim) os espaços E a string "&nbsp;"
-                const cleanedParts = currentLesson.queryParts.map(part => 
+                const cleanedParts = currentLesson.queryParts.map(part => 
                     // Regex: Substitui globalmente (g) a string literal "&nbsp;" por um espaço
                     // e também o caractere \u00A0, depois faz o trim.
                     part.replace(/&nbsp;|\u00A0/g, ' ').trim()
@@ -2446,13 +2446,13 @@
         
         // Constrói a string de display de forma inteligente
         const builtQuery = userQueryParts.reduce((acc, part, index) => {
-            const noSpaceBefore = 
+            const noSpaceBefore = 
                 index === 0 ||
                 part === ',' ||
                 part === ';' ||
                 part === ')' ||
                 (index > 0 && userQueryParts[index - 1] === '(');
-            
+            
             return acc + (noSpaceBefore ? '' : ' ') + part;
         }, '');
 
@@ -2500,7 +2500,7 @@
                     )}
 
                     {/* Query constructor */}
-                 <h3 className="text-sm text-white/70 mb-2">Sua Query:</h3>
+                 <h3 className="text-sm text-white/70 mb-2">Sua Query:</h3>
                     <div className="bg-black/20 p-4 rounded-xl border border-white/10 min-h-[100px] mb-6 font-mono">
                         {builtQuery || <span className="text-white/50">...</span>}
                     </div>
@@ -2508,14 +2508,14 @@
                     {/* Parts bank (renderiza 'shuffledParts') */}
                     <div className="flex flex-wrap gap-3 justify-center">
                         {shuffledParts.map((part, index) => (
-                            <button 
-                                key={index} 
-                                onClick={() => handlePartClick(part, index)} 
-                                disabled={showResult} 
+                            <button 
+                                key={index} 
+                                onClick={() => handlePartClick(part, index)} 
+                                disabled={showResult} 
                                 className="w-auto bg-white/10 hover:bg-white/20 text-white font-mono px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                     >
+                     >
                                 {part}
-                   </button>
+                   </button>
                         ))}
                     </div>
                 </main>
