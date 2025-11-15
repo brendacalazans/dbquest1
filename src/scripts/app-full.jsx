@@ -1509,13 +1509,11 @@
             };
 
             // Atualiza o DB
-{/* [redacted] */}
             update(ref(db, `users/${userId}/gamification`), updates);
             // Atualiza o Leaderboard
             update(ref(db, `leaderboard/${userId}`), { 
                 totalXP: newXP, 
                 streak: newStreak,
-Read blocks in context.
                 // ✨ (Opcional, mas recomendado) Adicione gemas ao leaderboard também
                 gems: newGems 
             });
