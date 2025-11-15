@@ -1478,7 +1478,7 @@
             // --- ✨ INÍCIO DA LÓGICA DE GEMAS ---
             let newGems = Number(userProgress.gems) || 0;
             let gemsAwarded = 0;
-            const BASE_GEM_REWARD = 5;       // Recompensa base por lição nova
+            const BASE_GEM_REWARD = 10;       // Recompensa base por lição nova
             const STREAK_BONUS_MILESTONE = 5;  // Bônus a cada 5 dias
             const STREAK_BONUS_AMOUNT = 25;    // Quantidade do bônus
 
