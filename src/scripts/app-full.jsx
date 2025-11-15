@@ -2415,11 +2415,18 @@
         useEffect(() => {
             if (currentLesson && currentLesson.queryParts) {
                 // 1. LIMPA (trim) os espaços E a string "&nbsp;"
-                const cleanedParts = currentLesson.queryParts.map(part => 
-                    // Regex: Substitui globalmente (g) a string literal "&nbsp;" por um espaço
-                    // e também o caractere \u00A0, depois faz o trim.
-                    part.replace(/&nbsp;|\u00A0/g, ' ').trim()
-                );
+                const cleanedParts = currentLesson.queryParts.map(part =>
+                        part
+                            // Remove qualquer tipo de espaço invisível
+                            .replace(/&nbsp;|&ensp;|&emsp;|\u00A0|\u200B|\u200C|\u200D|\u202F/g, ' ')
+                            
+                            // Remove múltiplos espaços que sobraram
+                            .replace(/\s+/g, ' ')
+                            
+                            // Trim final
+                            .trim()
+                    );
+
                 // 2. Embaralha as partes limpas
                 setShuffledParts(shuffleArray(cleanedParts));
                 // 3. Reseta o estado
