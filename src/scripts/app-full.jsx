@@ -1411,45 +1411,117 @@
             }
         }, [showResult, currentLesson, currentQuestion, userProgress.lives, userId, db]);
         
-        // --- LÓGICA DE OFENSIVA (STREAK) CORRIGIDA ---
-        const handleLessonCompletion = (lessonId, lessonXP) => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
-            
-            const lastCompletedDate = userProgress.lastCompletedLessonDate ? new Date(userProgress.lastCompletedLessonDate) : null;
-            if (lastCompletedDate) {
-                lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
-            }
+       
+        // --- LÓGICA DE OFENSIVA (STREAK) E GEMAS (VERSÃO CORRIGIDA) ---
+        const handleLessonCompletion = (lessonId, lessonXP) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Zera a hora para comparar apenas o dia
+            
+            const lastCompletedDate = userProgress.lastCompletedLessonDate 
+                ? new Date(userProgress.lastCompletedLessonDate) 
+                : null;
+            
+            if (lastCompletedDate) {
+                lastCompletedDate.setHours(0, 0, 0, 0); // Zera a hora da última data
+            }
 
-            let newStreak = userProgress.streak;
-            // Só incrementa a ofensiva se a última lição foi ANTES de hoje
-            if (!lastCompletedDate || lastCompletedDate.getTime() < today.getTime()) {
-                newStreak += 1;
-                console.log("Ofensiva incrementada!");
-            } else {
-                console.log("Lição completada hoje, ofensiva mantida.");
-            }
+            // --- LÓGICA DE STREAK (Aprimorada) ---
+            let newStreak = userProgress.streak || 0;
+            let streakIncreasedToday = false; // Flag para bônus de gema
+            
+            if (!lastCompletedDate) {
+                // Primeira lição do usuário
+                newStreak = 1;
+                streakIncreasedToday = true; 
+                console.log("Primeira lição! Ofensiva iniciada: 1 dia");
+            } else {
+                // Calcula ontem para verificar consecutividade
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                yesterday.setHours(0, 0, 0, 0);
+                
+                const lastCompletedTime = lastCompletedDate.getTime();
+                const todayTime = today.getTime();
+                const yesterdayTime = yesterday.getTime();
+                
+                if (lastCompletedTime === todayTime) {
+                    // Já completou lição hoje
+                    newStreak = userProgress.streak || 1;
+                    streakIncreasedToday = false; 
+                    console.log("Lição completada hoje, ofensiva mantida:", newStreak, "dias");
+                } else if (lastCompletedTime === yesterdayTime) {
+                    // Completou ontem - incrementa
+                    newStreak = (userProgress.streak || 0) + 1;
+                    streakIncreasedToday = true; 
+                    console.log("Ofensiva incrementada! Dias consecutivos:", newStreak);
+                } else if (lastCompletedTime < yesterdayTime) {
+                    // Perdeu o streak
+                    newStreak = 1;
+                    streakIncreasedToday = true; 
+                    console.log("Ofensiva perdida! Recomeçando do dia 1");
+                } else {
+                    // Caso de segurança
+                    newStreak = userProgress.streak || 1;
+                }
+            }
+            
+            // --- LÓGICA DE XP E NÍVEL ---
+            const newXP = (Number(userProgress.totalXP) || 0) + (Number(lessonXP) || 0);
+            const newLevel = Math.floor(newXP / 100) + 1;
+            const completed = [...(userProgress.completedLessons || [])];
+            
+            const isNewLesson = !completed.includes(lessonId); // Verifica se é a primeira vez
+            if (isNewLesson) {
+                completed.push(lessonId);
+            }
 
-            const newXP = (Number(userProgress.totalXP) || 0) + (Number(lessonXP) || 0);
-            const newLevel = Math.floor(newXP / 100) + 1;
-            const completed = [...(userProgress.completedLessons || [])];
-            if (!completed.includes(lessonId)) {
-                completed.push(lessonId);
-            }
+            // --- ✨ INÍCIO DA LÓGICA DE GEMAS ---
+            let newGems = Number(userProgress.gems) || 0;
+            let gemsAwarded = 0;
+            const BASE_GEM_REWARD = 5;       // Recompensa base por lição nova
+            const STREAK_BONUS_MILESTONE = 5;  // Bônus a cada 5 dias
+            const STREAK_BONUS_AMOUNT = 25;    // Quantidade do bônus
 
-            const updates = {
-                totalXP: newXP,
-                level: newLevel,
-                streak: newStreak,
-                lastCompletedLessonDate: new Date().toISOString(), // Salva a data E hora exata
-                completedLessons: completed
-            };
+            // 1. Recompensa base (apenas se a lição for nova)
+            if (isNewLesson) {
+                gemsAwarded += BASE_GEM_REWARD;
+                console.log(`+${BASE_GEM_REWARD} gemas por completar uma nova lição!`);
+            }
 
-            update(ref(db, `users/${userId}/gamification`), updates);
-            update(ref(db, `leaderboard/${userId}`), { totalXP: newXP, streak: newStreak });
-            
-            return newXP;
-        };
+            // 2. Bônus de Ofensiva (Streak)
+            // Só dá o bônus se o streak aumentou HOJE
+            if (streakIncreasedToday && newStreak > 0 && newStreak % STREAK_BONUS_MILESTONE === 0) {
+                gemsAwarded += STREAK_BONUS_AMOUNT;
+                console.log(`BÔNUS DE OFENSIVA! +${STREAK_BONUS_AMOUNT} gemas por ${newStreak} dias!`);
+            }
+
+            newGems += gemsAwarded;
+            // --- ✨ FIM DA LÓGICA DE GEMAS ---
+
+            // --- Objeto de Updates para o Firebase ---
+            const updates = {
+                totalXP: newXP,
+                level: newLevel,
+                streak: newStreak,
+                gems: newGems, // <-- ✨ AQUI ESTÁ A ADIÇÃO
+                lastCompletedLessonDate: new Date().toISOString(), // Salva a data E hora exata
+                completedLessons: completed
+            };
+
+            // Atualiza o DB
+{/* [redacted] */}
+            update(ref(db, `users/${userId}/gamification`), updates);
+            // Atualiza o Leaderboard
+            update(ref(db, `leaderboard/${userId}`), { 
+                totalXP: newXP, 
+                streak: newStreak,
+Read blocks in context.
+                // ✨ (Opcional, mas recomendado) Adicione gemas ao leaderboard também
+                gems: newGems 
+            });
+            
+            return newXP;
+        };
 
         const nextQuestion = useCallback(() => {
             setShowResult(false);
