@@ -2477,11 +2477,20 @@
         );
     });
 
+    const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
+    
     // --- NOVO COMPONENTE PARA EXERCÍCIOS PRÁTICOS ---
     const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
         const [userQueryParts, setUserQueryParts] = useState([]);
         const [showResult, setShowResult] = useState(false);
 
+        // 🔀 Embaralha tokens quando a lição carregar
+        useEffect(() => {
+            if (currentLesson?.queryParts) {
+                currentLesson.queryParts = shuffleArray(currentLesson.queryParts);
+            }
+        }, [currentLesson]);
+            
         // Progresso simples (ou está 0% ou 100%)
         const progress = showResult ? 100 : 0; 
         
