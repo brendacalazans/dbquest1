@@ -2389,188 +2389,221 @@
         );
     }
     
-    // --- COMPONENTE PRACTICEVIEW (COMPLETO E CORRIGIDO) ---
+    // Novo Componente para o Desafio de IA
+    const ChallengeView = memo(({ challenge, onBack, onGenerateChallenge }) => {
+        const [selectedAnswer, setSelectedAnswer] = useState(null);
+        const [showResult, setShowResult] = useState(false);
 
-    // --- COMPONENTE PRACTICEVIEW (CORREÇÃO DEFINITIVA PARA &nbsp;) ---
+        const handleCheckAnswer = () => {
+            setShowResult(true);
+        };
+        
+        const handleNext = () => {
+            setSelectedAnswer(null);
+            setShowResult(false);
+            onGenerateChallenge();
+        };
 
-    // Helper function para embaralhar o array (Fisher-Yates shuffle)
-    const shuffleArray = (array) => {
-        let currentIndex = array.length, randomIndex;
-        const newArray = [...array]; // Cria uma cópia para não mutar o original
-        while (currentIndex !== 0) {
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex--;
-            [newArray[currentIndex], newArray[randomIndex]] = [
-                newArray[randomIndex], newArray[currentIndex]];
-        }
-        return newArray;
-    };
+        const getOptionClasses = (index) => {
+            if (showResult) {
+                if (index === challenge.correctIndex) {
+                    return `bg-green-500/30 border-green-400 text-white`;
+                }
+                if (selectedAnswer === index) {
+                    return `bg-red-500/30 border-red-400 text-white`;
+                }
+                return `bg-white/5 border-white/10 opacity-60 cursor-not-allowed`;
+            }
 
-    const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
-        const [userQueryParts, setUserQueryParts] = useState([]);
-        const [showResult, setShowResult] = useState(false);
-        const [shuffledParts, setShuffledParts] = useState([]);
+            if (selectedAnswer === index) {
+                return `bg-cyan-500/30 border-cyan-400`;
+            }
+            
+            return `bg-gray-800/50 border-white/20 text-gray-200 hover:bg-gray-800/70 hover:border-white/30`;
+        };
+        
+        if (!challenge) {
+            return (
+                <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
+                    <button onClick={onBack} className="absolute top-6 left-6 flex items-center gap-2 text-white/60 hover:text-white"><ArrowLeft /> Voltar</button>
+                    <p className="text-white/80">Nenhum desafio encontrado.</p>
+                </div>
+            );
+        }
 
-        // EFEITO: Embaralha e LIMPA as partes da query
-        useEffect(() => {
-            if (currentLesson && currentLesson.queryParts) {
-                // 1. LIMPA (trim) os espaços E a string "&nbsp;"
-                const cleanedParts = currentLesson.queryParts.map(part =>
-                        part
-                            // Remove qualquer tipo de espaço invisível
-                            .replace(/&nbsp;|&ensp;|&emsp;|\u00A0|\u200B|\u200C|\u200D|\u202F/g, ' ')
-                            
-                            // Remove múltiplos espaços que sobraram
-                            .replace(/\s+/g, ' ')
-                            
-                            // Trim final
-                            .trim()
-                    );
+        const isCorrect = selectedAnswer === challenge.correctIndex;
 
-                // 2. Embaralha as partes limpas
-                setShuffledParts(shuffleArray(cleanedParts));
-                // 3. Reseta o estado
-                setUserQueryParts([]);
-                setShowResult(false);
-            }
-        }, [currentLesson]);
-
-        const progress = showResult ? 100 : 0; 
-        
-        // Normaliza a query para ser robusta contra espaços
-        const normalizeQuery = (query) => {
-            if (!query) return "";
-            return query
-                .replace(/;$/, '')
-                .replace(/\s*,\s*/g, ',')
-                .replace(/\s*=\s*/g, '=')
-                .replace(/\s*\(\s*/g, '(')
-                .replace(/\s*\)\s*/g, ')')
-                .replace(/\s+/g, ' ')
-                .trim()
-                .toLowerCase();
-        };
-        
-        // Constrói a string de display de forma inteligente
-        const builtQuery = userQueryParts.reduce((acc, part, index) => {
-            const noSpaceBefore = 
-                index === 0 ||
-                part === ',' ||
-                part === ';' ||
-                part === ')' ||
-                (index > 0 && userQueryParts[index - 1] === '(');
-            
-            return acc + (noSpaceBefore ? '' : ' ') + part;
-        }, '');
-
-        const isCorrect = normalizeQuery(builtQuery) === normalizeQuery(currentLesson.correctQuery);
-
-        const handleCheck = () => {
-            setShowResult(true);
-        };
-        
-        const handleContinue = () => {
-            onPracticeComplete(isCorrect);
-        };
-        
-        const handlePartClick = (part, index) => {
-            setUserQueryParts(prev => [...prev, part]);
-            setShuffledParts(prev => prev.filter((_, i) => i !== index));
-        };
-        
-        const handleUndo = () => {
-            if (userQueryParts.length === 0) return;
-            const lastPart = userQueryParts[userQueryParts.length - 1];
-            setUserQueryParts(prev => prev.slice(0, -1));
-            setShuffledParts(prev => [...prev, lastPart]);
-        };
-
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col">
-                <header className="bg-white/10 border-b border-white/20">
-                    <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
-                        <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><X/></button>
-                        <div className="w-full bg-white/20 h-4 rounded-full"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-300" style={{width: `${progress}%`}} /></div>
-                        <div className="flex items-center gap-2 text-red-400"> <Heart /> <span className="font-bold">{userProgress.lives}</span> </div>
-                    </div>
-                </header>
-                
-                <main className="max-w-4xl mx-auto px-6 py-8 flex-1 w-full">
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4">{currentLesson.title}</h2>
-                    <p className="text-lg text-white/80 mb-6">{currentLesson.description}</p>
-                    
-                    {currentLesson.schema && (
-                    <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
-                        <h3 className="text-sm text-white/70 mb-2">Schema da Tabela:</h3>
-                        <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{currentLesson.schema}</code></pre>
-                    </div>
-                    )}
-
-                    {/* Query constructor */}
-                 <h3 className="text-sm text-white/70 mb-2">Sua Query:</h3>
-                    <div className="bg-black/20 p-4 rounded-xl border border-white/10 min-h-[100px] mb-6 font-mono">
-                        {builtQuery || <span className="text-white/50">...</span>}
-                    </div>
-
-                    {/* Parts bank (renderiza 'shuffledParts') */}
-                    <div className="flex flex-wrap gap-3 justify-center">
-                        {shuffledParts.map((part, index) => (
-                            <button 
-                                key={index} 
-                                onClick={() => handlePartClick(part, index)} 
-                                disabled={showResult} 
-                                className="w-auto bg-white/10 hover:bg-white/20 text-white font-mono px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
-                     >
-                                {part}
-                   </button>
-                        ))}
-                    </div>
-                </main>
-                
-                {/* Footer (LAYOUT CORRIGIDO) */}
-                <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
-                    <div className="max-w-4xl mx-auto">
-                        {!showResult ? (
-                            // SE NÃO ESTIVER MOSTRANDO RESULTADO, MOSTRA BOTÕES DE AÇÃO
-                            <div className="flex flex-col sm:flex-row gap-4">
-                                <button 
-                                    onClick={handleUndo} 
-                                    disabled={showResult || userQueryParts.length === 0} 
-                                    className="w-full sm:w-auto bg-red-500/20 hover:bg-red-500/40 text-red-300 px-6 py-4 rounded-xl transition-colors disabled:opacity-50 font-semibold"
-                       >
-                                    Desfazer
-                                </button>
-                         <button
-                                    onClick={handleCheck}
-                             disabled={shuffledParts.length > 0} // Desabilita se ainda houver partes não usadas
-                                    className="flex-1 bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
-                       >
-                                    {shuffledParts.length > 0 ? "Use todas as partes" : "Verificar"}
-                         </button>
-                            </div>
-                     ) : (
-                            // SE ESTIVER MOSTRANDO RESULTADO, MOSTRA FEEDBACK
-                            <div className="animate-fade-in">
-                                <div className="flex items-center gap-3 mb-3">
-                       {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
-                                </div>
-                                <p className="text-white/90 mb-4 font-mono">
-                        {isCorrect ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.` : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
-                                </p>
-                                <button
-                           onClick={handleContinue}
-                                    className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
-                     >
-                                    Continuar
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </footer>
-            </div>
-        );
-    });
+        return (
+        <div className="min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-gray-900 flex flex-col text-white animate-fade-in">
+            <header className="bg-white/10 border-b border-white/20">
+            <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+                <button onClick={onBack} className="text-white/80 hover:text-white"><ArrowLeft/></button>
+                <h1 className="text-xl font-bold flex items-center gap-2"><Sparkles className="text-purple-400"/> Desafio Rápido de SQL</h1>
+            </div>
+            </header>
     
+            <main className="flex-1 flex flex-col justify-between p-6">
+            <div className="max-w-3xl w-full mx-auto">
+                <div className="bg-black/20 p-6 rounded-xl border border-white/10 mb-6">
+                    <p className="text-lg text-white/90 mb-4">{challenge.description}</p>
+                    <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{challenge.schema}</code></pre>
+                </div>
+                <h2 className="text-xl font-bold text-center mb-6">{challenge.question}</h2>
+                <div className="space-y-3">
+                    {challenge.options.map((option, index) => (
+                        <button key={index} onClick={() => !showResult && setSelectedAnswer(index)} disabled={showResult} className={`w-full transition-all text-left font-mono text-sm p-4 rounded-xl border-2 ${getOptionClasses(index)}`}>
+                            <code>{option}</code>
+                        </button>
+                    ))}
+                </div>
+            </div>
+                <footer className="mt-8">
+                    {showResult && (
+                    <div className={`max-w-3xl w-full mx-auto p-5 rounded-xl mb-4 animate-fade-in ${isCorrect ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                        <div className="flex items-center gap-3 mb-3">{isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto! 🎉</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}</div>
+                        <p className="text-white/90">{challenge.explanation}</p>
+                    </div>
+                )}
+                <div className="max-w-3xl w-full mx-auto">
+                    {!showResult ? (
+                    <button onClick={handleCheckAnswer} disabled={selectedAnswer === null} className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 transition-transform">Verificar</button>
+                    ) : (
+                    <button onClick={handleNext} className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}>Gerar Novo Desafio</button>
+                    )}
+                </div>
+                </footer>
+            </main>
+        </div>
+        );
+    });
+
+    // --- NOVO COMPONENTE PARA EXERCÍCIOS PRÁTICOS ---
+    const PracticeView = memo(({ currentLesson, userProgress, onNavigate, onPracticeComplete }) => {
+        const [userQueryParts, setUserQueryParts] = useState([]);
+        const [showResult, setShowResult] = useState(false);
+
+        // Progresso simples (ou está 0% ou 100%)
+        const progress = showResult ? 100 : 0; 
+        
+        // Normaliza a query para comparação (remove espaços extras, ponto e vírgula final, e ignora maiúsculas/minúsculas)
+        const normalizeQuery = (query) => {
+            if (!query) return "";
+            return query.replace(/;$/, '').replace(/\s+/g, ' ').trim().toLowerCase();
+        };
+
+        const buildQuerySmart = (parts) => {
+            let query = "";
+        
+            parts.forEach((p, i) => {
+                if (p === "," || p === ";" || p === ")" ) {
+                    // cola sem espaço
+                    query += p;
+                } else if (p === "(") {
+                    // abre parêntese colado
+                    query += p;
+                } else {
+                    // demais tokens: adiciona com espaço normal
+                    query += (query ? " " : "") + p;
+                }
+            });
+        
+            return query;
+        };
+        
+        const builtQuery = buildQuerySmart(userQueryParts);
+        const isCorrect = normalizeQuery(builtQuery) === normalizeQuery(currentLesson.correctQuery);
+
+        const handleCheck = () => {
+            // Apenas exibe o resultado. A lógica de vidas/conclusão
+            // acontece no 'handleContinue' (chamando onPracticeComplete)
+            setShowResult(true);
+        };
+        
+        const handleContinue = () => {
+            // Informa o App (componente pai) se o usuário acertou ou errou
+            onPracticeComplete(isCorrect);
+        };
+        
+        const handlePartClick = (part) => {
+            setUserQueryParts(prev => [...prev, part]);
+        };
+        
+        const handleUndo = () => {
+            setUserQueryParts(prev => prev.slice(0, -1));
+        };
+
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 text-white flex flex-col">
+                <header className="bg-white/10 border-b border-white/20">
+                    <div className="max-w-4xl mx-auto px-6 py-4 flex items-center gap-4">
+                        <button onClick={() => onNavigate('trailDetail')} className="text-white/80 hover:text-white"><X/></button>
+                        <div className="w-full bg-white/20 h-4 rounded-full"><div className="bg-gradient-to-r from-green-400 to-emerald-500 h-full rounded-full transition-all duration-300" style={{width: `${progress}%`}} /></div>
+                        <div className="flex items-center gap-2 text-red-400"> <Heart /> <span className="font-bold">{userProgress.lives}</span> </div>
+                    </div>
+                </header>
+               
+                <main className="max-w-4xl mx-auto px-6 py-8 flex-1 w-full">
+                    <h2 className="text-2xl md:text-3xl font-bold mb-4">{currentLesson.title}</h2>
+                    <p className="text-lg text-white/80 mb-6">{currentLesson.description}</p>
+                    
+                    <div className="bg-black/20 p-4 rounded-xl border border-white/10 mb-6">
+                        <h3 className="text-sm text-white/70 mb-2">Schema da Tabela:</h3>
+                        <pre className="bg-black/30 p-4 rounded-lg text-sm text-cyan-300 font-mono whitespace-pre-wrap"><code>{currentLesson.schema}</code></pre>
+                    </div>
+
+                    {/* Query constructor */}
+                    <h3 className="text-sm text-white/70 mb-2">Sua Query:</h3>
+                    <div className="bg-black/20 p-4 rounded-xl border border-white/10 min-h-[100px] mb-6 font-mono">
+                        {builtQuery || <span className="text-white/50">...</span>}
+                    </div>
+
+                 {/* Parts bank */}
+                    <div className="flex flex-wrap gap-3 justify-center">
+                        {currentLesson.queryParts.map((part, index) => (
+                            <button key={index} onClick={() => handlePartClick(part)} disabled={showResult} className="bg-white/10 hover:bg-white/20 text-white font-mono px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                                {part}
+                            </button>
+                        ))}
+                       <button onClick={handleUndo} disabled={showResult || userQueryParts.length === 0} className="bg-red-500/20 hover:bg-red-500/40 text-red-300 px-4 py-2 rounded-lg transition-colors disabled:opacity-50">
+                            Desfazer
+                        </button>
+                    </div>
+                </main>
+                
+                {/* Footer for Check/Continue */}
+                <footer className="bg-white/10 border-t border-white/20 p-6 sticky bottom-0">
+                    <div className="max-w-4xl mx-auto">
+                        {!showResult ? (
+                            <button
+                           onClick={handleCheck}
+                                disabled={userQueryParts.length === 0}
+                                className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform disabled:opacity-50"
+                           >
+                                Verificar
+                            </button>
+                       ) : (
+                            <div className="animate-fade-in">
+                                <div className="flex items-center gap-3 mb-3">
+                                    {isCorrect ? <><Check /><span className="text-green-400 font-bold text-lg">Correto!</span></> : <><X /><span className="text-red-400 font-bold text-lg">Incorreto</span></>}
+                                </div>
+                                <p className="text-white/90 mb-4 font-mono">
+                                    {isCorrect ? `Perfeito! A query "${currentLesson.correctQuery}" está correta.` : `Opa, não foi bem isso. A query correta era: ${currentLesson.correctQuery}`}
+                           </p>
+                                <button
+                                 onClick={handleContinue}
+                                    className={`w-full text-white font-bold py-4 rounded-xl hover:scale-105 transition-transform ${isCorrect ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gradient-to-r from-orange-500 to-red-500'}`}
+                                >
+                                    Continuar
+                                </button>
+                        </div>
+                        )}
+                    </div>
+               </footer>
+            </div>
+        );
+    });
+
+
     const container = document.getElementById('root');
     const root = ReactDOM.createRoot(container);
     root.render(<App />);
